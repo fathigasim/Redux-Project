@@ -1,0 +1,83 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from "../api/axios";
+
+interface AuthState {
+  token: string | null;
+  refreshToken: string | null;
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: AuthState = {
+  token: null,
+  refreshToken: null,
+  loading: false,
+  error: null,
+};
+
+// Load auth from localStorage
+export const loadStoredAuth = createAsyncThunk("auth/loadStoredAuth", async () => {
+  const stored = localStorage.getItem("auth");
+  if (stored) return JSON.parse(stored);
+  return { token: null, refreshToken: null };
+});
+
+// Login thunk
+export const login = createAsyncThunk(
+  "auth/login",
+  async (credentials: { username: string; password: string }, { rejectWithValue }) => {
+    try {
+      const res = await api.post("/api/auth/login", credentials);
+      return res.data; // { token, refreshToken }
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data || "Login failed");
+    }
+  }
+);
+
+// Refresh token thunk
+export const refreshTokenThunk = createAsyncThunk(
+  "auth/refreshToken",
+  async (refreshToken: string, { getState }) => {
+    const state: any = getState();
+    const accessToken = state.auth.token; // current access token
+    const response = await api.post("/api/token/refresh", {
+      accessToken,
+      refreshToken,
+    });
+    return response.data;
+  }
+);
+
+
+const authSlice = createSlice({
+  name: "auth",
+  initialState,
+  reducers: {
+    logout: (state) => {
+      state.token = null;
+      state.refreshToken = null;
+      localStorage.removeItem("auth");
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loadStoredAuth.fulfilled, (state, action) => {
+        state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
+      })
+      .addCase(login.fulfilled, (state, action) => {
+        state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
+        localStorage.setItem("auth", JSON.stringify(action.payload));
+      })
+      .addCase(refreshTokenThunk.fulfilled, (state, action) => {
+        state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
+        localStorage.setItem("auth", JSON.stringify(action.payload));
+      });
+  },
+});
+
+export const { logout } = authSlice.actions;
+export default authSlice.reducer;
