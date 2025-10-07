@@ -14,6 +14,10 @@ import Login from './components/Login';
 import Users from './components/Users';
 import Product from './components/Product';
 import { Routes, Route } from "react-router-dom";
+import Cart from './components/Cart';
+import Cancel from './components/cancel';
+import Success from './components/success';
+import Header from './components/Headers';
 
 function App() {
   // const dispatch = useAppDispatch();
@@ -32,11 +36,15 @@ const dispatch = useAppDispatch();
   return (
 <>
 {/* <Users /> */}
+      <Header/>
      <Routes>
       <Route path="/users" element={<Users />} />
       <Route path="/" element={<Login />} />
       <Route path="/testWeather" element={<WeatherTest />} />
       <Route path='/products' element={<Product/>}/>
+      <Route path='/cart' element={<Cart/>}/>
+      <Route path='/success' element={<Success/>}/>
+      <Route path='/cancel' element={<Cancel/>}/>
     </Routes>
      
 

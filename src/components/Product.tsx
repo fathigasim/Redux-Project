@@ -1,72 +1,122 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
+import { useDebounce } from "use-debounce";
+import {
+  fetchProducts,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  filterBySearch,
+  sortByPrice,
+  setPage,
+  type Product,
+} from "../features/productSlice";
+import { addToCart, type CartItem } from "../features/cartSlice";
+import { selectFilteredProducts } from "../features/memoizedSelector";
 import { type RootState, type AppDispatch } from "../app/store";
-import { fetchProducts, addProduct,updateProduct,type Product } from "../features/productSlice";
+import "./Products.css"; // optional: extract styles for cleaner JSX
 
 const Products: React.FC = () => {
-  const { product, loading, error } = useSelector((state: RootState) => state.products);
   const dispatch = useDispatch<AppDispatch>();
 
+  // Redux state
+  const { loading, error, totalCount } = useSelector((state: RootState) => state.products);
+  const products = useSelector(selectFilteredProducts);
+  const searchQuery = useSelector((state: RootState) => state.products.searchQuery);
+  const sort = useSelector((state: RootState) => state.products.sort);
+  const page = useSelector((state: RootState) => state.products.page);
+  const pageSize = useSelector((state: RootState) => state.products.pageSize);
+
+  // Local UI state
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [debouncedSearch] = useDebounce(localSearch, 500);
   const [thename, setTheName] = useState("");
-  const [theprice, setThePrice] = useState(""); // keep as string
-// --- State for EDITING functionality ---
-  // Tracks the ID of the product currently being edited (null if none)
-  const [editingId, setEditingId] = useState<string | null>(null); 
-  // State for the inputs inside the edit row
+  const [theprice, setThePrice] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editname, setEditName] = useState("");
   const [editprice, setEditPrice] = useState("");
+
+  // URL sync
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // --- Initial load: read from URL
   useEffect(() => {
+    const search = searchParams.get("search") || "";
+    const sortParam = searchParams.get("sort") || "";
+    const pageParam = Number(searchParams.get("page")) || 1;
+
+    if (search) dispatch(filterBySearch(search));
+    if (sortParam) dispatch(sortByPrice(sortParam));
+    if (pageParam) dispatch(setPage(pageParam));
+
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  const handleAdd = (e: React.FormEvent<HTMLFormElement>) => {
+  // --- Update Redux search only after debounce
+  useEffect(() => {
+    dispatch(filterBySearch(debouncedSearch));
+  }, [debouncedSearch, dispatch]);
+
+  // --- Sync filters back to URL
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (debouncedSearch) params.search = debouncedSearch;
+    if (sort) params.sort = sort;
+    if (page) params.page = page.toString();
+    setSearchParams(params);
+  }, [debouncedSearch, sort, page, setSearchParams]);
+
+  // --- Fetch products when filters or pagination change
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch, page, sort, debouncedSearch]);
+
+  // --- CRUD handlers
+  const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!thename || !theprice) return; // prevent empty
-
-    dispatch(addProduct({ 
-      name: thename, 
-      price: Number(theprice) 
-    }));
-
+    if (!thename || !theprice) return;
+    dispatch(addProduct({ name: thename, price: Number(theprice) }));
     setTheName("");
     setThePrice("");
   };
-const handleEditStart = (product: Product) => {
-    // 1. Set the ID of the product being edited
-    setEditingId(product.id);
-    // 2. Populate the edit state with the current product data
-    setEditName(product.name);
-    setEditPrice(String(product.price)); // Convert number back to string for input value
-  };
-  const handleUpdate = (id: string) => {
-    if (!editname || !editprice || isNaN(Number(editprice))) return;
 
-    // Dispatch the thunk with the data from the edit state
-    dispatch(updateProduct({ 
-      id: id, 
-      name: editname, 
-      // Ensure price is converted back to a number/string format your thunk expects
-      price: Number(editprice) 
-    }));
-    
-    // Reset editing state
+  const handleEditStart = (product: Product) => {
+    setEditingId(product.id);
+    setEditName(product.name);
+    setEditPrice(String(product.price));
+  };
+
+  const handleUpdate = (id: string) => {
+    if (!editname || !editprice) return;
+    dispatch(updateProduct({ id, name: editname, price: Number(editprice) }));
     setEditingId(null);
     setEditName("");
     setEditPrice("");
   };
 
-  return (
-      <div style={{ padding: "20px" }}>
-      <h2>Products CRUD Demo</h2>
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+  const handleDelete = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      dispatch(deleteProduct(id));
+    }
+  };
 
-      {/* ADD PRODUCT FORM (Omitted for brevity, but it's correct) */}
-      <form onSubmit={handleAdd}>
-        {/* ... form inputs for thename and theprice ... */}
+  const handleAddToCart = (product: Product) => {
+    const cartItem: CartItem = { id: product.id, name: product.name, price: product.price, quantity: 1 };
+    dispatch(addToCart(cartItem));
+  };
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  // --- UI rendering
+  return (
+    <div className="products-container">
+      <h2 className="title">🛒 Product Management</h2>
+
+      {/* ADD PRODUCT */}
+      <form onSubmit={handleAdd} className="add-form">
         <input
-          placeholder="Name"
+          placeholder="Product Name"
           value={thename}
           onChange={(e) => setTheName(e.target.value)}
         />
@@ -76,71 +126,101 @@ const handleEditStart = (product: Product) => {
           value={theprice}
           onChange={(e) => setThePrice(e.target.value)}
         />
-        <button type="submit">Add Product</button>
+        <button type="submit">Add</button>
       </form>
-      
-      <hr />
 
-      {/* PRODUCT LIST TABLE */}
-      <table>
-        <thead>
+      {/* FILTERS */}
+      <div className="filters">
+        <input
+          type="text"
+          placeholder="🔍 Search..."
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
+        />
+        <select
+          value={sort}
+          onChange={(e) => dispatch(sortByPrice(e.target.value))}
+        >
+          <option value="">Sort by</option>
+          <option value="lowToHigh">Price: Low → High</option>
+          <option value="highToLow">Price: High → Low</option>
+        </select>
+      </div>
+
+      {/* PRODUCTS TABLE */}
+      {loading ? (
+        <p className="loading">Loading products...</p>
+      ) : error ? (
+        <p className="error">{error}</p>
+      ) : (
+        <table className="products-table">
+          <thead>
             <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Actions</th>
+              <th>Name</th>
+              <th>Price (₹)</th>
+              <th>Actions</th>
             </tr>
-        </thead>
-        <tbody>
-          {product.map((u) => {
-            // Check if the current product is the one being edited
-            const isEditing = u.id === editingId;
-
-            return (
-              <tr key={u.id}>
-                
-                {/* 1. NAME and PRICE cells */}
-                {isEditing ? (
-                  <>
-                    <td>
-                      <input 
-                        type="text" 
-                        value={editname} 
-                        onChange={(e) => setEditName(e.target.value)} 
-                      />
-                    </td>
-                    <td>
-                      <input 
-                        type="number" 
-                        value={editprice} 
-                        onChange={(e) => setEditPrice(e.target.value)} 
-                      />
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td>{u.name}</td>
-                    <td>{u.price}</td>
-                  </>
-                )}
-
-                {/* 2. ACTIONS cell */}
-                <td>
-                  {isEditing ? (
-                    // Save/Cancel buttons when editing
-                    <>
-                      <button onClick={() => handleUpdate(u.id)}>Save</button>
-                      <button onClick={() => setEditingId(null)}>Cancel</button>
-                    </>
-                  ) : (
-                    // Edit button when not editing
-                    <button onClick={() => handleEditStart(u)}>Edit</button>
-                  )}
-                </td>
+          </thead>
+          <tbody>
+            {products.length === 0 ? (
+              <tr>
+                <td colSpan={3} style={{ textAlign: "center" }}>No products found</td>
               </tr>
+            ) : (
+              products.map((p) => {
+                const isEditing = p.id === editingId;
+                return (
+                  <tr key={p.id}>
+                    {isEditing ? (
+                      <>
+                        <td><input value={editname} onChange={(e) => setEditName(e.target.value)} /></td>
+                        <td><input type="number" value={editprice} onChange={(e) => setEditPrice(e.target.value)} /></td>
+                      </>
+                    ) : (
+                      <>
+                        <td>{p.name}</td>
+                        <td>{p.price}</td>
+                      </>
+                    )}
+                    <td>
+                      {isEditing ? (
+                        <>
+                          <button onClick={() => handleUpdate(p.id)}>💾 Save</button>
+                          <button onClick={() => setEditingId(null)}>✖ Cancel</button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => handleEditStart(p)}>✏️ Edit</button>
+                          <button onClick={() => handleDelete(p.id)}>🗑 Delete</button>
+                          <button onClick={() => handleAddToCart(p)}>➕ Add</button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      )}
+
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          {[...Array(totalPages)].map((_, i) => {
+            const num = i + 1;
+            return (
+              <button
+                key={num}
+                className={`page-btn ${page === num ? "active" : ""}`}
+                onClick={() => dispatch(setPage(num))}
+              >
+                {num}
+              </button>
             );
           })}
-        </tbody>
-      </table>
+        </div>
+      )}
     </div>
   );
 };

@@ -7,6 +7,7 @@ import App from './App.tsx'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from './context/themeContext';
 import { BrowserRouter } from 'react-router'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
