@@ -4,11 +4,6 @@ import api from "../api/axios";
 // ---------------------------
 // Interfaces & Types
 // ---------------------------
-export interface Order {
-  id: string;
-  OrderDate: string;
-  price: number;
-}
 
 export interface OrderItems {
   itemId: string;
@@ -17,7 +12,17 @@ export interface OrderItems {
   price: number;
   quantity:number;
 }
+export interface Order {
+  id: string;
+  orderDate: string;
+  orderItems: OrderItems[];
+    totalAmount: number;
+}
 
+
+// interface OrderItemState{
+//   orderItems:OrderItems[]
+// }
 // interface ProductResponse {
 //   items: Product[];
 //   totalItems: number;
@@ -27,6 +32,7 @@ export interface OrderItems {
 
 interface OrderState {
   order: Order[];
+  // orderItems:OrderItems[],
   loading: boolean;
   error: string | null;
  
@@ -37,6 +43,7 @@ interface OrderState {
 // ---------------------------
 const initialState: OrderState = {
   order: [],
+  // orderItems:[],
   loading: false,
   error: null,
  
@@ -47,7 +54,7 @@ const initialState: OrderState = {
 // ---------------------------
 
 // 🟦 Fetch Products (with pagination & filters)
-export const fetchProducts = createAsyncThunk<Order[]>(
+export const fetchOrders= createAsyncThunk<Order[]>(
   "orders/fetchOrders",
   async () => {
     //_, { getState }
@@ -63,10 +70,28 @@ export const fetchProducts = createAsyncThunk<Order[]>(
 
     const res = await api.get("https://localhost:7171/api/Order");
     console.log("fetchOrders -> response", res.data);
-    return res.data;
+    return res.data as Order[];
   }
 );
+export const OrderByDate= createAsyncThunk(
+  "orders/report/DatedOrders",
+  async (date:string) => {
+    //_, { getState }
+    //const state: any = getState();
+    // const { searchQuery, sort, page, pageSize } = state.products;
 
+    // const params: any = {
+    //   q: searchQuery || "",
+    //   sort: sort || "",
+    //   page,
+    //   pageSize,
+    // };
+
+    const res = await api.get(`/api/Order/${date}`);
+    console.log("fetchOrders -> response", res.data);
+    return await res.data as Order[];
+  }
+);
 // 🟩 Add Product
 // export const addProduct = createAsyncThunk<Order, Omit<Order, "id">>(
 //   "products/addProduct",
@@ -105,55 +130,35 @@ const orderSlice = createSlice({
   name: "orders",
   initialState,
   reducers: {
-    // 🔍 Filters & Sorting
-    // sortByPrice(state, action: PayloadAction<string>) {
-    //   state.sort = action.payload;
-    //   state.page = 1;
-    // },
-    // filterBySearch(state, action: PayloadAction<string>) {
-    //   state.searchQuery = action.payload;
-    //   state.page = 1;
-    // },
-    // clearFilters(state) {
-    //   state.sort = "";
-    //   state.searchQuery = "";
-    //   state.page = 1;
-    // },
-
-    // // 📄 Pagination
-    // setPage(state, action: PayloadAction<number>) {
-    //   state.page = action.payload;
-    // },
-    // setPageSize(state, action: PayloadAction<number>) {
-    //   state.pageSize = action.payload;
-    //   state.page = 1; // reset to first page when page size changes
-    // },
+    
   },
 
   extraReducers: (builder) => {
     builder
       // 🟦 Fetch
-      .addCase(fetchProducts.pending, (state) => {
+      .addCase(fetchOrders.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchProducts.fulfilled, (state, action) => {
+      .addCase(fetchOrders.fulfilled, (state, action) => {
         state.loading = false;
         state.order = action.payload;
+        // state.orderItems=action.payload.;
         // state.totalCount = action.payload.totalItems;
         // state.page = action.payload.pageNumber;
 
         // ✅ FIX: Only override if backend sends pageSize
        // state.pageSize = action.payload.pageSize || state.pageSize;
       })
-      .addCase(fetchProducts.rejected, (state, action) => {
+      .addCase(fetchOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Error fetching products";
       })
-
-      // 🟩 Add
-    //   .addCase(addProduct.fulfilled, (state, action) => {
-    //     state.product.push(action.payload);
-    //   })
+      .addCase(OrderByDate.fulfilled, (state, action) => {
+        state.order=action.payload
+      }) .addCase(OrderByDate.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Error fetching orders";
+      })
 
       // 🟨 Update
     //   .addCase(updateProduct.fulfilled, (state, action) => {

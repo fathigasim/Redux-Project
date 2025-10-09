@@ -13,11 +13,15 @@ import { loadStoredAuth } from './features/authSlice';
 import Login from './components/Login';
 import Users from './components/Users';
 import Product from './components/Product';
-import { Routes, Route } from "react-router-dom";
+// import { Routes, Route } from "react-router-dom";
 import Cart from './components/Cart';
-import Cancel from './components/cancel';
-import Success from './components/success';
+ import Cancel from './components/Cancel';
+ import Success from './components/Success'
 import Header from './components/Headers';
+import Order from './components/Order';
+import OrderDates from './components/Reports/OrderDates';
+import OrderAnalytics from './components/OrderAnalytics';
+import {BrowserRouter ,Route,Routes } from "react-router-dom";
 
 function App() {
   // const dispatch = useAppDispatch();
@@ -32,21 +36,26 @@ const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(loadStoredAuth());
-  }, []);
+  }, [dispatch]);
   return (
 <>
 {/* <Users /> */}
-      <Header/>
+    
+      <BrowserRouter>
+        <Header/>
      <Routes>
       <Route path="/users" element={<Users />} />
       <Route path="/" element={<Login />} />
       <Route path="/testWeather" element={<WeatherTest />} />
       <Route path='/products' element={<Product/>}/>
       <Route path='/cart' element={<Cart/>}/>
+      <Route path='/orders' element={<Order/>}/>
+      <Route path='/analytics' element={<OrderAnalytics/>}/>
+      <Route path='/orderByDateRep' element={<OrderDates/>}/>
       <Route path='/success' element={<Success/>}/>
       <Route path='/cancel' element={<Cancel/>}/>
     </Routes>
-     
+     </BrowserRouter>
 
 </>
   )

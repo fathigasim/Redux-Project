@@ -68,6 +68,12 @@ object-fit:cover;
 
 
 @media(max-width:771px){
+    .maindiv{
+      
+      flex-direction:column;
+      margin-left: auto;
+  margin-right: auto;
+    }
     .filters{
         width:40%;
         padding:10px;
