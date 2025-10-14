@@ -20,12 +20,14 @@ interface ProductResponse {
 interface ProductState {
   product: Product[];
   loading: boolean;
-  error: string | null;
-  sort: string;          // "lowToHigh" | "highToLow" | ""
-  searchQuery: string;
+  error: string |string []| null;
+  success: string | null;
+  sort: string;
+  searchQuery: string | number | null;
   page: number;
   pageSize: number;
   totalCount: number;
+    formErrors: { name?: string; price?: string };
 }
 
 // ---------------------------
@@ -35,65 +37,92 @@ const initialState: ProductState = {
   product: [],
   loading: false,
   error: null,
-  sort: "",
-  searchQuery: "",
-  page: 1,
-  pageSize: 2,       // default; can be overridden by backend
+  success: null,
+  sort: localStorage.getItem("sort") || "",
+  searchQuery: localStorage.getItem("searchQuery") || "",
+  page: Number(localStorage.getItem("page")) || 1,
+  pageSize: 2,
   totalCount: 0,
+  formErrors: {},
 };
+
+interface FetchProductsParams {
+  page?: number;
+  sort?: string;
+  searchQuery?: string | number;
+}
 
 // ---------------------------
 // Async Thunks
 // ---------------------------
-
-// 🟦 Fetch Products (with pagination & filters)
-export const fetchProducts = createAsyncThunk<ProductResponse>(
+export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsParams | undefined>(
   "products/fetchProducts",
-  async (_, { getState }) => {
+  async (overrideParams, { getState }) => {
     const state: any = getState();
     const { searchQuery, sort, page, pageSize } = state.products;
 
-    const params: any = {
-      q: searchQuery || "",
-      sort: sort || "",
-      page,
+    const params = {
+      q: overrideParams?.searchQuery ?? searchQuery ?? "",
+      sort: overrideParams?.sort ?? sort ?? "",
+      page: overrideParams?.page ?? page ?? 1,
       pageSize,
     };
 
-    const res = await api.get("https://localhost:7171/api/Products", { params });
-    console.log("fetchProducts -> response", res.data);
+    const res = await api.get("/api/Products", { params });
     return res.data;
   }
 );
 
-// 🟩 Add Product
-export const addProduct = createAsyncThunk<Product, Omit<Product, "id">>(
+export const addProduct = createAsyncThunk<
+  { product: Product; message: string },
+  { name: string; price: number },
+  { rejectValue: Record<string, string[] | string> }
+>(
   "products/addProduct",
-  async (newProduct) => {
-    const res = await api.post("/api/Products", newProduct);
-    return res.data;
+  async (newProduct, { rejectWithValue }) => {
+    try {
+      const res = await api.post("/api/Products", newProduct);
+      return {
+        product: res.data.product,
+        message: res.data.message,
+      };
+    } catch (err: any) {
+      const res = err.response;
+
+      // --- Case 1: ModelState validation errors (from [ApiController]) ---
+      if (res?.status === 400 && res.data?.errors) {
+        // { errors: { Name: ["..."], Price: ["..."] } }
+        return rejectWithValue(res.data.errors);
+      }
+
+      // --- Case 2: Backend localized message ---
+      if (res?.data?.message) {
+        return rejectWithValue({ general: res.data.message });
+      }
+
+      // --- Fallback ---
+      return rejectWithValue({ general: "Unexpected error" });
+    }
   }
 );
 
-// 🟨 Update Product
+
 export const updateProduct = createAsyncThunk<Product, Partial<Product>>(
   "products/updateProduct",
   async (productData) => {
     const { id, ...updatedFields } = productData;
     if (!id) throw new Error("Product ID is required for update.");
-
     const res = await api.put(`/api/Products/${id}`, updatedFields);
     return res.data;
   }
 );
 
-// 🟥 Delete Product
 export const deleteProduct = createAsyncThunk<string, string>(
   "products/deleteProduct",
   async (id) => {
     if (!id) throw new Error("Product ID is required for delete.");
     await api.delete(`/api/Products/${id}`);
-    return id; // ✅ just return the id, no need to return full response
+    return id;
   }
 );
 
@@ -104,34 +133,44 @@ const productSlice = createSlice({
   name: "products",
   initialState,
   reducers: {
-    // 🔍 Filters & Sorting
+    // Filters & Sorting
     sortByPrice(state, action: PayloadAction<string>) {
       state.sort = action.payload;
-      state.page = 1;
+      state.page = 1; // reset page on sort
+      localStorage.setItem("sort", action.payload);
+      localStorage.setItem("page", "1");
     },
     filterBySearch(state, action: PayloadAction<string>) {
       state.searchQuery = action.payload;
-      state.page = 1;
+      state.page = 1; // reset page on search
+      localStorage.setItem("searchQuery", action.payload);
+      localStorage.setItem("page", "1");
     },
     clearFilters(state) {
       state.sort = "";
       state.searchQuery = "";
       state.page = 1;
+      localStorage.removeItem("sort");
+      localStorage.removeItem("searchQuery");
+      localStorage.setItem("page", "1");
     },
-
-    // 📄 Pagination
+    clearMessages(state) {
+      state.error = null;
+      state.success = null;
+    },
     setPage(state, action: PayloadAction<number>) {
       state.page = action.payload;
+      localStorage.setItem("page", action.payload.toString());
     },
     setPageSize(state, action: PayloadAction<number>) {
       state.pageSize = action.payload;
-      state.page = 1; // reset to first page when page size changes
+      state.page = 1;
+      localStorage.setItem("page", "1");
     },
   },
-
   extraReducers: (builder) => {
     builder
-      // 🟦 Fetch
+      // Fetch
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
       })
@@ -140,8 +179,6 @@ const productSlice = createSlice({
         state.product = action.payload.items;
         state.totalCount = action.payload.totalItems;
         state.page = action.payload.pageNumber;
-
-        // ✅ FIX: Only override if backend sends pageSize
         state.pageSize = action.payload.pageSize || state.pageSize;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
@@ -149,18 +186,44 @@ const productSlice = createSlice({
         state.error = action.error.message || "Error fetching products";
       })
 
-      // 🟩 Add
+      // Add
       .addCase(addProduct.fulfilled, (state, action) => {
-        state.product.push(action.payload);
+        state.product.push(action.payload.product);
+        state.success = action.payload.message;
+        state.error = null;
+        state.loading=false;
       })
+     .addCase(addProduct.rejected, (state, action) => {
+  state.loading = false;
+  state.success = null;
+  state.formErrors = {}; // reset previous validation errors
 
-      // 🟨 Update
+  const payload = action.payload as
+    | { Name?: string[]; Price?: string[] }
+    | { general?: string }
+    | undefined;
+
+  if (payload && ('Name' in payload || 'Price' in payload)) {
+    state.error = null;
+    state.formErrors = {
+      name: Array.isArray(payload.Name) ? payload.Name[0] : undefined,
+      price: Array.isArray(payload.Price) ? payload.Price[0] : undefined,
+    };
+  } else if (payload && 'general' in payload) {
+    state.error = payload.general as string;
+  } else {
+    state.error = action.error?.message || "Error adding product";
+  }
+})
+
+
+      // Update
       .addCase(updateProduct.fulfilled, (state, action) => {
         const index = state.product.findIndex((p) => p.id === action.payload.id);
         if (index >= 0) state.product[index] = action.payload;
       })
 
-      // 🟥 Delete
+      // Delete
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.product = state.product.filter((p) => p.id !== action.payload);
       });
@@ -176,6 +239,7 @@ export const {
   clearFilters,
   setPage,
   setPageSize,
+  clearMessages,
 } = productSlice.actions;
 
 export default productSlice.reducer;

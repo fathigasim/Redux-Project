@@ -48,6 +48,7 @@
 import axios from "axios";
 import { store } from "../app/store";
 import { refreshTokenThunk, logout } from "../features/authSlice";
+import i18n from "../i18n";
 
 const api = axios.create({
   baseURL: "https://localhost:7171",
@@ -59,6 +60,8 @@ api.interceptors.request.use((config) => {
   const state = store.getState() as { auth: { token?: string } };
   const token = state.auth.token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
+    const lang = localStorage.getItem("lang") || "en"; // store selected language
+  config.headers["Accept-Language"] = i18n.language || lang; // send language in headers
   return config;
 });
 

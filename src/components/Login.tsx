@@ -17,7 +17,7 @@ const Login = () => {
   dispatch(logout());
  }
   return (
-    <div>
+    <div style={{marginTop:100}}>
       <h2>Login</h2>
       {token && <p>✅ Logged in with token</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}

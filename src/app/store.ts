@@ -7,6 +7,8 @@ import weatherTestReducer from '../features/testSlice'
 import usersReducer from '../features/usersSlice';
 import productReducer from '../features/productSlice'
 import orderReducer from '../features/orderSlice'
+import manageReducer from '../features/manageSlice'
+import languageReducer from '../features/languageSlice'
 import cartReducer, { type CartState } from '../features/cartSlice'
 
 // Load cart from localStorage
@@ -34,7 +36,9 @@ export const store = configureStore({
        users:usersReducer,
        products:productReducer,
       cart:cartReducer,
-      orders:orderReducer
+      orders:orderReducer,
+      language:languageReducer,
+      manage:manageReducer
   },
     preloadedState
 });

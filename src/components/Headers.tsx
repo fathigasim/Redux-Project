@@ -10,6 +10,8 @@ import { useSearchParams } from "react-router-dom";
 import { filterBySearch } from '../features/productSlice';
 import { AiFillDelete } from "react-icons/ai";
 import { useDebounce } from "use-debounce";
+import i18n from "../i18n";
+// import LanguageSelector from "./LanguageSelector";
 const Header = () => {
     const dispatch = useDispatch();
   const items = useSelector((state: RootState) => state.cart.items);
@@ -35,6 +37,7 @@ const Header = () => {
       setSearchParams(rest);
     }
   }, [debouncedSearch]);
+  const lang = localStorage.getItem("lang") || "en";
   return (
        <Navbar
       bg="dark"
@@ -42,7 +45,7 @@ const Header = () => {
       expand="md"
       fixed="top"
       className="shadow-sm py-3"
-      style={{ height: 80 }}
+      style={{ height: 80,marginBottom:100 }}
     >
       <Container fluid>
         {/* Brand */}
@@ -116,6 +119,13 @@ const Header = () => {
                 )}
               </Dropdown.Menu>
             </Dropdown>
+            <div style={{ direction: lang === "ar" ? "rtl" : "ltr", padding: "2rem" }}>
+                  {/* <LanguageSelector /> */}
+                  <button onClick={() => i18n.changeLanguage("ar")}>AR</button>
+<button onClick={() => i18n.changeLanguage("en")}>EN</button>
+
+            </div>
+           
           </Nav>
         </Navbar.Collapse>
       </Container>
