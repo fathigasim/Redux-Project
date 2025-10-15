@@ -1,11 +1,17 @@
-
+import { Alert, Container } from "react-bootstrap"
+import { Link } from "react-router"
 
 const Success = () => {
     localStorage.setItem('cart','')
+    
   return (
-    <div>
+   <Container style={{marginTop:100}}>
+    <Alert variant="success" className="text-center">
       Successfull Payment
-    </div>
+    </Alert>
+     <Link to="/products">Back To Product</Link>
+    </Container>
+   
   )
 }
 

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { forgotPassword, clearMessages } from "./manageSlice";
-import { type RootState, type AppDispatch } from "../../app/store";
+import { forgotPassword, clearMessages } from "../features/manageSlice";
+import { type RootState, type AppDispatch } from "../app/store";
 
 export default function ForgotPassword() {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, success } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.manage
   );
 
   const [email, setEmail] = useState("");
@@ -26,7 +26,7 @@ export default function ForgotPassword() {
       toast.success(success);
       dispatch(clearMessages());
     }
-  }, [error, success]);
+  }, [dispatch,error, success]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50">

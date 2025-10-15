@@ -40,6 +40,7 @@ const OrderAnalytics: React.FC = () => {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
+    <Container style={{marginTop:100}}>
     <div className="p-4 space-y-8">
       <h2 className="text-xl font-semibold mb-4">📊 Order Analytics</h2>
 
@@ -71,6 +72,7 @@ const OrderAnalytics: React.FC = () => {
         </ResponsiveContainer>
       </div>
     </div>
+    </Container>
   );
 };
 

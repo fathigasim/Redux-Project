@@ -1,87 +1,61 @@
-import { Badge, Container, Dropdown, Form, Navbar,Nav, Button } from "react-bootstrap"
-import { useState,useEffect } from "react";
-import { FaShoppingCart } from 'react-icons/fa';
+import { Navbar, Nav, Container, Form, Button, Dropdown, Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import {type RootState } from "../app/store";
-import { useSelector, useDispatch } from 'react-redux'
-import { removeFromCart } from '../features/cartSlice'
-import { useSearchParams } from "react-router-dom";
-// import {type CartState } from '../features/cartSlice';
-import { filterBySearch } from '../features/productSlice';
+import { FaShoppingCart } from "react-icons/fa";
 import { AiFillDelete } from "react-icons/ai";
-import { useDebounce } from "use-debounce";
-import i18n from "../i18n";
-// import LanguageSelector from "./LanguageSelector";
-const Header = () => {
-    const dispatch = useDispatch();
-  const items = useSelector((state: RootState) => state.cart.items);
-//   const {state:{cart},dispatch,productDispatch}=CartState();
-      const [searchParams, setSearchParams] = useSearchParams();
-  
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { removeFromCart } from "../features/cartSlice"; // adjust path
+import { useTranslation } from "react-i18next";
+import { logout } from "../features/authSlice";
 
-  // ✅ Initialize search state from URL
-  const initialSearch = searchParams.get("search") || "";
+export default function AppNavbar() {
+  const { i18n } = useTranslation();
+  const dispatch = useDispatch();
 
-  const [localSearch, setLocalSearch] = useState(initialSearch);
-  const [debouncedSearch] = useDebounce(localSearch, 500);
+    const handleLogout = () => {
+    dispatch(logout());
+  };
 
-  // ✅ When the debounced value changes, update Redux + URL
-  useEffect(() => {
-    dispatch(filterBySearch(debouncedSearch));
-    const params = Object.fromEntries(searchParams.entries());
-    if (debouncedSearch) {
-      setSearchParams({ ...params, search: debouncedSearch });
-    } else {
-      // remove search param when cleared
-      const { search, ...rest } = params;
-      setSearchParams(rest);
-    }
-  }, [debouncedSearch]);
-  const lang = localStorage.getItem("lang") || "en";
+  const items = useSelector((state: any) => state.cart.items);
+  const [localSearch, setLocalSearch] = useState("");
+  const isAuthenticated = useSelector((state: any) => state.auth.token !== null);
+  const user = useSelector((state: any) => state.auth.user);
+
   return (
-       <Navbar
+    <Navbar
       bg="dark"
       variant="dark"
       expand="md"
       fixed="top"
       className="shadow-sm py-3"
-      style={{ height: 80,marginBottom:100 }}
+      style={{ height: "80px", zIndex: 1030 }}
     >
-      <Container fluid>
+      <Container fluid className="align-items-center">
         {/* Brand */}
         <Navbar.Brand as={Link} to="/" className="fw-bold fs-4 text-white">
           🛒 Shopping Cart
         </Navbar.Brand>
 
-        {/* Hamburger Toggle */}
+        {/* Toggle for mobile */}
         <Navbar.Toggle aria-controls="navbarResponsive" />
 
-        {/* Collapsible Section */}
-        <Navbar.Collapse id="navbarResponsive">
-          {/* Search Bar (centered on medium+, stacked on small) */}
-          <Form className="mx-auto my-2 my-md-0" style={{ maxWidth: 500, flex: 1 }}>
+        <Navbar.Collapse id="navbarResponsive" className="justify-content-between">
+          {/* Search Bar */}
+          <Form className="mx-auto my-2 my-md-0" style={{ maxWidth: "350px",  flexGrow: 1 }}>
             <Form.Control
               type="text"
               placeholder="Search Product"
-              className="me-2"
               value={localSearch}
-            //   onChange={(e) => {
-            //     // productDispatch({
-            //     //   type: 'FILTER_BY_SEARCH',
-            //     //   payload: e.target.value,
-            //     // });
-            //     dispatch(filterBySearch(e.target.value))
-            //   }}
-                    onChange={(e) => setLocalSearch(e.target.value)}
-        defaultValue={searchParams.get("search") || ""}
-
+              onChange={(e) => setLocalSearch(e.target.value)}
+              className="me-2"
             />
           </Form>
 
-          {/* Cart Dropdown (always right-aligned) */}
-          <Nav className="ms-auto">
+          {/* Right Section (Cart + Language + Auth) */}
+          <Nav className="d-flex align-items-center ms-auto gap-3">
+            {/* Cart Dropdown */}
             <Dropdown align="end">
-              <Dropdown.Toggle variant="success" id="dropdown-cart">
+              <Dropdown.Toggle variant="success" id="dropdown-cart" className="d-flex align-items-center">
                 <FaShoppingCart color="white" fontSize="22px" />
                 <Badge bg="light" text="dark" className="ms-1">
                   {items.length}
@@ -91,25 +65,25 @@ const Header = () => {
               <Dropdown.Menu style={{ minWidth: 370 }}>
                 {items.length > 0 ? (
                   <>
-                    {items.map((prod) => (
+                    {items.map((prod: any) => (
                       <div
                         key={prod.id}
                         className="d-flex align-items-center justify-content-between p-2 border-bottom"
                       >
                         <div>
                           <div className="fw-semibold">{prod.name}</div>
-                          <div className="text-muted small">₹ {String(prod.price).split('.')[0]}</div>
+                          <div className="text-muted small">₹ {String(prod.price).split(".")[0]}</div>
                         </div>
                         <AiFillDelete
                           fontSize="20px"
                           className="text-danger"
-                          style={{ cursor: 'pointer' }}
+                          style={{ cursor: "pointer" }}
                           onClick={() => dispatch(removeFromCart(prod.id))}
                         />
                       </div>
                     ))}
                     <Link to="/cart">
-                      <Button variant="primary" style={{ width: '95%', margin: '10px' }}>
+                      <Button variant="primary" style={{ width: "95%", margin: "10px" }}>
                         Go To Cart
                       </Button>
                     </Link>
@@ -119,18 +93,46 @@ const Header = () => {
                 )}
               </Dropdown.Menu>
             </Dropdown>
-            <div style={{ direction: lang === "ar" ? "rtl" : "ltr", padding: "2rem" }}>
-                  {/* <LanguageSelector /> */}
-                  <button onClick={() => i18n.changeLanguage("ar")}>AR</button>
-<button onClick={() => i18n.changeLanguage("en")}>EN</button>
 
+            {/* Language Toggle */}
+            <div className="d-flex align-items-center gap-2">
+              <Button
+                variant={i18n.language =="ar" ? "outline-light": "light"}
+                size="sm"
+                onClick={() => i18n.changeLanguage("ar")}
+              >
+                AR
+              </Button>
+              <Button
+                 variant={i18n.language =="en" ? "outline-light": "light"}
+                size="sm"
+                onClick={() => i18n.changeLanguage("en")}
+              >
+                EN
+              </Button>
             </div>
-           
+
+            {/* Auth Section */}
+            {isAuthenticated ? (
+              <Dropdown align="end">
+                <Dropdown.Toggle variant="outline-info" id="dropdown-user">
+                  {user?.userName || "Profile"}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item as={Link} to="/profile">Profile</Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/orders">My Orders</Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item as={Link} to="/logout" onClick={handleLogout}>Logout</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <Button as={Link} to="/" variant="outline-info">
+                Login
+              </Button>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>
     </Navbar>
-  )
+  );
 }
-
-export default Header

@@ -18,6 +18,7 @@ import { addToCart, type CartItem } from "../features/cartSlice";
 import { selectFilteredProducts } from "../features/memoizedSelector";
 import { type RootState, type AppDispatch } from "../app/store";
 import { useTranslation } from "react-i18next";
+import { Container } from "react-bootstrap";
 import "./Products.css";
 
 interface Props {
@@ -157,7 +158,7 @@ const Products: React.FC<Props> = ({ language }) => {
 
   const totalPages = Math.ceil(totalCount / pageSize);
   return (
-    <div className="products-container">
+    <Container style={{marginTop:100}}>
       <h2 className="title">{language === "ar" ? "إدارة المنتجات" : "Product Management"} 🛒</h2>
 
       {/* ADD PRODUCT FORM */}
@@ -282,7 +283,7 @@ const Products: React.FC<Props> = ({ language }) => {
           })}
         </div>
       )}
-    </div>
+    </Container>
   );
 };
 

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import {type RootState } from '../app/store'
 import { removeFromCart, clearCart } from '../features/cartSlice'
 import api from '../api/axios'
+import Container from 'react-bootstrap/Container'
 export default function Cart() {
   const items = useSelector((state: RootState) => state.cart.items)
   //const token = useSelector((state: RootState) => state.auth.token)
@@ -21,6 +22,7 @@ export default function Cart() {
   }
  console.log('Cart items:', items) // Debug
   return (
+    <Container style={{marginTop:100,justifyContent:"center",alignItems:"center"}}>
     <div>
       <h2>Cart</h2>
       {items.length === 0 && <p>Cart is empty</p>}
@@ -38,5 +40,6 @@ export default function Cart() {
         </>
       )}
     </div>
+    </Container>
   )
 }

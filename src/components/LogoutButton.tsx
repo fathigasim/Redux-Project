@@ -1,11 +1,12 @@
-//import { useAppDispatch } from "../app/hooks";
-//import { revokeToken } from "../features/authSlice";
+// import { useAppDispatch } from "../app/hooks";
+import { useDispatch } from "react-redux";
+import { logout } from "../features/authSlice";
 
 export  const LogoutButton =()=> {
- // const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-   // dispatch(revokeToken());
+    dispatch(logout());
   };
 
   return <button onClick={handleLogout}>Logout from All Devices</button>;

@@ -41,7 +41,7 @@ const initialState: ProductState = {
   sort: localStorage.getItem("sort") || "",
   searchQuery: localStorage.getItem("searchQuery") || "",
   page: Number(localStorage.getItem("page")) || 1,
-  pageSize: 2,
+  pageSize: 5,
   totalCount: 0,
   formErrors: {},
 };

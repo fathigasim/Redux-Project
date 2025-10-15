@@ -21,7 +21,11 @@ import Header from './components/Headers';
 import Order from './components/Order';
 import OrderDates from './components/Reports/OrderDates';
 import OrderAnalytics from './components/OrderAnalytics';
+import ForgotPassword from './components/ForgotPassword';
+ import ResetPassword from './components/ResetPassword';
 import {BrowserRouter ,Route,Routes } from "react-router-dom";
+import { Container } from 'react-bootstrap';
+import { LogoutButton } from './components/LogoutButton';
 
 function App() {
   // const dispatch = useAppDispatch();
@@ -43,18 +47,23 @@ const dispatch = useAppDispatch();
     
       <BrowserRouter>
         <Header/>
+        <Container className='mt-3'>
      <Routes>
       <Route path="/users" element={<Users />} />
       <Route path="/" element={<Login />} />
       <Route path="/testWeather" element={<WeatherTest />} />
       <Route path='/products' element={<Product/>}/>
+      <Route path='/foregot' element={<ForgotPassword/>}/>
+      <Route path='/reset' element={<ResetPassword/>}/>
       <Route path='/cart' element={<Cart/>}/>
       <Route path='/orders' element={<Order/>}/>
       <Route path='/analytics' element={<OrderAnalytics/>}/>
       <Route path='/orderByDateRep' element={<OrderDates/>}/>
       <Route path='/success' element={<Success/>}/>
       <Route path='/cancel' element={<Cancel/>}/>
+      <Route path='/logout' element={<LogoutButton/>}/>
     </Routes>
+    </Container>
      </BrowserRouter>
 
 </>

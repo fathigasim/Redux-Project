@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { resetPassword, clearMessages } from "./manageSlice";
-import { type RootState, type AppDispatch } from "../../app/store";
+import { resetPassword, clearMessages } from "../features/manageSlice";
+import { type RootState, type AppDispatch } from "../app/store";
 
 export default function ResetPassword() {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, success } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.manage
   );
 
   const [searchParams] = useSearchParams();
@@ -33,9 +33,9 @@ export default function ResetPassword() {
     if (success) {
       toast.success(success);
       dispatch(clearMessages());
-      navigate("/login");
+      navigate("/");
     }
-  }, [error, success]);
+  }, [dispatch,navigate,error, success]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50">

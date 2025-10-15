@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import api from "../../api/axios";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from "../api/axios";
 
 interface AuthState {
   loading: boolean;
@@ -20,9 +20,9 @@ export const forgotPassword = createAsyncThunk<
   { rejectValue: { message: string } }
 >(
   "auth/forgotPassword",
-  async ({ email }, { rejectWithValue }) => {
+  async ( {email} , { rejectWithValue }) => {
     try {
-      const res = await api.post("/api/Auth/forgot-password", { email });
+      const res = await api.post("/api/Auth/forgot",  {email} );
       return { message: res.data.message };
     } catch (err: any) {
       const message =
@@ -41,7 +41,7 @@ export const resetPassword = createAsyncThunk<
   "auth/resetPassword",
   async ({ token, newPassword }, { rejectWithValue }) => {
     try {
-      const res = await api.post("/api/Auth/reset-password", {
+      const res = await api.post("/api/Auth/reset", {
         token,
         newPassword,
       });
@@ -56,7 +56,7 @@ export const resetPassword = createAsyncThunk<
 
 // =============== 🔹 SLICE ===============
 const manageSlice = createSlice({
-  name: "auth",
+  name: "manage",
   initialState,
   reducers: {
     clearMessages(state) {
@@ -100,4 +100,4 @@ const manageSlice = createSlice({
 });
 
 export const { clearMessages } = manageSlice.actions;
-export default authSlice.reducer;
+export default manageSlice.reducer;

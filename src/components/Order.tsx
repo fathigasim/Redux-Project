@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useSelector,useDispatch } from "react-redux";
 import {type AppDispatch, type RootState } from "../app/store";
 import {fetchOrders} from "../features/orderSlice"
-import { Card } from "react-bootstrap";
+import { Card, Container } from "react-bootstrap";
 import './styles.css'
 const Order = () => {
     
@@ -13,7 +13,7 @@ const Order = () => {
    }, [dispatch]);
    
       return (
-    <div style={{top:0}}>
+    <Container style={{marginTop:100}}>
       {loading &&<div>...Loading</div>}
         {error &&
             <p>{error}</p>}
@@ -50,7 +50,7 @@ const Order = () => {
           </div>
         
       
-    </div>
+    </Container>
   )
 }
 
