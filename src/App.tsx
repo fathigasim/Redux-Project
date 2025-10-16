@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import { useAppDispatch } from './app/hooks';
 import { loadStoredAuth } from './features/authSlice';
 import Login from './components/Login';
+import Logins from './components/logins';
 import Users from './components/Users';
 import Product from './components/Product';
 // import { Routes, Route } from "react-router-dom";
@@ -26,6 +27,7 @@ import ForgotPassword from './components/ForgotPassword';
 import {BrowserRouter ,Route,Routes } from "react-router-dom";
 import { Container } from 'react-bootstrap';
 import { LogoutButton } from './components/LogoutButton';
+import Register from './components/Register';
 
 function App() {
   // const dispatch = useAppDispatch();
@@ -61,7 +63,9 @@ const dispatch = useAppDispatch();
       <Route path='/orderByDateRep' element={<OrderDates/>}/>
       <Route path='/success' element={<Success/>}/>
       <Route path='/cancel' element={<Cancel/>}/>
-      <Route path='/logout' element={<LogoutButton/>}/>
+      <Route path='/logins' element={<Logins/>}/>
+       <Route path='/register' element={<Register/>}/>
+      
     </Routes>
     </Container>
      </BrowserRouter>

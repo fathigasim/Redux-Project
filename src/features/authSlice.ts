@@ -23,15 +23,28 @@ export const loadStoredAuth = createAsyncThunk("auth/loadStoredAuth", async () =
 });
 
 // Login thunk
-export const login = createAsyncThunk(
+export const login = createAsyncThunk<
+any//response type (can replace with your actual model)
+,{username:string,password:string}//input type
+,{rejectValue:{error:string}}//thunkAPI type error payload typ
+>(
   "auth/login",
-  async (credentials: { username: string; password: string }, { rejectWithValue }) => {
+  async (credentials: { username: string; password: string }, { rejectWithValue}
+  ) => {
     try {
       const res = await api.post("/api/auth/login", credentials);
       return res.data; // { token, refreshToken }
     } catch (err: any) {
-      return rejectWithValue(err.response?.data || "Login failed");
-    }
+      console.log(err.response);
+      // if(err.response?.data.otherError){
+      //  return rejectWithValue({error:err.response?.data.error});
+      // }
+      if(err.response?.data.error){
+       return rejectWithValue({error:err.response?.data.error});
+      } else {
+       return rejectWithValue({error:"Login failed"});
+      }
+  }
   }
 );
 
@@ -69,6 +82,11 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.token = action.payload.token;
         state.refreshToken = action.payload.refreshToken;
+        localStorage.setItem("auth", JSON.stringify(action.payload));
+      }).addCase(login.rejected, (state, action) => {
+        state.error = action.payload?.error || "Login failed";
+      
+        state.loading = false;
         localStorage.setItem("auth", JSON.stringify(action.payload));
       })
       .addCase(refreshTokenThunk.fulfilled, (state, action) => {

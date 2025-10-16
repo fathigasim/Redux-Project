@@ -1,5 +1,5 @@
 import { Navbar, Nav, Container, Form, Button, Dropdown, Badge } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
 import { AiFillDelete } from "react-icons/ai";
 import { useState } from "react";
@@ -11,9 +11,11 @@ import { logout } from "../features/authSlice";
 export default function AppNavbar() {
   const { i18n } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
     const handleLogout = () => {
     dispatch(logout());
+    navigate("/logins");
   };
 
   const items = useSelector((state: any) => state.cart.items);
