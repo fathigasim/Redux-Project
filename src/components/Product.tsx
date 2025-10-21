@@ -14,19 +14,22 @@ import {
   clearMessages,
   type Product,
 } from "../features/productSlice";
-import { addToCart, type CartItem } from "../features/cartSlice";
+import { addToCart} from "../features/cartSlice";
 import { selectFilteredProducts } from "../features/memoizedSelector";
 import { type RootState, type AppDispatch } from "../app/store";
 import { useTranslation } from "react-i18next";
 import { Container } from "react-bootstrap";
+import i18next from "i18next";
 import "./Products.css";
 
-interface Props {
-  language: "en" | "ar";
-}
 
-const Products: React.FC<Props> = ({ language }) => {
-  const { t, i18n } = useTranslation();
+
+// interface Props {
+//   language: "en" | "ar";
+// }
+
+const Products= () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -45,40 +48,54 @@ const Products: React.FC<Props> = ({ language }) => {
   const [debouncedSearch] = useDebounce(localSearch, 500);
 
   // --- Initial load
-  useEffect(() => {
-    const search = searchParams.get("search") || "";
-    const sortParam = searchParams.get("sort") || "";
-    const pageParam = Number(searchParams.get("page")) || 1;
+  
+useEffect(() => {
+  const search = searchParams.get("search") || "";
+  const sortParam = searchParams.get("sort") || "";
+  const pageParam = Number(searchParams.get("page")) || 1;
 
-    dispatch(filterBySearch(search));
-    dispatch(sortByPrice(sortParam));
-    dispatch(setPage(pageParam));
-    dispatch(fetchProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
-  }, [dispatch, searchParams]);
+  dispatch(filterBySearch(search));
+  dispatch(sortByPrice(sortParam));
+  dispatch(setPage(pageParam));
+
+  dispatch(fetchProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
+}, [dispatch, searchParams]);
 
   // --- Debounced search
-  useEffect(() => {
-    if (debouncedSearch !== searchQuery) {
-      dispatch(filterBySearch(debouncedSearch));
-      dispatch(setPage(1));
-      setSearchParams({ ...Object.fromEntries(searchParams), search: debouncedSearch, page: "1" });
-      dispatch(fetchProducts({ searchQuery: debouncedSearch, sort, page: 1 }));
-    }
-  }, [debouncedSearch]);
+  // useEffect(() => {
+  //   if (debouncedSearch !== searchQuery) {
+  //     const s = String(debouncedSearch);
+  //     dispatch(filterBySearch(s));
+  //     dispatch(setPage(1));
+  //     setSearchParams({ ...Object.fromEntries(searchParams), search: s, page: "1" });
+  //     dispatch(fetchProducts({ searchQuery: s, sort, page: 1 }));
+  //   }
+  // }, [debouncedSearch]);
+useEffect(() => {
+  const s = String(debouncedSearch);
+  const currentSearch = searchParams.get("search") || "";
 
-  // --- Sync URL
-  useEffect(() => {
-    const params: Record<string, string> = {};
-    if (debouncedSearch) params.search = debouncedSearch;
-    if (sort) params.sort = sort;
-    if (page) params.page = page.toString();
+  if (s !== currentSearch) {
+    const params = {
+      ...Object.fromEntries(searchParams),
+      search: s,
+      page: "1",
+    };
     setSearchParams(params);
-  }, [debouncedSearch, sort, page]);
+  }
+}, [debouncedSearch]);
+  // useEffect(() => {
+  //   const params: Record<string, string> = {};
+  //   if (debouncedSearch) params.search = String(debouncedSearch);
+  //   if (sort) params.sort = sort;
+  //   if (page) params.page = page.toString();
+  //   setSearchParams(params);
+  // }, [setSearchParams,debouncedSearch, sort, page]);
+  // }, [debouncedSearch, sort, page]);
 
-  // --- Refetch on sort/page/lang change
-  useEffect(() => {
-    dispatch(fetchProducts({ searchQuery: debouncedSearch, sort, page }));
-  }, [dispatch, page, sort, debouncedSearch, language]);
+  // useEffect(() => {
+  //   dispatch(fetchProducts({ searchQuery: String(debouncedSearch), sort, page }));
+  // }, [dispatch, page, sort, debouncedSearch, i18next.language]);
 
   // --- Toast notifications
   useEffect(() => {
@@ -90,7 +107,7 @@ const Products: React.FC<Props> = ({ language }) => {
      // toast.success(success);
       dispatch(clearMessages());
     }
-  }, [error, success]);
+  }, [dispatch,error, success]);
 
   // --- Add Product
   const handleAdd = async (e: React.FormEvent) => {
@@ -99,9 +116,9 @@ const Products: React.FC<Props> = ({ language }) => {
 
     const errors: Record<string, string> = {};
     if (!thename)
-      errors.name = language === "ar" ? "الاسم مطلوب" : "Name is required";
+      errors.name = i18next.language === "ar" ? "الاسم مطلوب" : "Name is required";
     if (!theprice)
-      errors.price = language === "ar" ? "السعر مطلوب" : "Price is required";
+      errors.price = i18next.language === "ar" ? "السعر مطلوب" : "Price is required";
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
@@ -114,7 +131,8 @@ const Products: React.FC<Props> = ({ language }) => {
 
       toast.success(result.message);
       setTheName("");
-      setThePrice("");
+        setThePrice("");
+        dispatch(fetchProducts({ page: 1 }));
     } catch (err: any) {
       console.error("Add product error:", err);
       // Backend validation shape: { Name: ["error1"], Price: ["error2"] }
@@ -126,7 +144,7 @@ const Products: React.FC<Props> = ({ language }) => {
       } else if (err?.message) {
         toast.error(err.message);
       } else {
-        toast.error(language === "ar" ? "خطأ غير متوقع" : "Unexpected error");
+        toast.error(i18next.language === "ar" ? "خطأ غير متوقع" : "Unexpected error");
       }
     }
   };
@@ -147,7 +165,7 @@ const Products: React.FC<Props> = ({ language }) => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm(language === "ar" ? "هل أنت متأكد من الحذف؟" : "Are you sure?")) {
+    if (window.confirm(i18next.language === "ar" ? "هل أنت متأكد من الحذف؟" : "Are you sure?")) {
       dispatch(deleteProduct(id));
     }
   };
@@ -159,14 +177,14 @@ const Products: React.FC<Props> = ({ language }) => {
   const totalPages = Math.ceil(totalCount / pageSize);
   return (
     <Container style={{marginTop:100}}>
-      <h2 className="title">{language === "ar" ? "إدارة المنتجات" : "Product Management"} 🛒</h2>
+      <h2 className="title">{i18next.language === "ar" ? "إدارة المنتجات" : "Product Management"} 🛒</h2>
 
       {/* ADD PRODUCT FORM */}
        
       {/* --- Add Form --- */}
       <form onSubmit={handleAdd}>
         <input
-          placeholder={language === "ar" ? "الاسم" : "Name"}
+          placeholder={i18next.language === "ar" ? "الاسم" : "Name"}
           value={thename}
           onChange={(e) => setTheName(e.target.value)}
           className={formErrors.name ? "is-invalid" : ""}
@@ -174,7 +192,7 @@ const Products: React.FC<Props> = ({ language }) => {
         {formErrors.name && <div className="text-danger">{formErrors.name}</div>}
 
         <input
-          placeholder={language === "ar" ? "السعر" : "Price"}
+          placeholder={i18next.language === "ar" ? "السعر" : "Price"}
           type="number"
           value={theprice}
           onChange={(e) => setThePrice(e.target.value)}
@@ -184,8 +202,8 @@ const Products: React.FC<Props> = ({ language }) => {
 
         <button type="submit" disabled={loading}>
           {loading
-            ? language === "ar" ? "جارٍ الإضافة..." : "Adding..."
-            : language === "ar" ? "إضافة المنتج" : "Add Product"}
+            ?i18next. language === "ar" ? "جارٍ الإضافة..." : "Adding..."
+            :i18next. language === "ar" ? "إضافة المنتج" : "Add Product"}
         </button>
       </form>
 
@@ -194,34 +212,45 @@ const Products: React.FC<Props> = ({ language }) => {
         <span>{t("Filters")}</span>
         <input
           type="text"
-          placeholder={language === "ar" ? "بحث..." : "Search..."}
+          placeholder={i18next.language === "ar" ? "بحث..." : "Search..."}
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
         />
-        <select value={sort} onChange={(e) => dispatch(sortByPrice(e.target.value))}>
-          <option value="">{language === "ar" ? "الترتيب" : "Sort by"}</option>
-          <option value="lowToHigh">{language === "ar" ? "السعر: من الأقل إلى الأعلى" : "Price: Low → High"}</option>
-          <option value="highToLow">{language === "ar" ? "السعر: من الأعلى إلى الأقل" : "Price: High → Low"}</option>
+        <select value={sort}
+        //  onChange={(e) => dispatch(sortByPrice(e.target.value))}
+        onChange={(e) => {
+    const sortValue = e.target.value;
+    const params = {
+      ...Object.fromEntries(searchParams),
+      sort: sortValue,
+      page: "1",
+    };
+    setSearchParams(params);
+  }}
+         >
+          <option value="">{i18next.language === "ar" ? "الترتيب" : "Sort by"}</option>
+          <option value="lowToHigh">{i18next.language === "ar" ? "السعر: من الأقل إلى الأعلى" : "Price: Low → High"}</option>
+          <option value="highToLow">{i18next.language === "ar" ? "السعر: من الأعلى إلى الأقل" : "Price: High → Low"}</option>
         </select>
       </div>
 
       {/* PRODUCTS TABLE */}
       {loading ? (
-        <p className="loading">{language === "ar" ? "جارٍ تحميل المنتجات..." : "Loading products..."}</p>
+        <p className="loading">{i18next.language === "ar" ? "جارٍ تحميل المنتجات..." : "Loading products..."}</p>
       ) : (
         <table className="products-table">
           <thead>
             <tr>
-              <th>{language === "ar" ? "الاسم" : "Name"}</th>
-              <th>{language === "ar" ? "السعر" : "Price (₹)"}</th>
-              <th>{language === "ar" ? "الإجراءات" : "Actions"}</th>
+              <th>{i18next.language === "ar" ? "الاسم" : "Name"}</th>
+              <th>{i18next.language === "ar" ? "السعر" : "Price (₹)"}</th>
+              <th>{i18next.language === "ar" ? "الإجراءات" : "Actions"}</th>
             </tr>
           </thead>
           <tbody>
             {products.length === 0 ? (
               <tr>
                 <td colSpan={3} style={{ textAlign: "center" }}>
-                  {language === "ar" ? "لا توجد منتجات" : "No products found"}
+                  {i18next.language === "ar" ? "لا توجد منتجات" : "No products found"}
                 </td>
               </tr>
             ) : (
@@ -247,14 +276,14 @@ const Products: React.FC<Props> = ({ language }) => {
                     <td>
                       {isEditing ? (
                         <>
-                          <button onClick={() => handleUpdate(p.id)}>💾 {language === "ar" ? "حفظ" : "Save"}</button>
-                          <button onClick={() => setEditingId(null)}>✖ {language === "ar" ? "إلغاء" : "Cancel"}</button>
+                          <button onClick={() => handleUpdate(p.id)}>💾 {i18next.language === "ar" ? "حفظ" : "Save"}</button>
+                          <button onClick={() => setEditingId(null)}>✖ {i18next.language === "ar" ? "إلغاء" : "Cancel"}</button>
                         </>
                       ) : (
                         <>
-                          <button onClick={() => handleEditStart(p)}>✏️ {language === "ar" ? "تعديل" : "Edit"}</button>
-                          <button onClick={() => handleDelete(p.id)}>🗑 {language === "ar" ? "حذف" : "Delete"}</button>
-                          <button onClick={() => handleAddToCart(p)}>➕ {language === "ar" ? "إضافة للسلة" : "Add"}</button>
+                          <button onClick={() => handleEditStart(p)}>✏️ {i18next.language === "ar" ? "تعديل" : "Edit"}</button>
+                          <button onClick={() => handleDelete(p.id)}>🗑 {i18next.language === "ar" ? "حذف" : "Delete"}</button>
+                          <button onClick={() => handleAddToCart(p)}>➕ {i18next.language === "ar" ? "إضافة للسلة" : "Add"}</button>
                         </>
                       )}
                     </td>
@@ -275,7 +304,15 @@ const Products: React.FC<Props> = ({ language }) => {
               <button
                 key={num}
                 className={`page-btn ${page === num ? "active" : ""}`}
-                onClick={() => dispatch(setPage(num))}
+                // onClick={() => dispatch(setPage(num))}
+                onClick={() => {
+  const params = {
+    ...Object.fromEntries(searchParams),
+    page: num.toString(),
+  };
+  setSearchParams(params);
+}}
+
               >
                 {num}
               </button>

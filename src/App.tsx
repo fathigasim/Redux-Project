@@ -10,7 +10,7 @@
 import { useEffect } from 'react';
 import { useAppDispatch } from './app/hooks';
 import { loadStoredAuth } from './features/authSlice';
-import Login from './components/Login';
+/*import Login from './components/Login';*/
 import Logins from './components/logins';
 import Users from './components/Users';
 import Product from './components/Product';
@@ -26,8 +26,9 @@ import ForgotPassword from './components/ForgotPassword';
  import ResetPassword from './components/ResetPassword';
 import {BrowserRouter ,Route,Routes } from "react-router-dom";
 import { Container } from 'react-bootstrap';
-import { LogoutButton } from './components/LogoutButton';
+
 import Register from './components/Register';
+import RequireAuth from './auth/RequireAuth';
 
 function App() {
   // const dispatch = useAppDispatch();
@@ -49,16 +50,16 @@ const dispatch = useAppDispatch();
     
       <BrowserRouter>
         <Header/>
-        <Container className='mt-3'>
+        <Container  style={{marginTop:100,top:70}}>
      <Routes>
       <Route path="/users" element={<Users />} />
-      <Route path="/" element={<Login />} />
+      {/*<Route path="/" element={<Login />} />*/}
       <Route path="/testWeather" element={<WeatherTest />} />
-      <Route path='/products' element={<Product/>}/>
-      <Route path='/foregot' element={<ForgotPassword/>}/>
+      <Route path='/product' element={<RequireAuth> <Product /></RequireAuth>}/>
+      <Route path='/forgot' element={<ForgotPassword/>}/>
       <Route path='/reset' element={<ResetPassword/>}/>
-      <Route path='/cart' element={<Cart/>}/>
-      <Route path='/orders' element={<Order/>}/>
+      <Route path='/cart' element={<RequireAuth><Cart/></RequireAuth>}/>
+      <Route path='/orders' element={<RequireAuth><Order /></RequireAuth>}/>
       <Route path='/analytics' element={<OrderAnalytics/>}/>
       <Route path='/orderByDateRep' element={<OrderDates/>}/>
       <Route path='/success' element={<Success/>}/>

@@ -13,7 +13,7 @@ export default function Cart() {
 
     const handleCheckout = async () => {
     try {
-      const res = await api.post('/api/payment/create-checkout-session',items)
+      const res = await api.post('/payment/create-checkout-session',items)
       window.location.href = res.data.url
     } catch (error) {
       console.error(error)

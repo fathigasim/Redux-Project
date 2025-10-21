@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { login } from "../features/authSlice";
+//import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 
-import { Form, Button, Container, Row, Col, Card, Alert } from "react-bootstrap";
+import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 
 export default function LoginForm() {
+ const navigate = useNavigate();
+const [searchParams] = useSearchParams();
+const redirect = searchParams.get("redirect") || "/product";
   const [username, setUsername] = useState("");
    const [password, setPassword] = useState("");
    const dispatch = useAppDispatch();
@@ -12,13 +17,23 @@ export default function LoginForm() {
 
  // Remove unused setError and email logic, and ensure error is displayed from Redux state
 
- const handleSubmit = (e: React.FormEvent) => {
-   e.preventDefault();
-   try {
-   dispatch(login({ username, password })).unwrap();
-   } catch (err) {
-        console.error("Failed to login:", err);
- };}
+// ...existing code...
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    const result = await dispatch(login({ username, password })).unwrap();
+    console.log("Login successful:", result);
+
+    // Prevent open redirect attacks by only allowing internal paths
+    const safeRedirect = redirect && redirect.startsWith("/") ? redirect : "/product";
+    navigate(safeRedirect, { replace: true });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Failed to login:", msg);
+    // Optionally dispatch an action or show a toast here to surface the error to the user
+  }
+};
+// ...existing code...
 
   return (
     <Container
@@ -70,9 +85,9 @@ export default function LoginForm() {
               <div className="text-center mt-3">
                 <small className="text-muted">
                   Forgot your password?{" "}
-                  <a href="/forgot" className="text-decoration-none">
+                  <Link to="/forgot" className="text-decoration-none">
                     Reset here
-                  </a>
+                  </Link>
                 </small>
               </div>
             </Card.Body>

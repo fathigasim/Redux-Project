@@ -1,7 +1,10 @@
 import { Alert, Container } from "react-bootstrap"
 import { Link } from "react-router"
-
+import { clearCart } from "../features/cartSlice";
+import { useDispatch } from "react-redux";
 const Success = () => {
+  const dispatch=useDispatch();
+  dispatch(clearCart());
     localStorage.setItem('cart','')
     
   return (

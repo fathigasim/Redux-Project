@@ -13,7 +13,7 @@ export const selectFilteredProducts = createSelector(
 
     if (searchQuery) {
       filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase())
+       String(p.name) .toLowerCase().includes(String(searchQuery).toLowerCase())
       );
     }
 

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../api/axios";
 
 // ---------------------------
@@ -68,7 +68,7 @@ export const fetchOrders= createAsyncThunk<Order[]>(
     //   pageSize,
     // };
 
-    const res = await api.get("https://localhost:7171/api/Order");
+    const res = await api.get("/Order");
     console.log("fetchOrders -> response", res.data);
     return res.data as Order[];
   }
@@ -87,7 +87,7 @@ export const OrderByDate= createAsyncThunk(
     //   pageSize,
     // };
 
-    const res = await api.get(`/api/Order/${date}`);
+    const res = await api.get(`/Order/${date}`);
     console.log("fetchOrders -> response", res.data);
     return await res.data as Order[];
   }

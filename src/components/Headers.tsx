@@ -1,4 +1,4 @@
-import { Navbar, Nav, Container, Form, Button, Dropdown, Badge } from "react-bootstrap";
+import { Navbar, Nav, Container, Form, Button, Dropdown, Badge,Col,Row } from "react-bootstrap";
 import { Link,useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
 import { AiFillDelete } from "react-icons/ai";
@@ -8,8 +8,12 @@ import { removeFromCart } from "../features/cartSlice"; // adjust path
 import { useTranslation } from "react-i18next";
 import { logout } from "../features/authSlice";
 
+import { BsPersonCircle } from 'react-icons/bs';
+
+
 export default function AppNavbar() {
-  const { i18n } = useTranslation();
+  
+    const { i18n,t } = useTranslation("navbar");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -21,8 +25,9 @@ export default function AppNavbar() {
   const items = useSelector((state: any) => state.cart.items);
   const [localSearch, setLocalSearch] = useState("");
   const isAuthenticated = useSelector((state: any) => state.auth.token !== null);
+  
   const user = useSelector((state: any) => state.auth.user);
-
+  console.log(i18n.hasResourceBundle("en", "navbar"));
   return (
     <Navbar
       bg="dark"
@@ -35,7 +40,7 @@ export default function AppNavbar() {
       <Container fluid className="align-items-center">
         {/* Brand */}
         <Navbar.Brand as={Link} to="/" className="fw-bold fs-4 text-white">
-          🛒 Shopping Cart
+          🛒 {t("ShoppingCart")}
         </Navbar.Brand>
 
         {/* Toggle for mobile */}
@@ -64,7 +69,7 @@ export default function AppNavbar() {
                 </Badge>
               </Dropdown.Toggle>
 
-              <Dropdown.Menu style={{ minWidth: 370 }}>
+              <Dropdown.Menu style={{ minWidth: 450 }}>
                 {items.length > 0 ? (
                   <>
                     {items.map((prod: any) => (
@@ -73,8 +78,20 @@ export default function AppNavbar() {
                         className="d-flex align-items-center justify-content-between p-2 border-bottom"
                       >
                         <div>
-                          <div className="fw-semibold">{prod.name}</div>
-                          <div className="text-muted small">₹ {String(prod.price).split(".")[0]}</div>
+                          {/* <div className="fw-semibold"><span style={{margin:5}}>product:</span>{prod.name}</div>
+                          <div className="text-muted small"><span style={{margin:5}}>price:₹ </span>{String(prod.price).split(".")[0]}</div>
+                          <div className="text-muted small"><span style={{margin:5}}>Quantity</span>{String(prod.quantity)}</div>
+                        */}
+                        <Container>
+                        <Row>
+        <Col md><span style={{margin:2}}>product:</span>{prod.name}</Col>
+        <Col md><span style={{margin:2}}>price:</span>{new Intl.NumberFormat(i18n.language, {
+  style: 'currency',
+  currency: 'SAR',
+}).format(prod.price)}</Col>
+        <Col md><span style={{margin:5}}>Quantity</span>{String(prod.quantity)}</Col>
+      </Row>
+      </Container>
                         </div>
                         <AiFillDelete
                           fontSize="20px"
@@ -84,31 +101,41 @@ export default function AppNavbar() {
                         />
                       </div>
                     ))}
-                    <Link to="/cart">
-                      <Button variant="primary" style={{ width: "95%", margin: "10px" }}>
-                        Go To Cart
-                      </Button>
-                    </Link>
+                   <span>Total:   {items.reduce((sum: number, i: any) => sum + i.price * i.quantity, 0)}</span>
+                    <div className="d-flex justify-content-center">
+                      <Link to="/cart">
+                        <Button variant="primary" style={{ width: "95%", margin: "10px" }}>
+                          Go To Cart
+                        </Button>
+                      </Link>
+                    </div>
                   </>
                 ) : (
-                  <span className="d-block text-center p-3 text-muted">Cart is Empty!</span>
+                  <span className="d-block text-center p-3 text-muted">{t("Cart_is_Empty")}</span>
                 )}
               </Dropdown.Menu>
             </Dropdown>
-
+           {/*User*/}
+           <div className="d-flex align-items-center gap-2">
+            {user&&<span style={{color:"blue"}}> {user} <BsPersonCircle style={{height:100}}/> </span>}
+           </div>
             {/* Language Toggle */}
             <div className="d-flex align-items-center gap-2">
               <Button
                 variant={i18n.language =="ar" ? "outline-light": "light"}
                 size="sm"
-                onClick={() => i18n.changeLanguage("ar")}
+                onClick={() =>{ i18n.changeLanguage("ar")
+                  document.body.dir = "rtl";
+                }}
               >
                 AR
               </Button>
               <Button
                  variant={i18n.language =="en" ? "outline-light": "light"}
                 size="sm"
-                onClick={() => i18n.changeLanguage("en")}
+                onClick={() =>{i18n.changeLanguage("en")
+                  document.body.dir = "ltr";
+                }}
               >
                 EN
               </Button>
@@ -124,13 +151,14 @@ export default function AppNavbar() {
                   <Dropdown.Item as={Link} to="/profile">Profile</Dropdown.Item>
                   <Dropdown.Item as={Link} to="/orders">My Orders</Dropdown.Item>
                   <Dropdown.Divider />
-                  <Dropdown.Item as={Link} to="/logout" onClick={handleLogout}>Logout</Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/logins" onClick={handleLogout}>Logout</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             ) : (
-              <Button as={Link} to="/" variant="outline-info">
-                Login
-              </Button>
+              // <Button as={Link} to="/logins" variant="outline-info">
+              //   Login
+              // </Button>
+              <Link to='/Logins'>Login</Link>
             )}
           </Nav>
         </Navbar.Collapse>

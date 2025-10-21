@@ -112,7 +112,7 @@ export const updateProduct = createAsyncThunk<Product, Partial<Product>>(
   async (productData) => {
     const { id, ...updatedFields } = productData;
     if (!id) throw new Error("Product ID is required for update.");
-    const res = await api.put(`/api/Products/${id}`, updatedFields);
+    const res = await api.put(`/Products/${id}`, updatedFields);
     return res.data;
   }
 );
@@ -121,7 +121,7 @@ export const deleteProduct = createAsyncThunk<string, string>(
   "products/deleteProduct",
   async (id) => {
     if (!id) throw new Error("Product ID is required for delete.");
-    await api.delete(`/api/Products/${id}`);
+    await api.delete(`/Products/${id}`);
     return id;
   }
 );

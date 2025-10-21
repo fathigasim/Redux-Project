@@ -16,18 +16,27 @@ const initialState: AuthState = {
 // =============== 🔹 FORGOT PASSWORD ===============
 export const forgotPassword = createAsyncThunk<
   { message: string },
-  { email: string },
-  { rejectValue: { message: string } }
+  { email: string }
+  ,
+  { rejectValue:{mailerror:string} }
 >(
   "auth/forgotPassword",
   async ( {email} , { rejectWithValue }) => {
     try {
-      const res = await api.post("/api/Auth/forgot",  {email} );
+      const res = await api.post("/Auth/forgot",  {email} );
       return { message: res.data.message };
     } catch (err: any) {
-      const message =
-        err.response?.data?.message || "Error sending password reset link.";
-      return rejectWithValue({ message });
+      console.log(err.response);
+      if(err.response?.data){
+            // const errorData = err.response?.data?.errors.email;
+        return rejectWithValue({mailerror:err.response?.data.errors.email[0]}    );
+      }
+     
+      else{
+      return rejectWithValue({mailerror:"Error sending password reset link."} );
+      }
+ 
+      
     }
   }
 );
@@ -41,15 +50,30 @@ export const resetPassword = createAsyncThunk<
   "auth/resetPassword",
   async ({ token, newPassword }, { rejectWithValue }) => {
     try {
-      const res = await api.post("/api/Auth/reset", {
+      const res = await api.post("/Auth/reset", {
         token,
         newPassword,
       });
       return { message: res.data.message };
     } catch (err: any) {
-      const message =
-        err.response?.data?.message || "Error resetting password.";
-      return rejectWithValue({ message });
+      console.log(err);
+     
+            if(err.response?.data?.errors?.newPassword[0]&&err.response?.data?.errors?.newPassword[1]){
+        return rejectWithValue({ message: err.response?.data.errors.newPassword[0] +''+err.response?.data.errors.newPassword[1] });
+            }
+            else if(err.response?.data?.errors?.newPassword[0]){
+      
+              return rejectWithValue({ message:err.response?.data.errors.newPassword[0] });
+            
+      }
+            else if(err.response?.data?.errors?.newPassword[1]){
+      
+              return rejectWithValue({ message:err.response?.data.errors.newPassword[1] });
+            
+      }
+            else{
+        return rejectWithValue({ message: "Error resetting password."});
+            }
     }
   }
 );
@@ -78,7 +102,7 @@ const manageSlice = createSlice({
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || "Unexpected error.";
+        state.error = action.payload?.mailerror || "Unexpected error.";
       });
 
     // Reset Password
@@ -94,6 +118,7 @@ const manageSlice = createSlice({
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
+        state.success = null;
         state.error = action.payload?.message || "Unexpected error.";
       });
   },

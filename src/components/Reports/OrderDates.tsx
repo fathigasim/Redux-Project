@@ -16,9 +16,10 @@ const OrderDates =  () => {
   return (
     <>
    <div style={{marginTop:'100px'}}>
+    {error&&<span>error </span>}
         <form onSubmit={handleSubmit}>
             <span>Search by date</span><input type='date' value={date} onChange={(e:any)=>setDate(e.target.value)} />
-            <button type='submit'>Search</button>
+            <button type='submit'>{loading? "Searching": "Search"}</button>
         </form>
  
           
