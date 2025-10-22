@@ -61,16 +61,7 @@ useEffect(() => {
   dispatch(fetchProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
 }, [dispatch, searchParams]);
 
-  // --- Debounced search
-  // useEffect(() => {
-  //   if (debouncedSearch !== searchQuery) {
-  //     const s = String(debouncedSearch);
-  //     dispatch(filterBySearch(s));
-  //     dispatch(setPage(1));
-  //     setSearchParams({ ...Object.fromEntries(searchParams), search: s, page: "1" });
-  //     dispatch(fetchProducts({ searchQuery: s, sort, page: 1 }));
-  //   }
-  // }, [debouncedSearch]);
+
 useEffect(() => {
   const s = String(debouncedSearch);
   const currentSearch = searchParams.get("search") || "";

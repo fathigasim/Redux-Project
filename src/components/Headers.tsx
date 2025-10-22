@@ -1,168 +1,243 @@
-import { Navbar, Nav, Container, Form, Button, Dropdown, Badge,Col,Row } from "react-bootstrap";
-import { Link,useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Navbar, Nav, Container, Form, Button, Dropdown, Badge, Col, Row } from "react-bootstrap";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
 import { AiFillDelete } from "react-icons/ai";
-import { useState } from "react";
+import { BsPersonCircle } from "react-icons/bs";
 import { useSelector, useDispatch } from "react-redux";
-import { removeFromCart } from "../features/cartSlice"; // adjust path
 import { useTranslation } from "react-i18next";
+import { useDebounce } from "use-debounce";
+import i18next from "i18next";
+
+import LangSelector from "../languagehelper/langselector";
+import { removeFromCart } from "../features/cartSlice";
 import { logout } from "../features/authSlice";
-
-import { BsPersonCircle } from 'react-icons/bs';
-
-
+import { filterBySearch, fetchProducts, setPage } from "../features/productSlice";
+import { clearSuggestions, fetchSuggestions } from "../features/suggestionSlice";
+import { type RootState, type AppDispatch } from "../app/store";
+import './header.css'
 export default function AppNavbar() {
-  
-    const { i18n,t } = useTranslation("navbar");
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-    const handleLogout = () => {
+  const { i18n, t } = useTranslation("navbar");
+  const items = useSelector((state: RootState) => state.cart.items);
+  
+  const isAuthenticated = useSelector((state: RootState) => state.auth.token !== null);
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  const [localSearch, setLocalSearch] = useState(searchParams.get("search") || "");
+  const [debouncedSearch] = useDebounce(localSearch, 500);
+  // const suggestions = useSelector((state: RootState) => state.seggessions.items);
+
+  // 🔹 Update global search in Redux when debouncedSearch changes
+  useEffect(() => {
+    dispatch(filterBySearch(debouncedSearch));
+
+    // Only trigger fetching on product-related pages (optional)
+    if (location.pathname.startsWith("/product") || location.pathname === "/") {
+      dispatch(setPage(1));
+      dispatch(fetchProducts({ searchQuery: debouncedSearch, page: 1 }));
+    }
+
+    // Sync search param in URL
+    const currentSearch = searchParams.get("search") || "";
+    if (debouncedSearch !== currentSearch) {
+      setSearchParams({ search: debouncedSearch });
+    }
+  }, [debouncedSearch]);
+  // Fetch suggestions on debounced input
+  // useEffect(() => {
+  //   if (debouncedSearch.trim() === "") {
+  //     dispatch(clearSuggestions());
+  //     return;
+  //   }
+  //   dispatch(fetchSuggestions(debouncedSearch));
+  // }, [debouncedSearch]);
+
+  // // Navigate when user selects a suggestion
+  // const handleSelectSuggestion = (name: string) => {
+  //   setLocalSearch(name);
+  //   dispatch(clearSuggestions());
+  //   setSearchParams({ search: name, page: "1" });
+  //   navigate(`/product?search=${encodeURIComponent(name)}&page=1`);
+  // };
+
+
+  const handleLogout = () => {
     dispatch(logout());
     navigate("/logins");
   };
 
-  const items = useSelector((state: any) => state.cart.items);
-  const [localSearch, setLocalSearch] = useState("");
-  const isAuthenticated = useSelector((state: any) => state.auth.token !== null);
-  
-  const user = useSelector((state: any) => state.auth.user);
-  console.log(i18n.hasResourceBundle("en", "navbar"));
   return (
     <Navbar
-      bg="dark"
-      variant="dark"
-      expand="md"
-      fixed="top"
-      className="shadow-sm py-3"
-      style={{ height: "80px", zIndex: 1030 }}
-    >
-      <Container fluid className="align-items-center">
-        {/* Brand */}
-        <Navbar.Brand as={Link} to="/" className="fw-bold fs-4 text-white">
-          🛒 {t("ShoppingCart")}
-        </Navbar.Brand>
+  bg="dark"
+  variant="dark"
+  expand="md" // expands on medium screens and up
+  fixed="top"
+  className="shadow-sm py-3"
+  style={{ height: "80px", zIndex: 1030 }}
+>
+  <Container fluid className="align-items-center">
+    {/* Brand */}
+    <Navbar.Brand as={Link} to="/" className="fw-bold fs-4 text-white">
+      🛒 {t("ShoppingCart")}
+    </Navbar.Brand>
 
-        {/* Toggle for mobile */}
-        <Navbar.Toggle aria-controls="navbarResponsive" />
+    {/* Toggle button for mobile */}
+    <Navbar.Toggle aria-controls="navbarResponsive" />
 
-        <Navbar.Collapse id="navbarResponsive" className="justify-content-between">
-          {/* Search Bar */}
-          <Form className="mx-auto my-2 my-md-0" style={{ maxWidth: "350px",  flexGrow: 1 }}>
-            <Form.Control
-              type="text"
-              placeholder="Search Product"
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              className="me-2"
-            />
-          </Form>
+    {/* Collapse section */}
+    <Navbar.Collapse id="navbarResponsive" className="justify-content-between">
+      {/* Search Bar */}
+      <div className="flex-grow-1 mx-2 position-relative">
+        <Form className="w-100 mb-2 mb-md-0">
+          <Form.Control
+            type="text"
+            placeholder={i18next.language === "ar" ? "بحث..." : "Search..."}
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+          />
+        </Form>
 
-          {/* Right Section (Cart + Language + Auth) */}
-          <Nav className="d-flex align-items-center ms-auto gap-3">
-            {/* Cart Dropdown */}
-            <Dropdown align="end">
-              <Dropdown.Toggle variant="success" id="dropdown-cart" className="d-flex align-items-center">
-                <FaShoppingCart color="white" fontSize="22px" />
-                <Badge bg="light" text="dark" className="ms-1">
-                  {items.length}
-                </Badge>
-              </Dropdown.Toggle>
-
-              <Dropdown.Menu style={{ minWidth: 450 }}>
-                {items.length > 0 ? (
-                  <>
-                    {items.map((prod: any) => (
-                      <div
-                        key={prod.id}
-                        className="d-flex align-items-center justify-content-between p-2 border-bottom"
-                      >
-                        <div>
-                          {/* <div className="fw-semibold"><span style={{margin:5}}>product:</span>{prod.name}</div>
-                          <div className="text-muted small"><span style={{margin:5}}>price:₹ </span>{String(prod.price).split(".")[0]}</div>
-                          <div className="text-muted small"><span style={{margin:5}}>Quantity</span>{String(prod.quantity)}</div>
-                        */}
-                        <Container>
-                        <Row>
-        <Col md><span style={{margin:2}}>product:</span>{prod.name}</Col>
-        <Col md><span style={{margin:2}}>price:</span>{new Intl.NumberFormat(i18n.language, {
-  style: 'currency',
-  currency: 'SAR',
-}).format(prod.price)}</Col>
-        <Col md><span style={{margin:5}}>Quantity</span>{String(prod.quantity)}</Col>
-      </Row>
-      </Container>
-                        </div>
-                        <AiFillDelete
-                          fontSize="20px"
-                          className="text-danger"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => dispatch(removeFromCart(prod.id))}
-                        />
-                      </div>
-                    ))}
-                   <span>Total:   {items.reduce((sum: number, i: any) => sum + i.price * i.quantity, 0)}</span>
-                    <div className="d-flex justify-content-center">
-                      <Link to="/cart">
-                        <Button variant="primary" style={{ width: "95%", margin: "10px" }}>
-                          Go To Cart
-                        </Button>
-                      </Link>
-                    </div>
-                  </>
-                ) : (
-                  <span className="d-block text-center p-3 text-muted">{t("Cart_is_Empty")}</span>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
-           {/*User*/}
-           <div className="d-flex align-items-center gap-2">
-            {user&&<span style={{color:"blue"}}> {user} <BsPersonCircle style={{height:100}}/> </span>}
-           </div>
-            {/* Language Toggle */}
-            <div className="d-flex align-items-center gap-2">
-              <Button
-                variant={i18n.language =="ar" ? "outline-light": "light"}
-                size="sm"
-                onClick={() =>{ i18n.changeLanguage("ar")
-                  document.body.dir = "rtl";
-                }}
+        {/* Suggestion dropdown */}
+        {/* {suggestions.length > 0 && (
+          <ul
+            className="list-group position-absolute w-100 shadow"
+            style={{ zIndex: 2000 }}
+          >
+            {suggestions.map((item) => (
+              <li
+                key={item.id}
+                className="list-group-item list-group-item-action"
+                onClick={() => handleSelectSuggestion(item.name)}
               >
-                AR
-              </Button>
-              <Button
-                 variant={i18n.language =="en" ? "outline-light": "light"}
-                size="sm"
-                onClick={() =>{i18n.changeLanguage("en")
-                  document.body.dir = "ltr";
-                }}
-              >
-                EN
-              </Button>
-            </div>
+                {item.name}
+              </li>
+            ))}
+          </ul>
+        )} */}
+      </div>
 
-            {/* Auth Section */}
-            {isAuthenticated ? (
-              <Dropdown align="end">
-                <Dropdown.Toggle variant="outline-info" id="dropdown-user">
-                  {user?.userName || "Profile"}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item as={Link} to="/profile">Profile</Dropdown.Item>
-                  <Dropdown.Item as={Link} to="/orders">My Orders</Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item as={Link} to="/logins" onClick={handleLogout}>Logout</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            ) : (
-              // <Button as={Link} to="/logins" variant="outline-info">
-              //   Login
-              // </Button>
-              <Link to='/Logins'>Login</Link>
-            )}
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+      {/* Right section */}
+      <Nav className="d-flex align-items-center ms-auto gap-2 gap-md-3 flex-wrap">
+        {/* Cart Dropdown */}
+        <Dropdown align="end" className="mb-2 mb-md-0">
+          <Dropdown.Toggle
+            variant="success"
+            id="dropdown-cart"
+            className="d-flex align-items-center"
+          >
+            <FaShoppingCart color="white" fontSize="22px" />
+            <Badge bg="light" text="dark" className="ms-1">
+              {items.length}
+            </Badge>
+          </Dropdown.Toggle>
+          <Dropdown.Menu
+  style={{
+    maxWidth: '95vw',       // full width on mobile
+    minWidth: 250,          // desktop minimum
+    maxHeight: '60vh',      // scroll if too tall
+    overflowY: 'auto',
+    padding: '0.5rem',
+  }}
+>
+  {items.length > 0 ? (
+    <>
+      {items.map((prod) => (
+        <div
+          key={prod.id}
+          className="d-flex align-items-center justify-content-between p-2 border-bottom flex-wrap"
+        >
+          <div className="d-flex flex-column flex-grow-1 me-2">
+            <span><strong>Product:</strong> {prod.name}</span>
+            <span>
+              <strong>Price:</strong>{" "}
+              {new Intl.NumberFormat(i18n.language, {
+                style: "currency",
+                currency: "SAR",
+              }).format(prod.price)}
+            </span>
+            <span><strong>Quantity:</strong> {prod.quantity}</span>
+          </div>
+
+          <AiFillDelete
+            fontSize="20px"
+            className="text-danger mt-1"
+            style={{ cursor: "pointer" }}
+            onClick={() => dispatch(removeFromCart(prod.id))}
+          />
+        </div>
+      ))}
+
+      <div className="d-flex justify-content-between p-2 fw-bold">
+        <span>Total:</span>
+        <span>
+          {items
+            .reduce((sum, i) => sum + i.price * i.quantity, 0)
+            .toLocaleString(i18n.language, { style: "currency", currency: "SAR" })}
+        </span>
+      </div>
+
+      <div className="d-flex justify-content-center">
+        <Link to="/cart">
+          <Button variant="primary" style={{ width: 'auto', margin: '0.5rem 0' }}>
+            Go To Cart
+          </Button>
+        </Link>
+      </div>
+    </>
+  ) : (
+    <span className="d-block text-center p-3 text-muted">
+      {t("Cart_is_Empty")}
+    </span>
+  )}
+</Dropdown.Menu>
+
+        </Dropdown>
+
+        {/* User Info */}
+        {user && (
+          <div className="d-flex align-items-center gap-1 mb-2 mb-md-0">
+            <span style={{ color: "blue" }}>
+              {user} <BsPersonCircle />
+            </span>
+          </div>
+        )}
+
+        {/* Language Selector */}
+        <div className="mb-2 mb-md-0">
+          <LangSelector />
+        </div>
+
+        {/* Auth Section */}
+        {isAuthenticated ? (
+          <Dropdown align="end" className="mb-2 mb-md-0">
+            <Dropdown.Toggle variant="outline-info" id="dropdown-user">
+              {user || "Profile"}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item as={Link} to="/profile">
+                Profile
+              </Dropdown.Item>
+              <Dropdown.Item as={Link} to="/orders">
+                My Orders
+              </Dropdown.Item>
+              <Dropdown.Divider />
+              <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        ) : (
+          <Link to="/logins" className="btn btn-outline-info mb-2 mb-md-0">
+            Login
+          </Link>
+        )}
+      </Nav>
+    </Navbar.Collapse>
+  </Container>
+</Navbar>
+
   );
 }

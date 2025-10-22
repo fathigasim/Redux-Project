@@ -1,0 +1,4 @@
+.list-group.position-absolute {
+  max-height: 250px;
+  overflow-y: auto;
+}

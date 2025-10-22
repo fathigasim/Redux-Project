@@ -30,15 +30,9 @@ import { Container } from 'react-bootstrap';
 import Register from './components/Register';
 import RequireAuth from './auth/RequireAuth';
 
+
 function App() {
-  // const dispatch = useAppDispatch();
-  // const { user } = useAppSelector((state) => state.auth);
 
-  // useEffect(() => {
-  //   dispatch(loadUserFromStorage());
-  // }, [dispatch]);
-
-  //useTokenRefresh();
 const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -50,12 +44,13 @@ const dispatch = useAppDispatch();
     
       <BrowserRouter>
         <Header/>
+        
         <Container  style={{marginTop:100,top:70}}>
      <Routes>
       <Route path="/users" element={<Users />} />
       {/*<Route path="/" element={<Login />} />*/}
       <Route path="/testWeather" element={<WeatherTest />} />
-      <Route path='/product' element={<RequireAuth> <Product /></RequireAuth>}/>
+      <Route path='/product' element={<Product />}/>
       <Route path='/forgot' element={<ForgotPassword/>}/>
       <Route path='/reset' element={<ResetPassword/>}/>
       <Route path='/cart' element={<RequireAuth><Cart/></RequireAuth>}/>

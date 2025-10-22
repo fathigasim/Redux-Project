@@ -49,7 +49,7 @@ const initialState: ProductState = {
 interface FetchProductsParams {
   page?: number;
   sort?: string;
-  searchQuery?: string | number;
+  searchQuery?: string | null;
 }
 
 // ---------------------------
@@ -72,6 +72,15 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
     return res.data;
   }
 );
+
+export const fetchSuggestions = createAsyncThunk(
+  "products/fetchSuggestions",
+  async (query: string) => {
+    const res = await api.get(`/api/products/suggest?query=${query}`);
+    return res.data; // e.g. a list of top 5 names
+  }
+);
+
 
 export const addProduct = createAsyncThunk<
   { product: Product; message: string },

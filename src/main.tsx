@@ -8,7 +8,9 @@ import { Provider } from 'react-redux'
 import { ThemeProvider } from './context/themeContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap-rtl/dist/css/bootstrap-rtl.min.css';
+
 import "./i18n";
 
 

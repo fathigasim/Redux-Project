@@ -10,6 +10,7 @@ import orderReducer from '../features/orderSlice'
 import manageReducer from '../features/manageSlice'
 import languageReducer from '../features/languageSlice'
 import registerReducer from '../features/registerSlice'
+import suggestionReducer from '../features/suggestionSlice'
 import cartReducer, { type CartState } from '../features/cartSlice'
 
 // Load cart from localStorage
@@ -40,7 +41,8 @@ export const store = configureStore({
       orders:orderReducer,
       language:languageReducer,
       manage:manageReducer,
-      register:registerReducer
+      register:registerReducer,
+      seggessions:suggestionReducer
   },
     preloadedState
 });
