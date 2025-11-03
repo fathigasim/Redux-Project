@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 import api from "../api/axios";
 
+
 // ---------------------------
 // Interfaces & Types
 // ---------------------------
@@ -8,6 +9,7 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  imageUrl:string
 }
 
 interface ProductResponse {
@@ -27,7 +29,7 @@ interface ProductState {
   page: number;
   pageSize: number;
   totalCount: number;
-    formErrors: { name?: string; price?: string };
+    formErrors: { name?: string; price?: string; image?:File|null  };
 }
 
 // ---------------------------
@@ -41,7 +43,7 @@ const initialState: ProductState = {
   sort: localStorage.getItem("sort") || "",
   searchQuery: localStorage.getItem("searchQuery") || "",
   page: Number(localStorage.getItem("page")) || 1,
-  pageSize: 5,
+  pageSize: 6,
   totalCount: 0,
   formErrors: {},
 };
@@ -84,13 +86,14 @@ export const fetchSuggestions = createAsyncThunk(
 
 export const addProduct = createAsyncThunk<
   { product: Product; message: string },
-  { name: string; price: number },
+  // { name: string; price: number },
+  { formData: FormData },
   { rejectValue: Record<string, string[] | string> }
 >(
   "products/addProduct",
-  async (newProduct, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
     try {
-      const res = await api.post("/api/Products", newProduct);
+      const res = await api.post("/api/Products", formData, {headers :{ 'Content-Type':'multipart/form-data'}} );
       return {
         product: res.data.product,
         message: res.data.message,
@@ -126,12 +129,25 @@ export const updateProduct = createAsyncThunk<Product, Partial<Product>>(
   }
 );
 
-export const deleteProduct = createAsyncThunk<string, string>(
-  "products/deleteProduct",
-  async (id) => {
-    if (!id) throw new Error("Product ID is required for delete.");
-    await api.delete(`/Products/${id}`);
-    return id;
+export const deleteProduct = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: { message: string } }
+>(
+  'products/deleteProduct',
+  async (id, { rejectWithValue }) => {
+    if (!id) {
+      return rejectWithValue({ message: 'Product ID is required for delete' });
+    }
+
+    try {
+      await api.delete(`/api/products/${id}`);
+      return id;
+    } catch (error) {
+      return rejectWithValue({ 
+        message: error instanceof Error ? error.message : 'Failed to delete product'
+      });
+    }
   }
 );
 
@@ -208,7 +224,7 @@ const productSlice = createSlice({
   state.formErrors = {}; // reset previous validation errors
 
   const payload = action.payload as
-    | { Name?: string[]; Price?: string[] }
+    | { Name?: string[]; Price?: string[],Image:File[] }
     | { general?: string }
     | undefined;
 
@@ -216,8 +232,8 @@ const productSlice = createSlice({
     state.error = null;
     state.formErrors = {
       name: Array.isArray(payload.Name) ? payload.Name[0] : undefined,
-      price: Array.isArray(payload.Price) ? payload.Price[0] : undefined,
-    };
+      price: Array.isArray(payload.Price) ? payload.Price[0] : undefined, 
+    image: Array.isArray(payload.Image) ? payload.Image[0] : undefined,};
   } else if (payload && 'general' in payload) {
     state.error = payload.general as string;
   } else {
@@ -232,13 +248,12 @@ const productSlice = createSlice({
         if (index >= 0) state.product[index] = action.payload;
       })
 
+     
       // Delete
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.product = state.product.filter((p) => p.id !== action.payload);
       });
-  },
-});
-
+    }});
 // ---------------------------
 // Exports
 // ---------------------------

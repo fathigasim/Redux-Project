@@ -40,7 +40,8 @@ const Products= () => {
   // --- Local state
   const [thename, setTheName] = useState("");
   const [theprice, setThePrice] = useState("");
-  const [formErrors, setFormErrors] = useState<{ name?: string; price?: string }>({});
+  const [image, setImage] = useState<File | null>(null);
+  const [formErrors, setFormErrors] = useState<{ name?: string; price?: string,image?:string }>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editname, setEditName] = useState("");
   const [editprice, setEditPrice] = useState("");
@@ -102,43 +103,56 @@ useEffect(() => {
 
   // --- Add Product
   const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormErrors({});
+  e.preventDefault();
+  setFormErrors({});
 
-    const errors: Record<string, string> = {};
-    if (!thename)
-      errors.name = i18next.language === "ar" ? "الاسم مطلوب" : "Name is required";
-    if (!theprice)
-      errors.price = i18next.language === "ar" ? "السعر مطلوب" : "Price is required";
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
+  try {
+    const formData = new FormData();
+    formData.append("name", thename);
+    formData.append("price", theprice);
+    if (image) {
+      formData.append("image", image);
     }
 
-    try {
-      const result = await dispatch(
-        addProduct({ name: thename, price: Number(theprice) })
-      ).unwrap();
+    // Fixed: Pass FormData directly, not wrapped in object
+    const result = await dispatch(addProduct(formData)).unwrap();
 
-      toast.success(result.message);
-      setTheName("");
-        setThePrice("");
-        dispatch(fetchProducts({ page: 1 }));
-    } catch (err: any) {
-      console.error("Add product error:", err);
-      // Backend validation shape: { Name: ["error1"], Price: ["error2"] }
-      if (err?.Name || err?.price) {
-        setFormErrors({
-          name: Array.isArray(err.name) ? err.name[0] : undefined,
-          price: Array.isArray(err.price) ? err.price[0] : undefined,
-        });
-      } else if (err?.message) {
-        toast.error(err.message);
-      } else {
-        toast.error(i18next.language === "ar" ? "خطأ غير متوقع" : "Unexpected error");
-      }
+    toast.success(result.message);
+    setTheName("");
+    setThePrice("");
+    setImage(null); // Don't forget to clear the image state
+    dispatch(fetchProducts({ page: 1 }));
+  } catch (err: any) {
+    console.error("Add product error:", err);
+
+    // Check if it's field-specific validation errors
+    // Backend returns: { Name: ["error1"], Price: ["error2"] }
+    // Note: ASP.NET Core uses PascalCase by default
+    if (err?.name || err?.price|| err?.image) {
+      setFormErrors({
+        name: Array.isArray(err.name) ? err.name[0] : undefined,
+        price: Array.isArray(err.price) ? err.price[0] : undefined,
+        image: Array.isArray(err.image) ? err.image[0] : undefined,
+      });
+    } 
+    // Check for general error message
+    else if (err?.general) {
+      toast.error(
+        typeof err.general === 'string' 
+          ? err.general 
+          : err.general[0]
+      );
+    } 
+    // Fallback
+    else {
+      toast.error(
+        i18next.language === "ar" 
+          ? "خطأ غير متوقع" 
+          : "Unexpected error"
+      );
     }
-  };
+  }
+};
 
   // --- Edit, Update, Delete
   const handleEditStart = (product: Product) => {
@@ -156,16 +170,26 @@ useEffect(() => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm(i18next.language === "ar" ? "هل أنت متأكد من الحذف؟" : "Are you sure?")) {
-      dispatch(deleteProduct(id));
-    }
-  };
+  if (window.confirm(i18next.language === "ar" ? "هل أنت متأكد من الحذف؟" : "Are you sure?")) {
+    dispatch(deleteProduct(id))
+      .unwrap()
+      .then(() => {
+        toast.success(i18next.language === "ar" ? "تم الحذف بنجاح" : "Successfully deleted");
+        // Optionally refresh the products list
+        dispatch(fetchProducts({ page }));
+      })
+      .catch((error) => {
+        toast.error(error.message || "Error deleting product");
+      });
+  }
+};
 
   const handleAddToCart = (product: Product) => {
     dispatch(addToCart({ id: product.id, name: product.name, price: product.price, quantity: 1 }));
   };
 
   const totalPages = Math.ceil(totalCount / pageSize);
+  console.log(products);
   return (
     <Container style={{marginTop:100}}>
       <h2 className="title">{i18next.language === "ar" ? "إدارة المنتجات" : "Product Management"} 🛒</h2>
@@ -186,11 +210,15 @@ useEffect(() => {
           placeholder={i18next.language === "ar" ? "السعر" : "Price"}
           type="number"
           value={theprice}
-          onChange={(e) => setThePrice(e.target.value)}
+          onChange={(e) => Number(setThePrice(e.target.value))}
           className={formErrors.price ? "is-invalid" : ""}
         />
         {formErrors.price && <div className="text-danger">{formErrors.price}</div>}
-
+        <input
+         
+          type="file"
+          onChange={(e) => {setImage((e.target.files as FileList)[0]);}}></input>
+         {formErrors.image && <div className="text-danger">{formErrors.image}</div>}
         <button type="submit" disabled={loading}>
           {loading
             ?i18next. language === "ar" ? "جارٍ الإضافة..." : "Adding..."
@@ -234,6 +262,7 @@ useEffect(() => {
             <tr>
               <th>{i18next.language === "ar" ? "الاسم" : "Name"}</th>
               <th>{i18next.language === "ar" ? "السعر" : "Price (₹)"}</th>
+               <th>Image</th>
               <th>{i18next.language === "ar" ? "الإجراءات" : "Actions"}</th>
             </tr>
           </thead>
@@ -262,6 +291,7 @@ useEffect(() => {
                       <>
                         <td>{p.name}</td>
                         <td>{p.price}</td>
+                        <td><img src={p.imageUrl} alt="image"></img></td>
                       </>
                     )}
                     <td>
@@ -316,3 +346,14 @@ useEffect(() => {
 };
 
 export default Products;
+
+
+//const errors: Record<string, string> = {};
+    // if (!thename)
+    //   errors.name = i18next.language === "ar" ? "الاسم مطلوب" : "Name is required";
+    // if (!theprice)
+    //   errors.price = i18next.language === "ar" ? "السعر مطلوب" : "Price is required";
+    // if (Object.keys(errors).length > 0) {
+    //   setFormErrors(errors);
+    //   return;
+    // }

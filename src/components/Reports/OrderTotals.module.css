@@ -1,0 +1,46 @@
+
+.container {
+  padding: 2rem;
+}
+
+.errorMessage {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+}
+
+.orderHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.orderInfo {
+  font-size: 0.95rem;
+}
+
+.orderInfo strong {
+  color: #495057;
+  margin-right: 0.25rem;
+}
+
+.noData {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.accordion {
+  margin-bottom: 1rem;
+}

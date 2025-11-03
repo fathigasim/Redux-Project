@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk,type PayloadAction } from "@reduxjs/toolkit";
 import api from "../api/axios";
 
 // ---------------------------
@@ -16,9 +16,15 @@ export interface Order {
   id: string;
   orderDate: string;
   orderItems: OrderItems[];
-    totalAmount: number;
+  totalAmount: number;
 }
 
+interface  OrderResponse {
+  items: Order[];
+  totalItems: number;
+  pageNumber: number;
+  pageSize: number;
+}
 
 // interface OrderItemState{
 //   orderItems:OrderItems[]
@@ -35,9 +41,16 @@ interface OrderState {
   // orderItems:OrderItems[],
   loading: boolean;
   error: string | null;
- 
+   page: number;
+  pageSize: number;
+  totalCount: number;
 }
 
+interface FetchOrdersParams {
+  page?: number;
+  // sort?: string;
+  // searchQuery?: string | null;
+}
 // ---------------------------
 // Initial State
 // ---------------------------
@@ -46,6 +59,9 @@ const initialState: OrderState = {
   // orderItems:[],
   loading: false,
   error: null,
+  page:1,
+  pageSize:3,
+  totalCount:0
  
 };
 
@@ -54,26 +70,26 @@ const initialState: OrderState = {
 // ---------------------------
 
 // 🟦 Fetch Products (with pagination & filters)
-export const fetchOrders= createAsyncThunk<Order[]>(
+export const fetchOrders= createAsyncThunk<OrderResponse,FetchOrdersParams>(
   "orders/fetchOrders",
-  async () => {
-    //_, { getState }
-    //const state: any = getState();
-    // const { searchQuery, sort, page, pageSize } = state.products;
+  async (overrideParams,{ getState }) => {
+    
+     const state: any = getState();
+     const { page, pageSize } = state.orders;
 
-    // const params: any = {
-    //   q: searchQuery || "",
-    //   sort: sort || "",
-    //   page,
-    //   pageSize,
-    // };
+    const params: any = {
+     // q: searchQuery || "",
+      //sort: sort || "",
+     page:  overrideParams?.page ?? page ?? 1,
+      pageSize,
+    };
 
-    const res = await api.get("/Order");
+    const res = await api.get("/api/Order",{ params });
     console.log("fetchOrders -> response", res.data);
-    return res.data as Order[];
+    return res.data as OrderResponse;
   }
 );
-export const OrderByDate= createAsyncThunk(
+export const OrderByDate= createAsyncThunk<OrderResponse,string>(
   "orders/report/DatedOrders",
   async (date:string) => {
     //_, { getState }
@@ -89,7 +105,7 @@ export const OrderByDate= createAsyncThunk(
 
     const res = await api.get(`/Order/${date}`);
     console.log("fetchOrders -> response", res.data);
-    return await res.data as Order[];
+    return await res.data as OrderResponse;
   }
 );
 // 🟩 Add Product
@@ -130,7 +146,10 @@ const orderSlice = createSlice({
   name: "orders",
   initialState,
   reducers: {
-    
+     setPage(state, action: PayloadAction<number>) {
+      state.page = action.payload;
+      localStorage.setItem("page", action.payload.toString());
+    },
   },
 
   extraReducers: (builder) => {
@@ -141,10 +160,10 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrders.fulfilled, (state, action) => {
         state.loading = false;
-        state.order = action.payload;
-        // state.orderItems=action.payload.;
-        // state.totalCount = action.payload.totalItems;
-        // state.page = action.payload.pageNumber;
+        state.order = action.payload.items;
+       
+         state.totalCount = action.payload.totalItems;
+        state.page = action.payload.pageNumber;
 
         // ✅ FIX: Only override if backend sends pageSize
        // state.pageSize = action.payload.pageSize || state.pageSize;
@@ -154,7 +173,11 @@ const orderSlice = createSlice({
         state.error = action.error.message || "Error fetching products";
       })
       .addCase(OrderByDate.fulfilled, (state, action) => {
-        state.order=action.payload
+        state.order=action.payload.items;
+        state.loading=false;
+        state.page=action.payload.pageNumber;
+        state.pageSize=action.payload.pageSize;
+        state.totalCount=action.payload.totalItems;
       }) .addCase(OrderByDate.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Error fetching orders";
@@ -176,12 +199,12 @@ const orderSlice = createSlice({
 // ---------------------------
 // Exports
 // ---------------------------
-// export const {
+ export const {
 //   sortByPrice,
 //   filterBySearch,
 //   clearFilters,
-//   setPage,
+  setPage,
 //   setPageSize,
-// } = productSlice.actions;
+ } = orderSlice.actions;
 
 export default orderSlice.reducer;
