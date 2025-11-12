@@ -2,6 +2,7 @@
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
 import { useBootstrapDirection } from "./useBootstrapDirection";
+import { Button, Container } from "react-bootstrap";
 
 export default function LangSelector() {
   const { i18n, t } = useTranslation("navbar");
@@ -13,11 +14,11 @@ export default function LangSelector() {
   };
 
   return (
-    <div className="container">
-      <button className="btn btn-primary" onClick={toggleLanguage}>
+    <Container className="container"   >
+      <Button className="btn btn-primary" size="sm" onClick={toggleLanguage}>
         {t("Switchto")} {i18next.language === "ar" ? t("English") : t("Arabic")}
         {/* Switchto {i18next.language === "ar" ? "English" : "Arabic"} */}
-      </button>
+      </Button>
 
       {/* <div className="mt-4">
         <div className="d-flex justify-content-between">
@@ -25,6 +26,6 @@ export default function LangSelector() {
           <span className="text-end">End</span>
         </div>
       </div> */}
-    </div>
+    </Container>
   );
 }

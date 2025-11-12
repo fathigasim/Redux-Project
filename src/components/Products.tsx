@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { useDebounce } from "use-debounce";
 import { toast } from "react-toastify";
+import {BsCartPlus} from 'react-icons/bs';
 
 import {Card,Row,Button,Form,Col,InputGroup} from 'react-bootstrap';
 import {
@@ -20,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import { Container } from "react-bootstrap";
 import i18next from "i18next";
 import "./Products.css";
-import "./imagestyel.css"
+import "./imagestyle.css"
 
 
 
@@ -33,16 +34,11 @@ const Products= () => {
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { loading, error, success, totalCount, sort, searchQuery, page, pageSize } =
+  const { loading, error, success, totalCount, sort, searchQuery, page, pageSize,products } =
     useSelector((state: RootState) => state.products);
-  const products = useSelector(selectFilteredProducts);
+  //const products = useSelector(selectFilteredProducts);
 
-  // --- Local state
-  const [thename, setTheName] = useState("");
-  const [theprice, setThePrice] = useState("");
-
-  const [editname, setEditName] = useState("");
-  const [editprice, setEditPrice] = useState("");
+ 
   const [localSearch, setLocalSearch] = useState(searchQuery ?? "");
   const [debouncedSearch] = useDebounce(localSearch, 500);
 
@@ -102,7 +98,7 @@ useEffect(() => {
   const totalPages = Math.ceil(totalCount / pageSize);
   return (
     <>
-    <Container  fluid="md">
+    <Container  fluid="md" style={{marginTop:30}}>
  <Form>
       <Row className="align-items-center">
         <Col xs="auto">
@@ -154,19 +150,19 @@ useEffect(() => {
       </Row>
     </Form>
     </Container>
-    <Container style={{marginTop:100}} fluid="md">
+    <Container style={{marginTop:20}} fluid="md">
       <Row>
      {products.map((product,index) =>( 
      
-         <Card key={index} style={{ width: '18rem' }}  className="m-3">
-      <Card.Img variant="top" src={product.imageUrl} className=".image-container"/>
+         <Card key={index} style={{ width: '14rem',gap:"1"}}  className="m-3">
+      <Card.Img variant="top" src={product.imageUrl} className=".image-container img-thumbnail card-img-top mt-2" style={{height:"10rem",width:"100% !important",objectFit:"cover" }}/>
       <Card.Body>
         <Card.Title>{product.name}</Card.Title>
         <Card.Text>
           Some quick example text to build on the card title and make up the
           bulk of the card's content.
         </Card.Text>
-        <Button variant="primary" onClick={()=>handleAddToCart}>Go somewhere</Button>
+        <Button variant="primary" onClick={()=>handleAddToCart(product)}><span>addToCart <BsCartPlus size="1.5em" /></span></Button>
       </Card.Body>
     </Card>
    

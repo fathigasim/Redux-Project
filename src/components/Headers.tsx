@@ -124,7 +124,7 @@ export default function AppNavbar() {
       {/* Right section */}
       <Nav className="d-flex align-items-center ms-auto gap-2 gap-md-3 flex-wrap">
         {/* Cart Dropdown */}
-        <Dropdown align="end" className="mb-2 mb-md-0">
+        <Dropdown align="start" className="">
           <Dropdown.Toggle
             variant="success"
             id="dropdown-cart"
@@ -135,7 +135,7 @@ export default function AppNavbar() {
               {items.length}
             </Badge>
           </Dropdown.Toggle>
-          <Dropdown.Menu
+          <Dropdown.Menu align="end"
   style={{
     maxWidth: '95vw',       // full width on mobile
     minWidth: 250,          // desktop minimum
@@ -149,7 +149,7 @@ export default function AppNavbar() {
       {items.map((prod) => (
         <div
           key={prod.id}
-          className="d-flex align-items-center justify-content-between p-2 border-bottom flex-wrap"
+          className="d-flex align-items-start justify-content-between"
         >
           <div className="d-flex flex-column flex-grow-1 me-2">
             <span><strong>Product:</strong> {prod.name}</span>

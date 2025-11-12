@@ -29,7 +29,7 @@ export const registerUser = createAsyncThunk<
   { rejectValue: Record<string, string[] | string> } // error payload type
 >("register/register", async (userentry, { rejectWithValue }) => {
   try {
-    const res = await api.post("/auth/register", userentry);
+    const res = await api.post("/api/auth/register", userentry);
     return { message: res.data.message, register: res.data.register };
   } catch (err: any) {
     console.log("Register error:", err.response);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { useDebounce } from "use-debounce";
@@ -8,9 +8,9 @@ import {
   addProduct,
   updateProduct,
   deleteProduct,
-  filterBySearch,
-  sortByPrice,
-  setPage,
+  // filterBySearch,
+  // sortByPrice,
+  // setPage,
   clearMessages,
   type Product,
 } from "../features/productSlice";
@@ -33,14 +33,15 @@ const Products= () => {
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { loading, error, success, totalCount, sort, searchQuery, page, pageSize } =
+  const { loading, error, success, totalCount, sort, searchQuery, page, pageSize,products } =
     useSelector((state: RootState) => state.products);
-  const products = useSelector(selectFilteredProducts);
-
+  //const products = useSelector(selectFilteredProducts);
+ const fileInputRef = useRef<HTMLInputElement>(null);
   // --- Local state
   const [thename, setTheName] = useState("");
   const [theprice, setThePrice] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const [image, setImage] = useState<File|null>(null);
+  
   const [formErrors, setFormErrors] = useState<{ name?: string; price?: string,image?:string }>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editname, setEditName] = useState("");
@@ -55,9 +56,9 @@ useEffect(() => {
   const sortParam = searchParams.get("sort") || "";
   const pageParam = Number(searchParams.get("page")) || 1;
 
-  dispatch(filterBySearch(search));
-  dispatch(sortByPrice(sortParam));
-  dispatch(setPage(pageParam));
+  // dispatch(filterBySearch(search));
+  // dispatch(sortByPrice(sortParam));
+  // dispatch(setPage(pageParam));
 
   dispatch(fetchProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
 }, [dispatch, searchParams]);
@@ -121,6 +122,10 @@ useEffect(() => {
     setTheName("");
     setThePrice("");
     setImage(null); // Don't forget to clear the image state
+     // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     dispatch(fetchProducts({ page: 1 }));
   } catch (err: any) {
     console.error("Add product error:", err);
@@ -215,7 +220,8 @@ useEffect(() => {
         />
         {formErrors.price && <div className="text-danger">{formErrors.price}</div>}
         <input
-         
+         // value={image}
+         ref={ fileInputRef }
           type="file"
           onChange={(e) => {setImage((e.target.files as FileList)[0]);}}></input>
          {formErrors.image && <div className="text-danger">{formErrors.image}</div>}

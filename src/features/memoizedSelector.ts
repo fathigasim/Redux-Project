@@ -2,7 +2,7 @@ import { createSelector } from "@reduxjs/toolkit";
 import {type RootState } from "../app/store";
 
 export const selectFilteredProducts = createSelector(
-  (state: RootState) => state.products.product,
+  (state: RootState) => state.products.products,
   (state: RootState) => state.products.searchQuery,
   (state: RootState) => state.products.sort,
  // (state: RootState) => state.products.byRating,

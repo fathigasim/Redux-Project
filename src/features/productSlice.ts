@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import api from "../api/axios";
+import axiosInstance from "../api/axios";
+
 
 
 // ---------------------------
@@ -20,7 +21,7 @@ interface ProductResponse {
 }
 
 interface ProductState {
-  product: Product[];
+  products: Product[];
   loading: boolean;
   error: string |string []| null;
   success: string | null;
@@ -36,7 +37,7 @@ interface ProductState {
 // Initial State
 // ---------------------------
 const initialState: ProductState = {
-  product: [],
+  products: [],
   loading: false,
   error: null,
   success: null,
@@ -70,7 +71,7 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
       pageSize,
     };
 
-    const res = await api.get("/api/Products", { params });
+    const res = await axiosInstance.get("/api/Products", { params });
     return res.data;
   }
 );
@@ -78,7 +79,7 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
 export const fetchSuggestions = createAsyncThunk(
   "products/fetchSuggestions",
   async (query: string) => {
-    const res = await api.get(`/api/products/suggest?query=${query}`);
+    const res = await axiosInstance.get(`/api/products/suggest?query=${query}`);
     return res.data; // e.g. a list of top 5 names
   }
 );
@@ -93,7 +94,7 @@ export const addProduct = createAsyncThunk<
   "products/addProduct",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await api.post("/api/Products", formData, {headers :{ 'Content-Type':'multipart/form-data'}} );
+      const res = await axiosInstance.post("/api/Products", formData, {headers :{ 'Content-Type':'multipart/form-data'}} );
       return {
         product: res.data.product,
         message: res.data.message,
@@ -124,7 +125,7 @@ export const updateProduct = createAsyncThunk<Product, Partial<Product>>(
   async (productData) => {
     const { id, ...updatedFields } = productData;
     if (!id) throw new Error("Product ID is required for update.");
-    const res = await api.put(`/Products/${id}`, updatedFields);
+    const res = await axiosInstance.put(`/Products/${id}`, updatedFields);
     return res.data;
   }
 );
@@ -141,7 +142,7 @@ export const deleteProduct = createAsyncThunk<
     }
 
     try {
-      await api.delete(`/api/products/${id}`);
+      await axiosInstance.delete(`/api/products/${id}`);
       return id;
     } catch (error) {
       return rejectWithValue({ 
@@ -198,10 +199,12 @@ const productSlice = createSlice({
       // Fetch
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
+        state.error=null;
+        state.success=null;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.product = action.payload.items;
+        state.products = action.payload.items;
         state.totalCount = action.payload.totalItems;
         state.page = action.payload.pageNumber;
         state.pageSize = action.payload.pageSize || state.pageSize;
@@ -213,7 +216,7 @@ const productSlice = createSlice({
 
       // Add
       .addCase(addProduct.fulfilled, (state, action) => {
-        state.product.push(action.payload.product);
+        state.products.push(action.payload.product);
         state.success = action.payload.message;
         state.error = null;
         state.loading=false;
@@ -228,7 +231,7 @@ const productSlice = createSlice({
     | { general?: string }
     | undefined;
 
-  if (payload && ('Name' in payload || 'Price' in payload)) {
+  if (payload && ('Name' in payload || 'Price' in payload ||'Image' in payload)) {
     state.error = null;
     state.formErrors = {
       name: Array.isArray(payload.Name) ? payload.Name[0] : undefined,
@@ -244,14 +247,14 @@ const productSlice = createSlice({
 
       // Update
       .addCase(updateProduct.fulfilled, (state, action) => {
-        const index = state.product.findIndex((p) => p.id === action.payload.id);
-        if (index >= 0) state.product[index] = action.payload;
+        const index = state.products.findIndex((p) => p.id === action.payload.id);
+        if (index >= 0) state.products[index] = action.payload;
       })
 
      
       // Delete
       .addCase(deleteProduct.fulfilled, (state, action) => {
-        state.product = state.product.filter((p) => p.id !== action.payload);
+        state.products = state.products.filter((p) => p.id !== action.payload);
       });
     }});
 // ---------------------------

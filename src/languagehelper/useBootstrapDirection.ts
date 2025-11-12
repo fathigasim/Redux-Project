@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import i18next from "i18next";
 
+
 export function useBootstrapDirection() {
   useEffect(() => {
     // Load last saved language from localStorage (if exists)
@@ -25,7 +26,9 @@ export function useBootstrapDirection() {
       link.rel = "stylesheet";
       link.id = "bootstrap-css";
       link.href = isRTL
-        ? "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
+       ? 
+       
+         "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
         : "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
       link.crossOrigin = "anonymous";
       head.appendChild(link);

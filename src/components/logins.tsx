@@ -10,7 +10,7 @@ export default function LoginForm() {
  const navigate = useNavigate();
 const [searchParams] = useSearchParams();
 const redirect = searchParams.get("redirect") || "/product";
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
    const dispatch = useAppDispatch();
  const { loading, error, token } = useAppSelector((state) => state.auth);
@@ -21,7 +21,7 @@ const redirect = searchParams.get("redirect") || "/product";
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   try {
-    const result = await dispatch(login({ username, password })).unwrap();
+    const result = await dispatch(login({ email, password })).unwrap();
     console.log("Login successful:", result);
 
     // Prevent open redirect attacks by only allowing internal paths
@@ -55,8 +55,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <Form.Control
                    type="text"
           placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
                     className="rounded-3 py-2"
                   />
                 </Form.Group>
