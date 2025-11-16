@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { useDebounce } from "use-debounce";
 import { toast } from "react-toastify";
 import {
-  fetchProducts,
+  fetchAdminProducts,
   addProduct,
   updateProduct,
   deleteProduct,
@@ -20,6 +20,8 @@ import { type RootState, type AppDispatch } from "../app/store";
 import { useTranslation } from "react-i18next";
 import { Container } from "react-bootstrap";
 import i18next from "i18next";
+import { FaUpload } from "react-icons/fa";
+
 import "./Products.css";
 
 
@@ -29,7 +31,8 @@ import "./Products.css";
 // }
 
 const Products= () => {
-  const { t } = useTranslation();
+  
+    const { i18n, t } = useTranslation("product");
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -60,7 +63,7 @@ useEffect(() => {
   // dispatch(sortByPrice(sortParam));
   // dispatch(setPage(pageParam));
 
-  dispatch(fetchProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
+  dispatch(fetchAdminProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
 }, [dispatch, searchParams]);
 
 
@@ -189,43 +192,65 @@ useEffect(() => {
   }
 };
 
-  const handleAddToCart = (product: Product) => {
-    dispatch(addToCart({ id: product.id, name: product.name, price: product.price, quantity: 1 }));
-  };
+  // const handleAddToCart = (product: Product) => {
+  //   dispatch(addToCart({ id: product.id, name: product.name, price: product.price, quantity: 1 }));
+  // };
 
   const totalPages = Math.ceil(totalCount / pageSize);
   console.log(products);
   return (
-    <Container style={{marginTop:100}}>
+    <Container style={{marginTop:30}}>
       <h2 className="title">{i18next.language === "ar" ? "إدارة المنتجات" : "Product Management"} 🛒</h2>
 
       {/* ADD PRODUCT FORM */}
+       {/* Form Error */}
        
+       <div style={{flexBasis:"300px",display:"flex", flexDirection:"column",justifyContent:"center",gap:"1.5rem"}}>
+        <ul style={{color:"red"}}>
+       {formErrors.name&&  <li>{formErrors.name && <div className="text-danger">{formErrors.name}</div>}</li>}
+        {formErrors.price&& <li>{formErrors.price && <div className="text-danger">{formErrors.price}</div>}</li>}
+        {formErrors.image&& <li>{formErrors.image && <div className="text-danger">{formErrors.image}</div>}</li>}
+       </ul>
+       </div>
+
       {/* --- Add Form --- */}
-      <form onSubmit={handleAdd}>
-        <input
+      <form onSubmit={handleAdd} style={{display:"flex",flexWrap:"wrap",flexGrow:"1",gap:"1.2rem",margin:"2rem"}}>
+       
+        <input style={{padding:"0.5rem",borderRadius:"0.3rem"}}
           placeholder={i18next.language === "ar" ? "الاسم" : "Name"}
           value={thename}
           onChange={(e) => setTheName(e.target.value)}
-          className={formErrors.name ? "is-invalid" : ""}
+          // className={formErrors.name ? "is-invalid" : ""}
+          className="from-control"
         />
-        {formErrors.name && <div className="text-danger">{formErrors.name}</div>}
+        
 
-        <input
+        <input style={{padding:"0.5rem",borderRadius:"0.3rem"}}
           placeholder={i18next.language === "ar" ? "السعر" : "Price"}
+          min="0"
           type="number"
           value={theprice}
           onChange={(e) => Number(setThePrice(e.target.value))}
           className={formErrors.price ? "is-invalid" : ""}
         />
-        {formErrors.price && <div className="text-danger">{formErrors.price}</div>}
-        <input
+        
+        {/* <input id="myFileUpload"
          // value={image}
          ref={ fileInputRef }
           type="file"
           onChange={(e) => {setImage((e.target.files as FileList)[0]);}}></input>
-         {formErrors.image && <div className="text-danger">{formErrors.image}</div>}
-        <button type="submit" disabled={loading}>
+          */}
+          <label className="file-upload">
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"
+    stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round"
+      d="M12 4v16m8-8H4" />
+  </svg>
+  Choose File
+  <input ref={ fileInputRef } type="file" id="fileInput"   onChange={(e) => {setImage((e.target.files as FileList)[0]);}}/>
+</label>
+        <button className="btn btn-primary" type="submit" disabled={loading}>
           {loading
             ?i18next. language === "ar" ? "جارٍ الإضافة..." : "Adding..."
             :i18next. language === "ar" ? "إضافة المنتج" : "Add Product"}
@@ -233,15 +258,16 @@ useEffect(() => {
       </form>
 
       {/* FILTERS */}
-      <div >
-        <span>{t("Filters")}</span>
-        <input
+      <div className="form-group" style={{marginBottom:"1rem",display:"flex",flexGrow:"1",gap:"1rem"}}>
+        <span className="form-control-sm form-label">{t("Filters")}</span>
+        <input className="form-control-sm" style={{padding:"0.2rem"}}
           type="text"
           placeholder={i18next.language === "ar" ? "بحث..." : "Search..."}
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
         />
         <select value={sort}
+        className="form-control-sm"
         //  onChange={(e) => dispatch(sortByPrice(e.target.value))}
         onChange={(e) => {
     const sortValue = e.target.value;
@@ -263,7 +289,7 @@ useEffect(() => {
       {loading ? (
         <p className="loading">{i18next.language === "ar" ? "جارٍ تحميل المنتجات..." : "Loading products..."}</p>
       ) : (
-        <table className="products-table">
+        <table className="table table-striped">
           <thead>
             <tr>
               <th>{i18next.language === "ar" ? "الاسم" : "Name"}</th>
@@ -297,7 +323,7 @@ useEffect(() => {
                       <>
                         <td>{p.name}</td>
                         <td>{p.price}</td>
-                        <td><img src={p.imageUrl} alt="image"></img></td>
+                        <td><img src={p.imageUrl} className="img-fluid rounded" style={{width:"5rem",height:"5rem"}} alt="image"></img></td>
                       </>
                     )}
                     <td>
@@ -310,7 +336,7 @@ useEffect(() => {
                         <>
                           <button onClick={() => handleEditStart(p)}>✏️ {i18next.language === "ar" ? "تعديل" : "Edit"}</button>
                           <button onClick={() => handleDelete(p.id)}>🗑 {i18next.language === "ar" ? "حذف" : "Delete"}</button>
-                          <button onClick={() => handleAddToCart(p)}>➕ {i18next.language === "ar" ? "إضافة للسلة" : "Add"}</button>
+                          {/* <button onClick={() => handleAddToCart(p)}>➕ {i18next.language === "ar" ? "إضافة للسلة" : "Add"}</button> */}
                         </>
                       )}
                     </td>

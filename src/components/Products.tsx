@@ -22,6 +22,7 @@ import { Container } from "react-bootstrap";
 import i18next from "i18next";
 import "./Products.css";
 import "./imagestyle.css"
+import i18n from "../i18n";
 
 
 
@@ -30,7 +31,8 @@ import "./imagestyle.css"
 // }
 
 const Products= () => {
-  const { t } = useTranslation();
+  
+  const { i18n, t } = useTranslation("product");
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -98,7 +100,7 @@ useEffect(() => {
   const totalPages = Math.ceil(totalCount / pageSize);
   return (
     <>
-    <Container  fluid="md" style={{marginTop:30}}>
+    <Container  fluid="md" style={{marginTop:30,fontFamily:'intel-one-mono-roboto'}}>
  <Form>
       <Row className="align-items-center">
         <Col xs="auto">
@@ -154,7 +156,7 @@ useEffect(() => {
       <Row>
      {products.map((product,index) =>( 
      
-         <Card key={index} style={{ width: '14rem',gap:"1"}}  className="m-3">
+         <Card key={index} style={{ width: '14rem',gap:"1",fontFamily:"intel-one-mono-roboto"}}  className="m-3">
       <Card.Img variant="top" src={product.imageUrl} className=".image-container img-thumbnail card-img-top mt-2" style={{height:"10rem",width:"100% !important",objectFit:"cover" }}/>
       <Card.Body>
         <Card.Title>{product.name}</Card.Title>
@@ -162,7 +164,14 @@ useEffect(() => {
           Some quick example text to build on the card title and make up the
           bulk of the card's content.
         </Card.Text>
-        <Button variant="primary" onClick={()=>handleAddToCart(product)}><span>addToCart <BsCartPlus size="1.5em" /></span></Button>
+        <Card.Footer style={{margin:'0.5rem',display:"flex",flexShrink:"1",height:"2rem",flexWrap:"wrap"}}><span>
+                      <strong>{t("Price")}:</strong>{" "}
+                      {new Intl.NumberFormat(i18n.language, {
+                        style: "currency",
+                        currency: "SAR",
+                      }).format(product.price)}
+                    </span></Card.Footer>
+        <Button variant="primary" onClick={()=>handleAddToCart(product)}><span>{t("addToCart")} <BsCartPlus size="1.5em" /></span></Button>
       </Card.Body>
     </Card>
    

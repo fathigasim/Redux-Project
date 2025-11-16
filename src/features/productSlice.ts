@@ -76,6 +76,25 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
   }
 );
 
+export const fetchAdminProducts = createAsyncThunk<ProductResponse, FetchProductsParams | undefined>(
+  "products/fetchAdminProducts",
+  async (overrideParams, { getState }) => {
+    const state: any = getState();
+    const { searchQuery, sort, page, pageSize } = state.products;
+
+    const params = {
+      q: overrideParams?.searchQuery ?? searchQuery ?? "",
+      sort: overrideParams?.sort ?? sort ?? "",
+      page: overrideParams?.page ?? page ?? 1,
+      pageSize,
+    };
+
+    const res = await axiosInstance.get("/api/Products/AdminProduct", { params });
+    return res.data;
+  }
+);
+
+
 export const fetchSuggestions = createAsyncThunk(
   "products/fetchSuggestions",
   async (query: string) => {
@@ -210,6 +229,23 @@ const productSlice = createSlice({
         state.pageSize = action.payload.pageSize || state.pageSize;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Error fetching products";
+      })
+
+      .addCase(fetchAdminProducts.pending, (state) => {
+        state.loading = true;
+        state.error=null;
+        state.success=null;
+      })
+      .addCase(fetchAdminProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = action.payload.items;
+        state.totalCount = action.payload.totalItems;
+        state.page = action.payload.pageNumber;
+        state.pageSize = action.payload.pageSize || state.pageSize;
+      })
+      .addCase(fetchAdminProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Error fetching products";
       })

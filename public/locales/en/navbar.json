@@ -7,5 +7,11 @@
     "ShoppingCart": "Shopping Cart",
     "Switchto": "to",
     "English": "English",
-    "Arabic": "Arabic"
+    "Arabic": "Arabic",
+    "Account": "Account",
+    "Orders": "Orders",
+    "ProductManagement": "Product Management",
+    "Products": "Products",
+    "Cart_is_Empty": "Cart is Empty"
+
 }

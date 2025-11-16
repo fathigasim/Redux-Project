@@ -72,28 +72,31 @@ export default function AppNavbar() {
   };
 
   return (
-    <Navbar
-  bg="dark"
-  variant="dark"
-  expand="md" // expands on medium screens and up
-  fixed="top"
-  className="shadow-sm py-3"
-  style={{ height: "80px", zIndex: 1030 }}
->
-  <Container fluid className="align-items-center">
+    <Navbar bg="dark" variant="dark" expand="md" className="mb-3">
+      <div
+      className="w-100 d-flex justify-content-between align-items-center px-3 py-2 border-bottom nav-mobile"
+   
+  >
+  <>
+  
+  <Container>
+  
     {/* Brand */}
-    <Navbar.Brand as={Link} to="/" className="fw-bold fs-4 text-white">
-      🛒 {t("ShoppingCart")}
+    
+    <Navbar.Brand as={Link} to="/" className="fw-bold fs-8 text-white">
+     <div style={{justifyContent:"start"}}> 🛒 {t("ShoppingCart")}</div>
     </Navbar.Brand>
 
     {/* Toggle button for mobile */}
     <Navbar.Toggle aria-controls="navbarResponsive" />
 
     {/* Collapse section */}
-    <Navbar.Collapse id="navbarResponsive" className="justify-content-between">
+    <Navbar.Collapse id="navbarResponsive" className="">
+     <>
+     <div >
       {/* Search Bar */}
-      <div className="flex-grow-1 mx-2 position-relative">
-        <Form className="w-100 mb-2 mb-md-0">
+     
+        <Form className="w-30">
           <Form.Control
             type="text"
             placeholder={i18next.language === "ar" ? "بحث..." : "Search..."}
@@ -101,7 +104,7 @@ export default function AppNavbar() {
             onChange={(e) => setLocalSearch(e.target.value)}
           />
         </Form>
-
+ 
         {/* Suggestion dropdown */}
         {/* {suggestions.length > 0 && (
           <ul
@@ -119,11 +122,29 @@ export default function AppNavbar() {
             ))}
           </ul>
         )} */}
-      </div>
-
+        
+     
+    
       {/* Right section */}
-      <Nav className="d-flex align-items-center ms-auto gap-2 gap-md-3 flex-wrap">
+      
+      <Nav >
+        <div style={{justifyContent:"center",flexGrow:"1",flexDirection:"row"}}>
         {/* Cart Dropdown */}
+        <Dropdown align="end" className="">
+            <Dropdown.Toggle variant="outline-info" id="dropdown-user">
+              {user || "Profile"}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item as={Link} to="/profile">
+                Reports
+              </Dropdown.Item>
+              <Dropdown.Item as={Link} to="/orders">
+                Orders
+              </Dropdown.Item>
+              <Dropdown.Divider />
+              <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
         <Dropdown align="start" className="">
           <Dropdown.Toggle
             variant="success"
@@ -181,26 +202,26 @@ export default function AppNavbar() {
         </span>
       </div>
 
-      <div className="d-flex justify-content-center">
+    
         <Link to="/cart">
           <Button variant="primary" style={{ width: 'auto', margin: '0.5rem 0' }}>
             Go To Cart
           </Button>
         </Link>
-      </div>
+    
     </>
-  ) : (
-    <span className="d-block text-center p-3 text-muted">
+        ) : (
+          <span className="d-block text-center p-3 text-muted">
       {t("Cart_is_Empty")}
-    </span>
-  )}
-</Dropdown.Menu>
+        </span>
+          )}
+        </Dropdown.Menu>
 
         </Dropdown>
 
         {/* User Info */}
         {user && (
-          <div className="d-flex align-items-center gap-1 mb-2 mb-md-0">
+          <div className="">
             <span style={{ color: "blue" }}>
               {user} <BsPersonCircle />
             </span>
@@ -208,13 +229,13 @@ export default function AppNavbar() {
         )}
 
         {/* Language Selector */}
-        <div className="mb-2 mb-md-0">
+        
           <LangSelector />
-        </div>
-
+        
+        
         {/* Auth Section */}
         {isAuthenticated ? (
-          <Dropdown align="end" className="mb-2 mb-md-0">
+          <Dropdown align="end" className="">
             <Dropdown.Toggle variant="outline-info" id="dropdown-user">
               {user || "Profile"}
             </Dropdown.Toggle>
@@ -234,9 +255,16 @@ export default function AppNavbar() {
             Login
           </Link>
         )}
+        </div>
       </Nav>
+    
+     </div>
+      </>
     </Navbar.Collapse>
+       
   </Container>
+ </>
+  </div>
 </Navbar>
 
   );

@@ -9,7 +9,7 @@ import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 export default function LoginForm() {
  const navigate = useNavigate();
 const [searchParams] = useSearchParams();
-const redirect = searchParams.get("redirect") || "/product";
+const redirect = searchParams.get("redirect") || "/products";
   const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
    const dispatch = useAppDispatch();
@@ -25,7 +25,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     console.log("Login successful:", result);
 
     // Prevent open redirect attacks by only allowing internal paths
-    const safeRedirect = redirect && redirect.startsWith("/") ? redirect : "/product";
+    const safeRedirect = redirect && redirect.startsWith("/") ? redirect : "/products";
     navigate(safeRedirect, { replace: true });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

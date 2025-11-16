@@ -19,13 +19,37 @@
   gap: 10px;
   margin-bottom: 20px;
 }
+.file-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #2563eb; /* blue-600 */
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+  }
 
-.add-form input, .filters input, select {
+  .file-upload:hover {
+    background-color: #1d4ed8; /* darker blue */
+  }
+
+  .file-upload input[type="file"] {
+    display: none;
+  }
+
+  .file-upload svg {
+    width: 18px;
+    height: 18px;
+  }
+/* .add-form input, .filters input, select {
   flex: 1;
   padding: 8px;
   border-radius: 8px;
   border: 1px solid #ccc;
-}
+} */
 
 .add-form button {
   background: #007bff;
@@ -95,6 +119,21 @@
   color: #555;
 }
 
+ input[type="file"]::file-selector-button {
+        background-color: #007bff; /* Blue background */
+        color: white; /* White text */
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease; /* Smooth hover effect */
+    }
+
+    input[type="file"]::file-selector-button:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+
 @media (max-width: 600px) {
   .add-form, .filters {
     flex-direction: column;
@@ -104,3 +143,4 @@
     font-size: 14px;
   }
 }
+

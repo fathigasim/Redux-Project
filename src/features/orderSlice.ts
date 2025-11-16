@@ -104,7 +104,7 @@ export const OrderByDate= createAsyncThunk<OrderResponse,string>(
     //   pageSize,
     // };
 
-    const res = await api.get(`/Order/${date}`);
+    const res = await api.get(`/api/Order/${date}`);
     console.log("fetchOrders -> response", res.data);
     return await res.data as OrderResponse;
   }
@@ -179,7 +179,13 @@ const orderSlice = createSlice({
         state.page=action.payload.pageNumber;
         state.pageSize=action.payload.pageSize;
         state.totalCount=action.payload.totalItems;
-      }) .addCase(OrderByDate.rejected, (state, action) => {
+      }) .addCase(OrderByDate.pending, (state) => {
+        state.loading = true
+        state.error = null;
+        state.order = [];
+      }) 
+      
+      .addCase(OrderByDate.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Error fetching orders";
       })

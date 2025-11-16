@@ -7,5 +7,10 @@
     "ShoppingCart": "سلة التسوق",
     "Switchto": "الى",
     "English": "الإنجليزية",
-    "Arabic": "العربية"
+    "Arabic": "العربية",
+    "Account": "الحساب",
+    "Orders": "الطلبات",
+    "ProductManagement": "إدارة المنتجات",
+    "Products": "المنتجات",
+    "Cart_is_Empty": "السلة فارغة"
 }
