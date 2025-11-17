@@ -22,7 +22,8 @@ import { Container } from "react-bootstrap";
 import i18next from "i18next";
 import "./Products.css";
 import "./imagestyle.css"
-import i18n from "../i18n";
+
+
 
 
 
@@ -95,6 +96,7 @@ useEffect(() => {
 
   const handleAddToCart = (product: Product) => {
     dispatch(addToCart({ id: product.id, name: product.name, price: product.price, quantity: 1 }));
+    toast.success(`${t("Product")}+" "+${product.name}`)
   };
 
   const totalPages = Math.ceil(totalCount / pageSize);

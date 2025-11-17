@@ -28,6 +28,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     const safeRedirect = redirect && redirect.startsWith("/") ? redirect : "/products";
     navigate(safeRedirect, { replace: true });
   } catch (err: unknown) {
+    console.log("Login failed:", err);
     const msg = err instanceof Error ? err.message : String(err);
     console.error("Failed to login:", msg);
     // Optionally dispatch an action or show a toast here to surface the error to the user

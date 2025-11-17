@@ -23,7 +23,7 @@ export const forgotPassword = createAsyncThunk<
   "auth/forgotPassword",
   async ( {email} , { rejectWithValue }) => {
     try {
-      const res = await api.post("/Auth/forgot",  {email} );
+      const res = await api.post("/api/Auth/forgot",  {email} );
       return { message: res.data.message };
     } catch (err: any) {
       console.log(err.response);
@@ -50,7 +50,7 @@ export const resetPassword = createAsyncThunk<
   "auth/resetPassword",
   async ({ token, newPassword }, { rejectWithValue }) => {
     try {
-      const res = await api.post("/Auth/reset", {
+      const res = await api.post("/api/Auth/reset", {
         token,
         newPassword,
       });

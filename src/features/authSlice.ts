@@ -1,6 +1,8 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk,type PayloadAction } from "@reduxjs/toolkit";
+
 import axiosInstance from "../api/axios";
 import { isTokenExpired } from "../utils/jwtUtils";
+
 
 interface AuthState {
   user: any | null;
@@ -50,7 +52,11 @@ export const loadStoredAuth = createAsyncThunk(
 );
 
 // Login
-export const login = createAsyncThunk(
+export const login = createAsyncThunk<
+  { token: string; refreshToken: string; activeUser: any },
+  { email: string; password: string },
+  { rejectValue: { error: string } }
+>(
   "auth/login",
   async (
     credentials: { email: string; password: string },

@@ -4,6 +4,7 @@
     "PriceLowToHigh": "السعر من الأقل إلى الأعلى",
     "PriceHighToLow": "السعر من الأعلى إلى الأقل",
     "Price": "السعر",
-    "addToCart": "أضف للسلة"
+    "addToCart": "أضف للسلة",
+    "product":"المنتج"
  
 }
