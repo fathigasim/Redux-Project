@@ -12,9 +12,12 @@ export default function ResetPassword() {
   const { loading, error, success } = useSelector(
     (state: RootState) => state.manage
   );
+    const { token } = useSelector(
+    (state: RootState) => state.auth
+  );
 
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
+  //const [searchParams] = useSearchParams();
+  //const token = searchParams.get("token");
   const [newPassword, setNewPassword] = useState("");
   const navigate = useNavigate();
 

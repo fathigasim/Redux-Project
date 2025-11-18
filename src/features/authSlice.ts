@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk,type PayloadAction } from "@reduxjs/toolkit";
 
-import axiosInstance from "../api/axios";
+import api from "../api/axios";
 import { isTokenExpired } from "../utils/jwtUtils";
 
 
@@ -63,7 +63,7 @@ export const login = createAsyncThunk<
     { rejectWithValue }
   ) => {
     try {
-      const res = await axiosInstance.post("/api/auth/login", credentials);
+      const res = await api.post("/api/auth/login", credentials);
       const payload = {
         token: res.data.token,
         refreshToken: res.data.refreshToken,
@@ -73,8 +73,13 @@ export const login = createAsyncThunk<
       localStorage.setItem("auth", JSON.stringify(payload));
       return payload;
     } catch (err: any) {
+      console.log("Auth Slice Error Response"+ err);
       return rejectWithValue({
-        error: err.response?.data?.error || "Network error",
+        
+        error: err.response?.data?.error || 
+               err.response?.data?.message || 
+               err.message ||
+               "Network error",
       });
     }
   }
@@ -93,7 +98,7 @@ export const refreshTokenThunk = createAsyncThunk(
         if (stored) accessToken = JSON.parse(stored).token;
       }
 
-      const response = await axiosInstance.post("/api/auth/token/refresh", {
+      const response = await api.post("/api/auth/token/refresh", {
         accessToken,
         refreshToken,
       });

@@ -27,10 +27,10 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Prevent open redirect attacks by only allowing internal paths
     const safeRedirect = redirect && redirect.startsWith("/") ? redirect : "/products";
     navigate(safeRedirect, { replace: true });
-  } catch (err: unknown) {
-    console.log("Login failed:", err);
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("Failed to login:", msg);
+  } catch (err: any) {
+    console.log("Login failed:", JSON.stringify(err));
+    // const msg = err instanceof Error ? err.message : String(err);
+    // console.error("Failed to login:", msg);
     // Optionally dispatch an action or show a toast here to surface the error to the user
   }
 };
@@ -50,7 +50,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     {token && <p>✅ Logged in with token</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-              <Form onSubmit={handleSubmit}>
+              <Form  onSubmit={handleSubmit}>
                 <Form.Group controlId="formEmail" className="mb-3">
                   <Form.Label className="fw-semibold">Email address</Form.Label>
                   <Form.Control
@@ -87,7 +87,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <small className="text-muted">
                   Forgot your password?{" "}
                   <Link to="/forgot" className="text-decoration-none">
-                    Reset here
+                    Click here
                   </Link>
                 </small>
               </div>
