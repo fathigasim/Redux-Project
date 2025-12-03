@@ -39,7 +39,7 @@ const OrderDates =  () => {
             <>
             <div key={index} style={{borderBottom:'1px solid gray',marginBottom:'10px',paddingBottom:'10px'}}>
               <p><strong>Order ID:</strong> {ord.id}</p>
-              <p><strong>Order Date:</strong> {new Date(ord.orderDate).toLocaleDateString()}</p>
+              <p><strong>Order Date:</strong> {new Date(ord.createdAt).toLocaleDateString()}</p>
               <div style={{justifyContent:"end",justifyItems:"self-start",display:"flex"}}>
               <Button >Print</Button>
              </div>

@@ -12,23 +12,24 @@ import languageReducer from '../features/languageSlice'
 import registerReducer from '../features/registerSlice'
 import suggestionReducer from '../features/suggestionSlice'
 import orderstatReducer from '../features/orderstatSlice'
-import cartReducer, { type CartState } from '../features/cartSlice'
+import basketReducer from '../features/basketSlice'
+
 
 // Load cart from localStorage
-const loadCart = (): CartState | undefined => {
-  try {
-    const serializedCart = localStorage.getItem('cart')
-    if (!serializedCart) return undefined
-    return { items: JSON.parse(serializedCart) }
-  } catch (e) {
-    console.error('Failed to load cart from localStorage', e)
-    return undefined
-  }
-}
+// const loadCart = (): CartState | undefined => {
+//   try {
+//     const serializedCart = localStorage.getItem('cart')
+//     if (!serializedCart) return undefined
+//     return { items: JSON.parse(serializedCart) }
+//   } catch (e) {
+//     console.error('Failed to load cart from localStorage', e)
+//     return undefined
+//   }
+// }
 // Preload cart state
-const preloadedState = {
-  cart: loadCart() || { items: [] }
-}
+// const preloadedState = {
+//   cart: loadCart() || { items: [] }
+// }
 export const store = configureStore({
   reducer: {
 
@@ -38,27 +39,28 @@ export const store = configureStore({
        weatherTest:weatherTestReducer,
        users:usersReducer,
        products:productReducer,
-      cart:cartReducer,
+      // cart:cartReducer,
       orders:orderReducer,
       language:languageReducer,
       manage:manageReducer,
       register:registerReducer,
       seggessions:suggestionReducer,
-      orderstats:orderstatReducer
+      orderstats:orderstatReducer,
+      basket:basketReducer
   },
-    preloadedState
+   // preloadedState
 });
 
 // Save cart to localStorage whenever it changes
-store.subscribe(() => {
-  try {
-    const state = store.getState()
-    const serializedCart = JSON.stringify(state.cart.items)
-    localStorage.setItem('cart', serializedCart)
-  } catch (e) {
-    console.error('Failed to save cart to localStorage', e)
-  }
-})
+// store.subscribe(() => {
+//   try {
+//     const state = store.getState()
+//     const serializedCart = JSON.stringify(state.cart.items)
+//     localStorage.setItem('cart', serializedCart)
+//   } catch (e) {
+//     console.error('Failed to save cart to localStorage', e)
+//   }
+// })
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

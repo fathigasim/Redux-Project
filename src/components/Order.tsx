@@ -28,7 +28,7 @@ const Order = () => {
                    order.map((ord)=>(
               <Card key={ord.id} style={{width:"300px" ,padding:15,margin:10,boxShadow:' 5px 2px 2px black',flexWrap:"wrap",gap:"20px",justifyContent:"center"}}>
                 <>
-                 <strong>Order Date:{new Date(ord.orderDate).toLocaleDateString() }</strong>
+                 <strong>Order Date:{new Date(ord.createdAt).toLocaleDateString() }</strong>
                    {ord.orderItems.map((item: any) => (
                         <table key={item.id} >
                             

@@ -39,16 +39,16 @@ const Register = () => {
   return (
     <Container
       fluid
-      className="d-flex justify-content-center align-items-center bg-light"
+      className="d-flex justify-content-center  bg-light"
       style={{ minHeight: "100vh" }}
     >
       <Row className="w-100 justify-content-center">
         <Col xs={11} sm={8} md={6} lg={4}>
           <Card className="shadow-lg border-0 rounded-4">
             <Card.Body className="p-4">
-              <h3 className="text-center mb-4 fw-semibold">Register</h3>
+              <h3 className="text-start mb-4 fw-semibold">Register</h3>
 
-              <Form noValidate onSubmit={handleSubmit}>
+              <Form noValidate onSubmit={handleSubmit} className="align-items-start">
                 <Form.Group controlId="formUsername" className="mb-3">
                   <Form.Label className="fw-semibold">Username</Form.Label>
                   <Form.Control

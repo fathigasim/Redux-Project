@@ -6,6 +6,7 @@ import i18n from "../i18n"; // Your i18n instance
 const axiosInstance = axios.create({
   // baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000",
   baseURL:"https://localhost:50586",
+  withCredentials: true,
   // timeout: 10000,
 });
 
@@ -118,7 +119,13 @@ export const setupAxiosInterceptors = () => {
     const isAuthEndpoint = originalRequest.url?.includes('/login') || 
                            originalRequest.url?.includes('/register') ||
                            originalRequest.url?.includes('/refresh');
-    
+  //try database failure senario
+    if (error.response?.status ===500) {
+      console.error("❌ Server error (500) encountered.");
+      window.location.href = '/error';
+      return Promise.reject(error);
+      
+    }  
     // Handle 401 errors (Unauthorized)
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       

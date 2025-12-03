@@ -15,6 +15,7 @@ import {
   type Product,
 } from "../features/productSlice";
 import { addToCart} from "../features/cartSlice";
+import { addToBasket,type basketInput } from "../features/basketSlice";
 import { selectFilteredProducts } from "../features/memoizedSelector";
 import { type RootState, type AppDispatch } from "../app/store";
 import { useTranslation } from "react-i18next";
@@ -38,6 +39,8 @@ const Products= () => {
 
   const { loading, error, success, totalCount, sort, searchQuery, page, pageSize,products } =
     useSelector((state: RootState) => state.products);
+   const {loading:basketLoading,error:basketError}=useSelector((state:RootState)=>state.basket);
+    
   //const products = useSelector(selectFilteredProducts);
  const fileInputRef = useRef<HTMLInputElement>(null);
   // --- Local state
@@ -192,9 +195,15 @@ useEffect(() => {
   }
 };
 
-  // const handleAddToCart = (product: Product) => {
-  //   dispatch(addToCart({ id: product.id, name: product.name, price: product.price, quantity: 1 }));
-  // };
+  const  handleAddToCart = async (basket: basketInput) => { 
+    try{
+   await dispatch(addToBasket({prodId:basket.prodId,inputQnt:1})).unwrap();
+    }
+    catch(err :any){
+      console.log(`some error ${err}`)
+      toast.error(err);
+    }
+  };
 
   const totalPages = Math.ceil(totalCount / pageSize);
   console.log(products);
@@ -336,7 +345,7 @@ useEffect(() => {
                         <>
                           <button onClick={() => handleEditStart(p)}>✏️ {i18next.language === "ar" ? "تعديل" : "Edit"}</button>
                           <button onClick={() => handleDelete(p.id)}>🗑 {i18next.language === "ar" ? "حذف" : "Delete"}</button>
-                          {/* <button onClick={() => handleAddToCart(p)}>➕ {i18next.language === "ar" ? "إضافة للسلة" : "Add"}</button> */}
+                          <button onClick={() => handleAddToCart({prodId:p.id,inputQnt:1})}>➕ {basketLoading ?`Loading ...`: "Add"}</button>
                         </>
                       )}
                     </td>

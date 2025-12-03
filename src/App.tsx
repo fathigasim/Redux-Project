@@ -31,7 +31,9 @@ import RequireAuth from './auth/RequireAuth';
 import OrderTotals from './components/Reports/OrderTotals';
 import NewNav from './components/NewNav';
 import Unauthorized from './components/Unauthorized';
-
+import Error from './components/Error';
+import Basket from './components/Basket';
+import { GetBasket } from './features/basketSlice';
 
 
 function App() {
@@ -57,6 +59,9 @@ const dispatch = useAppDispatch();
     };
 
     initializeApp();
+   
+     // dispatch(GetBasket()); // Load cart once on login
+   
   }, [dispatch]); // Run only once on mount
 
   // Show loading screen while initializing
@@ -97,7 +102,10 @@ const dispatch = useAppDispatch();
       <Route path='/cancel' element={<Cancel/>}/>
       <Route path='/logins' element={<Logins/>}/>
       <Route path='/register' element={<Register/>}/>
+      <Route path='basket' element={<Basket/>}/>
       <Route path='/unauthorized' element={<Unauthorized/>}/>
+      <Route path='/error' element={<Error/>}/>
+      <Route path='*' element={<Unauthorized/>}/>
       
     </Routes>
     

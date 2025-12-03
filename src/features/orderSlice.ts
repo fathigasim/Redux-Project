@@ -14,7 +14,7 @@ export interface OrderItems {
 }
 export interface Order {
   id: string;
-  orderDate: string;
+  createdAt: string;
   orderItems: OrderItems[];
   totalAmount: number;
 }

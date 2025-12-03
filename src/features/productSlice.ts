@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import axiosInstance from "../api/axios";
+import api from "../api/axios";
 
 
 
@@ -71,7 +71,7 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
       pageSize,
     };
 
-    const res = await axiosInstance.get("/api/Products", { params });
+    const res = await api.get("/api/Products", { params });
     return res.data;
   }
 );
@@ -89,7 +89,7 @@ export const fetchAdminProducts = createAsyncThunk<ProductResponse, FetchProduct
       pageSize,
     };
 
-    const res = await axiosInstance.get("/api/Products/AdminProduct", { params });
+    const res = await api.get("/api/Products/AdminProduct", { params });
     return res.data;
   }
 );
@@ -98,7 +98,7 @@ export const fetchAdminProducts = createAsyncThunk<ProductResponse, FetchProduct
 export const fetchSuggestions = createAsyncThunk(
   "products/fetchSuggestions",
   async (query: string) => {
-    const res = await axiosInstance.get(`/api/products/suggest?query=${query}`);
+    const res = await api.get(`/api/products/suggest?query=${query}`);
     return res.data; // e.g. a list of top 5 names
   }
 );
@@ -113,7 +113,7 @@ export const addProduct = createAsyncThunk<
   "products/addProduct",
   async (formData, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.post("/api/Products", formData, {headers :{ 'Content-Type':'multipart/form-data'}} );
+      const res = await api.post("/api/Products", formData, {headers :{ 'Content-Type':'multipart/form-data'}} );
       return {
         product: res.data.product,
         message: res.data.message,
@@ -144,7 +144,7 @@ export const updateProduct = createAsyncThunk<Product, Partial<Product>>(
   async (productData) => {
     const { id, ...updatedFields } = productData;
     if (!id) throw new Error("Product ID is required for update.");
-    const res = await axiosInstance.put(`/Products/${id}`, updatedFields);
+    const res = await api.put(`/Products/${id}`, updatedFields);
     return res.data;
   }
 );
@@ -161,7 +161,7 @@ export const deleteProduct = createAsyncThunk<
     }
 
     try {
-      await axiosInstance.delete(`/api/products/${id}`);
+      await api.delete(`/api/products/${id}`);
       return id;
     } catch (error) {
       return rejectWithValue({ 

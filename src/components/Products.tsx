@@ -14,7 +14,8 @@ import {
   clearMessages,
   type Product,
 } from "../features/productSlice";
-import { addToCart} from "../features/cartSlice";
+
+
 import { selectFilteredProducts } from "../features/memoizedSelector";
 import { type RootState, type AppDispatch } from "../app/store";
 import { useTranslation } from "react-i18next";
@@ -22,6 +23,9 @@ import { Container } from "react-bootstrap";
 import i18next from "i18next";
 import "./Products.css";
 import "./imagestyle.css"
+import Paginationbootstrap from "./paginationbootstrap";
+import { addToBasket,GetBasket,type basketInput } from "../features/basketSlice";
+import Basket from "./Basket";
 
 
 
@@ -39,8 +43,9 @@ const Products= () => {
 
   const { loading, error, success, totalCount, sort, searchQuery, page, pageSize,products } =
     useSelector((state: RootState) => state.products);
+    const { items} = useSelector((state: RootState) => state.basket);
   //const products = useSelector(selectFilteredProducts);
-
+  const {loading:basketLoading,error:basketError}=useSelector((state: RootState) => state.basket);
  
   const [localSearch, setLocalSearch] = useState(searchQuery ?? "");
   const [debouncedSearch] = useDebounce(localSearch, 500);
@@ -52,10 +57,10 @@ useEffect(() => {
   const sortParam = searchParams.get("sort") || "";
   const pageParam = Number(searchParams.get("page")) || 1;
 
-  dispatch(filterBySearch(search));
-  dispatch(sortByPrice(sortParam));
-  dispatch(setPage(pageParam));
-
+  // dispatch(filterBySearch(search));
+  // dispatch(sortByPrice(sortParam));
+  // dispatch(setPage(pageParam));
+   dispatch(GetBasket());
   dispatch(fetchProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
 }, [dispatch, searchParams]);
 
@@ -94,14 +99,29 @@ useEffect(() => {
 
 
 
-  const handleAddToCart = (product: Product) => {
-    dispatch(addToCart({ id: product.id, name: product.name, price: product.price, quantity: 1 }));
-    toast.success(`${t("Product")}+" "+${product.name}`)
+ const  handleAddToCart = async (basket: basketInput) => { 
+    try{
+   await dispatch(addToBasket({prodId:basket.prodId,inputQnt:1})).unwrap();
+    toast.success("Product added to cart");
+    }
+    catch(err :any){
+      console.log(`some error ${err}`)
+      if(err.response.status===400)
+      alert(err.response.data)
+      toast.error(err.response.data)
+    }
   };
 
   const totalPages = Math.ceil(totalCount / pageSize);
   return (
     <>
+    {items.length>0 &&
+    <Container fluid="md" style={{marginTop:20,fontFamily:'intel-one-mono-roboto'}}>
+      <h4>{t("cartItems")}: {items.length}</h4>
+      <Basket />
+    </Container>
+    }
+    <div></div>
     <Container  fluid="md" style={{marginTop:30,fontFamily:'intel-one-mono-roboto'}}>
  <Form>
       <Row className="align-items-center">
@@ -173,7 +193,7 @@ useEffect(() => {
                         currency: "SAR",
                       }).format(product.price)}
                     </span></Card.Footer>
-        <Button variant="primary" onClick={()=>handleAddToCart(product)}><span>{t("addToCart")} <BsCartPlus size="1.5em" /></span></Button>
+        <Button variant="primary" onClick={()=>handleAddToCart({prodId:product.id,inputQnt:1})}><span>{t("addToCart")} <BsCartPlus size="1.5em" /></span></Button>
       </Card.Body>
     </Card>
    
@@ -182,7 +202,7 @@ useEffect(() => {
      </Container>
    
 
-
+{/* 
       <Container className="pagination-container">
       {totalPages > 1 && (
         <div className="pagination">
@@ -208,7 +228,13 @@ useEffect(() => {
           })}
         </div>
       )}
-    </Container>
+    </Container> */}
+    <Paginationbootstrap
+  page={page}
+  totalPages={totalPages}
+  searchParams={searchParams}
+  setSearchParams={setSearchParams}
+/>
     </>
   );
 };

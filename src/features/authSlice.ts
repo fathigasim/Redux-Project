@@ -10,6 +10,7 @@ interface AuthState {
   refreshToken: string | null;
   loading: boolean;
   error: string | null;
+   formErrors: { email?: string; password?: string; };
 }
 
 const initialState: AuthState = {
@@ -18,6 +19,7 @@ const initialState: AuthState = {
   refreshToken: null,
   loading: false,
   error: null,
+  formErrors:{}
 };
 
 // Load from storage
@@ -25,20 +27,20 @@ export const loadStoredAuth = createAsyncThunk(
   "auth/loadStoredAuth",
   async () => {
     const stored = localStorage.getItem("auth");
-    if (!stored) return { token: null, refreshToken: null, user: null };
+    if (!stored) return { token: null, refreshToken: null, activeUser: null };
 
     const parsed = JSON.parse(stored);
 
     if (!parsed.token) {
       localStorage.removeItem("auth");
-      return { token: null, refreshToken: null, user: null };
+      return { token: null, refreshToken: null, activeUser: null };
     }
 
     // Token expired? Attempt refresh on app start
     if (isTokenExpired(parsed.token)) {
       if (!parsed.refreshToken) {
         localStorage.removeItem("auth");
-        return { token: null, refreshToken: null, user: null };
+        return { token: null, refreshToken: null, activeUser: null };
       }
 
       return {
@@ -55,7 +57,7 @@ export const loadStoredAuth = createAsyncThunk(
 export const login = createAsyncThunk<
   { token: string; refreshToken: string; activeUser: any },
   { email: string; password: string },
-  { rejectValue: { error: string } }
+  { rejectValue: Record<string, string[] | string> }
 >(
   "auth/login",
   async (
@@ -73,14 +75,39 @@ export const login = createAsyncThunk<
       localStorage.setItem("auth", JSON.stringify(payload));
       return payload;
     } catch (err: any) {
-      console.log("Auth Slice Error Response"+ err);
-      return rejectWithValue({
-        
-        error: err.response?.data?.error || 
-               err.response?.data?.message || 
-               err.message ||
-               "Network error",
-      });
+     console.log("Auth Slice Error:", err);
+      
+      // Access response from error object
+      const res = err.response;
+      
+      if (!res) {
+        // Network error or no response
+        return rejectWithValue({ general: "Network error" });
+      }
+
+      console.log("Error status:", res.status);
+      console.log("Error data:", res.data);
+
+      // --- Case 1: 400 Bad Request (user/pass error) ---
+      if (res.status === 400 && res.data?.error) {
+        console.log(`User or pass error: ${res.data.error}`);
+        return rejectWithValue({ passError: res.data.error });
+      }
+
+      // --- Case 2: ModelState validation errors ---
+      if (res.data?.errors) {
+        // { errors: { email: ["..."], password: ["..."] } }
+        console.log("Model validation errors:", res.data.errors);
+        return rejectWithValue(res.data.errors);
+      }
+
+      // --- Case 3: Backend localized message ---
+      if (res.data?.error) {
+        return rejectWithValue({ general: res.data.error });
+      }
+
+      // --- Fallback ---
+      return rejectWithValue({ general: "Unexpected error" });
     }
   }
 );
@@ -155,9 +182,9 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(login.rejected, (state, action) => {
+      .addCase(login.rejected, (state) => {
         state.loading = false;
-        state.error = action.payload?.error || "Login failed";
+       
       })
 
       // Refresh
@@ -165,6 +192,14 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.refreshToken = action.payload.refreshToken;
         state.user = action.payload.activeUser;
+        //const parsedUser=localStorage.getItem("auth");
+        // if(parsedUser){
+        //   const userObj=JSON.parse(parsedUser);
+        //   state.user=userObj.activeUser;}
+        //   else{
+        //     state.user=null;
+        //   }
+        
       });
   },
 });

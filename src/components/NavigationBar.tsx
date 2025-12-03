@@ -25,7 +25,7 @@ const NavigationBar = () => {
   
    
   
-  const items = useSelector((state: RootState) => state.cart.items);
+  const items = useSelector((state: RootState) => state.basket);
   const {  searchQuery } =
       useSelector((state: RootState) => state.products);
       const [localSearch, setLocalSearch] = useState(searchQuery ?? "");
@@ -37,6 +37,8 @@ const NavigationBar = () => {
       const {user,token} = useSelector((state: RootState) => state.auth);
       const roles = token ? getUserRoles(token) : [];
       const adminRole=roles.includes("Admin");
+      
+  
       console.log("Current user in NavBar:", user);
       const handleLogout = () => {
         dispatch(logout());
@@ -89,6 +91,7 @@ const NavigationBar = () => {
       }
 
       {/* Cart Dropdown */}
+      {user&&
       <Dropdown align="end">
         <Dropdown.Toggle
           variant="success"
@@ -162,7 +165,7 @@ const NavigationBar = () => {
           )}
         </Dropdown.Menu>
       </Dropdown>
-
+}
       {/* Account Dropdown */}
       {user &&
       <Dropdown align="end">
@@ -172,7 +175,7 @@ const NavigationBar = () => {
         <Dropdown.Menu>
           <Dropdown.Item>Profile</Dropdown.Item>
           <Dropdown.Divider />
-          <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+          <Dropdown.Item onClick={handleLogout }>Logout</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
   }
