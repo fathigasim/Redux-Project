@@ -14,14 +14,14 @@ import {
   clearMessages,
   type Product,
 } from "../features/productSlice";
-import { addToCart} from "../features/cartSlice";
+
 import { addToBasket,type basketInput } from "../features/basketSlice";
-import { selectFilteredProducts } from "../features/memoizedSelector";
+
 import { type RootState, type AppDispatch } from "../app/store";
 import { useTranslation } from "react-i18next";
 import { Container } from "react-bootstrap";
 import i18next from "i18next";
-import { FaUpload } from "react-icons/fa";
+
 
 import "./Products.css";
 

@@ -7,7 +7,7 @@ import { setPage } from '../../features/orderstatSlice';
 import { fetchOrderStats } from '../../features/orderstatSlice';
 import Accordion from 'react-bootstrap/Accordion';
 import { Container } from 'react-bootstrap';
-import Pagination from 'react-bootstrap/Pagination';
+
 import CustomPagination from '../CustomPagination';
 import styles from './OrderTotals.module.css';
 

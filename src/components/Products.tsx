@@ -5,25 +5,23 @@ import { useDebounce } from "use-debounce";
 import { toast } from "react-toastify";
 import {BsCartPlus} from 'react-icons/bs';
 
-import {Card,Row,Button,Form,Col,InputGroup} from 'react-bootstrap';
+import {Card,Row,Button,Form,Col} from 'react-bootstrap';
 import {
   fetchProducts,
-  filterBySearch,
-  sortByPrice,
-  setPage,
+
   clearMessages,
-  type Product,
+
 } from "../features/productSlice";
 
 
-import { selectFilteredProducts } from "../features/memoizedSelector";
+
 import { type RootState, type AppDispatch } from "../app/store";
 import { useTranslation } from "react-i18next";
 import { Container } from "react-bootstrap";
 import i18next from "i18next";
 import "./Products.css";
 import "./imagestyle.css"
-import Paginationbootstrap from "./paginationbootstrap";
+import Paginationbootstrap from "./Paginationbootstrap";
 import { addToBasket,GetBasket,type basketInput } from "../features/basketSlice";
 import Basket from "./Basket";
 
@@ -41,7 +39,7 @@ const Products= () => {
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { loading, error, success, totalCount, sort, searchQuery, page, pageSize,products } =
+  const {error, success, totalCount, sort, searchQuery, page, pageSize,products } =
     useSelector((state: RootState) => state.products);
     const { items} = useSelector((state: RootState) => state.basket);
   //const products = useSelector(selectFilteredProducts);

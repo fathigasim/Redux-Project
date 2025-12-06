@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "react-router";
 import { useSelector,useDispatch } from "react-redux";
 import {type AppDispatch, type RootState } from "../app/store";

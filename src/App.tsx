@@ -10,8 +10,7 @@ import Logins from './components/logins';
 import Users from './components/Users';
 import Product from './components/Product';
 import Products from './components/Products';
-// import { Routes, Route } from "react-router-dom";
-import Cart from './components/Cart';
+
  import Cancel from './components/Cancel';
  import Success from './components/Success'
 
@@ -95,7 +94,7 @@ const dispatch = useAppDispatch();
       <Route path='/products' element={<Products />}/>
       <Route path='/forgot' element={<ForgotPassword/>}/>
       <Route path='/reset' element={<ResetPassword/>}/>
-      <Route path='/cart' element={<RequireAuth allowedRoles={['User']}><Cart  /></RequireAuth>}/>
+      
       <Route path='/orders' element={<RequireAuth><Order /></RequireAuth>}/>
       <Route path='/analytics' element={<OrderAnalytics/>}/>
       <Route path='/charts' element={<RechartAnalysis/>}/>

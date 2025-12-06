@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { GetBasket,RemoveFromBasket,ClearBasket,BasketSummery} from '../features/basketSlice'
+import { GetBasket,RemoveFromBasket,ClearBasket} from '../features/basketSlice'
 import {type RootState,type AppDispatch } from '../app/store'
 import i18n from '../i18n'
 import { toast } from 'react-toastify'
