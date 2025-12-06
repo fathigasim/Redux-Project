@@ -14,7 +14,7 @@ import Products from './components/Products';
 import Cart from './components/Cart';
  import Cancel from './components/Cancel';
  import Success from './components/Success'
-import Header from './components/Headers';
+
 import Order from './components/Order';
 import OrderDates from './components/Reports/OrderDates';
 import OrderAnalytics from './components/OrderAnalytics';
@@ -29,11 +29,14 @@ import NavigationBar from './components/NavigationBar';
 import Register from './components/Register';
 import RequireAuth from './auth/RequireAuth';
 import OrderTotals from './components/Reports/OrderTotals';
-import NewNav from './components/NewNav';
+
 import Unauthorized from './components/Unauthorized';
 import Error from './components/Error';
 import Basket from './components/Basket';
-import { GetBasket } from './features/basketSlice';
+
+
+import RechartAnalysis from './components/Reports/RechartAnalysis';
+import PdfReport from './components/Reports/PdfReport';
 
 
 function App() {
@@ -50,7 +53,7 @@ const dispatch = useAppDispatch();
 
         
         console.log('✅ App initialized: Interceptors setup & auth loaded');
-      } catch (error) {
+      } catch (error:any) {
         console.log('⚠️ No stored auth found or error loading auth');
       } finally {
         // Always set initialized to true, even if no auth found
@@ -84,7 +87,6 @@ const dispatch = useAppDispatch();
         {/* <Header/> */}
         {/* <NewNav/> */}
         <NavigationBar />
-        
      <Routes>
       <Route path="/users" element={<Users />} />
       <Route path="/" element={<Products />} />
@@ -96,8 +98,10 @@ const dispatch = useAppDispatch();
       <Route path='/cart' element={<RequireAuth allowedRoles={['User']}><Cart  /></RequireAuth>}/>
       <Route path='/orders' element={<RequireAuth><Order /></RequireAuth>}/>
       <Route path='/analytics' element={<OrderAnalytics/>}/>
+      <Route path='/charts' element={<RechartAnalysis/>}/>
       <Route path='/orderByDateRep' element={<OrderDates/>}/>
       <Route path='/ordertotals' element={<OrderTotals/>}/>
+      <Route path='/printPdf' element={<PdfReport/>}/>
       <Route path='/success' element={<Success/>}/>
       <Route path='/cancel' element={<Cancel/>}/>
       <Route path='/logins' element={<Logins/>}/>

@@ -16,6 +16,7 @@ import { removeFromCart } from '../features/cartSlice';
 import { useDebounce } from 'use-debounce';
 import { useSearchParams } from 'react-router-dom';
 import { getUserRoles } from '../utils/jwtUtils';
+import { BasketSummery,GetBasket } from '../features/basketSlice';
 import i18next from "i18next";
 import './header.css';
 import logo from '../assets/transperantCommers.png';
@@ -25,7 +26,7 @@ const NavigationBar = () => {
   
    
   
-  const items = useSelector((state: RootState) => state.basket);
+  const {items,basketSummery} = useSelector((state: RootState) => state.basket);
   const {  searchQuery } =
       useSelector((state: RootState) => state.products);
       const [localSearch, setLocalSearch] = useState(searchQuery ?? "");
@@ -57,6 +58,29 @@ const NavigationBar = () => {
         setSearchParams(params);
       }
     }, [debouncedSearch]);
+
+    useEffect(() => {
+
+       try{
+                      dispatch(BasketSummery()).unwrap();
+      
+                  console.log("Basket summery loaded")
+                          
+                }
+      
+                catch(err:any){
+                       alert(err)
+                }
+    },[dispatch,items]);
+
+    useEffect(() => {
+
+       try{
+                      dispatch(GetBasket());  
+       }
+                catch(err:any){
+                       alert(err)
+                }},[dispatch]);
   return (
 <Navbar expand="lg" className="bg-light" style={{fontFamily:'intel-one-mono-roboto'}} >
   {/* === Top Row === */}
@@ -101,7 +125,8 @@ const NavigationBar = () => {
         >
           <FaShoppingCart color="white" fontSize="22px" />
           <Badge bg="light" text="dark" className="ms-1">
-            {items.length}
+            <span style={{gap:'0.5rem'}}>{basketSummery.basketCount}</span>
+            {/* <span>{basketSummery.basketTotal}</span> */}
           </Badge>
         </Dropdown.Toggle>
         <Dropdown.Menu
@@ -121,7 +146,7 @@ const NavigationBar = () => {
                   className="d-flex align-items-center justify-content-between p-2 border-bottom flex-wrap"
                 >
                   <div className="d-flex flex-column flex-grow-1 me-2">
-                    <span><strong>Product:</strong> {prod.name}</span>
+                    <span><strong>Product:</strong> {prod.productName}</span>
                     <span>
                       <strong>Price:</strong>{" "}
                       {new Intl.NumberFormat(i18n.language, {
@@ -151,7 +176,7 @@ const NavigationBar = () => {
               </div>
 
               <div className="d-flex justify-content-center">
-                <Link to="/cart">
+                <Link to="/basket" style={{ textDecoration: 'none' }}>
                   <Button variant="primary" style={{ width: 'auto', margin: '0.5rem 0' }}>
                     Go To Cart
                   </Button>

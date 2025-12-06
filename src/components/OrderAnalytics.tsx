@@ -1,8 +1,14 @@
 import React, { useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { type RootState, type AppDispatch } from "../app/store";
-import { fetchOrders } from "../features/orderSlice";
+
+import { fetchAllOrders } from "../features/orderstatSlice";
 import { Container } from "react-bootstrap";
+import { CSVLink } from 'react-csv';
+import * as XLSX from 'xlsx';
+import { Link } from "react-router";
+
+
 import {
   ResponsiveContainer,
   LineChart,
@@ -17,30 +23,77 @@ import {
 } from "recharts";
 
 const OrderAnalytics: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { order, loading, error } = useSelector((state: RootState) => state.orders);
+ const dispatch = useDispatch<AppDispatch>();
+const { chartData, loading, error } = useSelector((state: RootState) => state.orderstats);
 
-  useEffect(() => {
-    dispatch(fetchOrders());
-  }, [dispatch]);
+useEffect(() => {
+  dispatch(fetchAllOrders());
+}, [dispatch]);
+// Add this debug log
+useEffect(() => {
+  console.log('chartData:', chartData);
+  console.log('Is array?', Array.isArray(chartData));
+  console.log('First item:', chartData?.[0]);
+  console.log('First item createdAt:', chartData?.[0]?.id);
+}, [chartData]);
+const monthlyData = useMemo(() => {
+  if (!chartData || !Array.isArray(chartData) || chartData.length === 0) {
+    return [];
+  }
+  
+  const map: Record<string, number> = {};
+  
+  chartData.forEach((item) => {
+    if (!item?.createdAt) return;
+    
+    const date = new Date(item.createdAt);
+    if (isNaN(date.getTime())) return;
+    
+    const month = date.toLocaleString("default", { month: "short" });
+    const monData = item.orderItems?.reduce((sum: number, i: any) => 
+      sum + (i.quantity * i.price), 0
+    ) || 0;
+    
+    map[month] = (map[month] || 0) + monData;
+  });
 
-  // 📊 Prepare monthly data
-  const monthlyData = useMemo(() => {
-    const map: Record<string, number> = {};
-    order.forEach((order) => {
-      const month = new Date(order.orderDate).toLocaleString("default", { month: "short" });
-       const monData=order.orderItems.reduce((sum, i:any) => sum+i.quantity*i.price,0);
-      // map[month] = (map[month] || 0) + order.totalAmount;
-      map[month] = (map[month] || 0) + monData;
-    });
+  return Object.entries(map).map(([month, total]) => ({ month, total }));
+}, [chartData]);
 
-    return Object.entries(map).map(([month, total]) => ({ month, total }));
-  }, [order]);
-    console.log(monthlyData)
-  if (loading) return <p>Loading charts...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+// Excel Export
+const exportToExcel = () => {
+  const ws = XLSX.utils.json_to_sheet(monthlyData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Report");
+  XLSX.writeFile(wb, `${new Date().toLocaleDateString("default", { month: "short" })}-report.xlsx`);
+};
+// Handle loading and error states
+if (loading) {
+  return <div>Loading chart data...</div>;
+}
+
+if (error) {
+  return <div>Error loading data: {error}</div>;
+}
+
+if(monthlyData.length === 0){
+  return <div>No data available for chart.</div>;
+}
+// Now safe to use monthlyData
   return (
+    <>
+    <Container>
+      <div style={{display:'flex',flexDirection:'row',justifyContent:'space-between',border:'2px solid firebrick',gap:'4rem',marginTop:'2rem'}}>
+ <div style={{flex:1}}><CSVLink data={monthlyData} filename={`${new Date().toLocaleDateString("default", { month: "short" })}-report.csv`}>
+   Download CSV
+</CSVLink>
+ <a href="#" style={{cursor:'pointer'}} onClick={exportToExcel}>Download Excel</a>
+  
+  <Link to="/printPdf"> Pdf Report</Link>
+</div>
+</div>
+    </Container>
     <Container style={{marginTop:100}}>
     <div className="p-4 space-y-8">
       <h2 className="text-xl font-semibold mb-4">📊 Order Analytics</h2>
@@ -59,7 +112,7 @@ const OrderAnalytics: React.FC = () => {
         </ResponsiveContainer>
       </div>
 
-      <div style={{ width: "100%", height: 300 }}>
+      <div style={{ width: "100%", height: 300, marginTop: 50 }}>
         <h3 className="font-medium mb-2">Monthly Order Totals (Bar)</h3>
         <ResponsiveContainer>
           <BarChart data={monthlyData}>
@@ -74,6 +127,7 @@ const OrderAnalytics: React.FC = () => {
       </div>
     </div>
     </Container>
+    </>
   );
 };
 

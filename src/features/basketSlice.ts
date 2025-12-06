@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk,type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../api/axios";
-import type { ActionDispatch } from "react";
+
 
 // ---------------------------
 // Interfaces & Types
@@ -26,18 +26,27 @@ quantity:number;
    }
 interface basketState {
    items:basketItems[];
+   basketSummery:basketSummery;
    message:string;
   loading: boolean;
   error: string | null;
  
 }
 
+interface basketSummery{
+     basketCount : number;
 
+   basketTotal:number;
+}
 // ---------------------------
 // Initial State
 // ---------------------------
 const initialState: basketState = {
   message: '',
+  basketSummery:{
+    basketCount:0,
+    basketTotal:0
+  },
   items:[],
   loading: false,
   error: null,
@@ -108,28 +117,39 @@ console.log(`response error ${res?.data}`)
     }
   }
 );
+//basket summery
+export const BasketSummery = createAsyncThunk<basketSummery,void,{rejectValue:string}>(
+  "basket/BasketSummery",
+  async ( _,{rejectWithValue}
+     ) => {
+        try{
+    const res = await api.get("/api/Basket/BasketSummery");
+    console.log();
+    return res.data as basketSummery;
+        }
+        catch(err:any){
+      const res= err.response;
+console.log(`response error ${res?.data}`)
+      return rejectWithValue(res?.data || " basket summery not available");}});
+//clear basket
+export const ClearBasket = createAsyncThunk(
+  "basket/ClearBasket",
+  async (message,{rejectWithValue}
+     ) => {
+        try{
+    const res = await api.delete("/api/Basket/ClearBasket");
+    console.log();
+    return message=res.data;
+    }
+    catch(err:any){
+      const res= err.response;
+console.log(`response error ${res?.data}`)
+      return rejectWithValue(res?.data || "Error adding to basket");
+      
+    }
+  }
+);
 
-// 🟨 Update Product
-// export const updateProduct = createAsyncThunk<Product, Partial<Product>>(
-//   "products/updateProduct",
-//   async (productData) => {
-//     const { id, ...updatedFields } = productData;
-//     if (!id) throw new Error("Product ID is required for update.");
-
-//     const res = await api.put(`/api/Products/${id}`, updatedFields);
-//     return res.data;
-//   }
-// );
-
-// 🟥 Delete Product
-// export const deleteProduct = createAsyncThunk<string, string>(
-//   "products/deleteProduct",
-//   async (id) => {
-//     if (!id) throw new Error("Product ID is required for delete.");
-//     await api.delete(`/api/Products/${id}`);
-//     return id; // ✅ just return the id, no need to return full response
-//   }
-// );
 
 // ---------------------------
 // Slice
@@ -138,7 +158,11 @@ const basketSlice = createSlice({
   name: "basket",
   initialState,
   reducers: {
-   
+    clearMessages(state){
+      state.error=null;
+      state.message="";
+      
+    }
   },
 
   extraReducers: (builder) => {
@@ -196,6 +220,34 @@ const basketSlice = createSlice({
         state.error="some error occured";
         
       })
+      .addCase(ClearBasket.fulfilled, (state,action) => {
+      
+        state.loading=false;
+        state.items=[];
+        state.error=null;
+        state.message=action.payload
+      })
+      .addCase(ClearBasket.pending, (state) => {
+      
+        state.loading=true;
+       
+        state.error=null;
+     
+        
+      })
+        .addCase(ClearBasket.rejected, (state) => {
+      
+        state.loading=false;
+      
+      })
+       .addCase(BasketSummery.fulfilled, (state,action) => {
+      
+        state.loading=false;
+        state.basketSummery.basketCount=action.payload.basketCount;
+        state.basketSummery.basketTotal=action.payload.basketTotal;
+        state.error=null;
+       
+      })
       
     
 
@@ -205,5 +257,5 @@ const basketSlice = createSlice({
 // ---------------------------
 // Exports
 // ---------------------------
-
+export const {clearMessages}=basketSlice.actions;
 export default basketSlice.reducer;

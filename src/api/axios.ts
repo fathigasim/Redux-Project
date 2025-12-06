@@ -2,10 +2,13 @@ import axios from "axios";
 import { store } from "../app/store"; // Your Redux store
 import { refreshTokenThunk, logout } from "../features/authSlice";
 import i18n from "../i18n"; // Your i18n instance
-
+ const apiUrl = import.meta.env.VITE_API_URL;
 const axiosInstance = axios.create({
+ 
   // baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000",
-  baseURL:"https://localhost:50586",
+  // baseURL:"https://localhost:50586",
+  baseURL:apiUrl,
+  headers:{'accept-language':i18n.language},
   withCredentials: true,
   // timeout: 10000,
 });

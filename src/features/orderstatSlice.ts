@@ -2,10 +2,36 @@ import { createSlice, createAsyncThunk,type PayloadAction } from "@reduxjs/toolk
 import api from "../api/axios";
 
 
+export interface ChartData {
+  id: number;
+  userId: number;
+  createdAt: string;  // ← You only use this
+  totalAmount: number;
+  status: string | null;
+  orderReference: string| null;
+  stripeSessionId: string|null;
+  stripePaymentIntentId: string | null;
+  paidAt: string;
+  orderItems: OrderItemsChart[];  // ← And this
+ 
+}
+
+interface OrderItemsChart {
+  name:string;
+  quantity:number;
+  price:number;
+   itemId: number,
+  productId: string,
+  orderId: number
+}
+
 interface OrderItems {
-  productName:string;
-  productQuantity:number;
-  productPrice:number;
+  name:string;
+  quantity:number;
+  price:number;
+   itemId: number,
+  productId: string,
+  orderId: number
 }
 interface OrderTotal {
   orderId:number;
@@ -16,7 +42,8 @@ interface OrderTotal {
 }
 
 interface OrderTotalState{
-  items:OrderTotal[]
+  items:OrderTotal[];
+  chartData:ChartData[];
   page: number;
   pageSize: number;
   totalCount: number;
@@ -37,6 +64,7 @@ interface ResponseOrderTotalState{
 const initialState:OrderTotalState={
 
    items: [] ,
+   chartData: [],
    page:1,
    pageSize:5,
    totalCount:0,
@@ -68,6 +96,18 @@ export const fetchOrderStats= createAsyncThunk<ResponseOrderTotalState,FetchOrde
     return res.data as ResponseOrderTotalState;
   }
 );
+export const fetchAllOrders= createAsyncThunk<ChartData[],void>(
+  "orders/orderStatsChart",
+  async ( ) => {
+   
+
+
+
+     const res = await api.get("/api/Order/GetAllOrders");
+    console.log("fetchOrderStats -> response", res.data);
+    return res.data as ChartData[];
+  }
+);
 
 const orderstatSlice = createSlice({
   name: "orders",
@@ -94,11 +134,20 @@ const orderstatSlice = createSlice({
         state.totalCount=action.payload.totalItems;
 
       }
-    ).addCase(fetchOrderStats.rejected,(state,action)=>{
-        state.error=action.error.message||"some went wrong";
-        state.loading=false;
-    }
-
+).addCase(fetchOrderStats.rejected,(state,action)=>{
+    state.error=action.error.message||"some went wrong";
+    state.loading=false;
+}
+).addCase(fetchAllOrders.fulfilled,(state,action)=>{
+    state.error=null;
+    state.loading=false;
+    //state.chartData.push(...action.payload);//or state.chartData=action.payload
+    state.chartData=action.payload;
+}
+).addCase(fetchAllOrders.rejected,(state,action)=>{
+    state.error=action.error.message||"some went wrong";
+    state.loading=false;
+}
 )
     
     }

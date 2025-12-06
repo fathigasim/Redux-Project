@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk,type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import api from "../api/axios";
 import { isTokenExpired } from "../utils/jwtUtils";
