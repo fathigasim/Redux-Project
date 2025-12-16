@@ -19,6 +19,7 @@ import OrderDates from './components/Reports/OrderDates';
 import OrderAnalytics from './components/OrderAnalytics';
 import ForgotPassword from './components/ForgotPassword';
  import ResetPassword from './components/ResetPassword';
+ import NotFound from './components/NotFound';
 import {BrowserRouter ,Route,Routes } from "react-router-dom";
 import { setupAxiosInterceptors } from './api/axios';
 
@@ -36,6 +37,7 @@ import Basket from './components/Basket';
 
 import RechartAnalysis from './components/Reports/RechartAnalysis';
 import PdfReport from './components/Reports/PdfReport';
+import ProductTest from './components/ProductTest';
 
 
 function App() {
@@ -92,6 +94,7 @@ const dispatch = useAppDispatch();
       <Route path="/testWeather" element={<WeatherTest />} />
       <Route path='/product' element={<RequireAuth allowedRoles={['Admin']}>< Product /></RequireAuth>}/>
       <Route path='/products' element={<Products />}/>
+      <Route path='/productTest' element={<ProductTest />}/>
       <Route path='/forgot' element={<ForgotPassword/>}/>
       <Route path='/reset' element={<ResetPassword/>}/>
       
@@ -108,7 +111,7 @@ const dispatch = useAppDispatch();
       <Route path='basket' element={<Basket/>}/>
       <Route path='/unauthorized' element={<Unauthorized/>}/>
       <Route path='/error' element={<Error/>}/>
-      <Route path='*' element={<Unauthorized/>}/>
+      <Route path='*' element={<NotFound/>}/>
       
     </Routes>
     

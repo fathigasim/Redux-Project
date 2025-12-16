@@ -12,7 +12,15 @@ export interface Product {
   price: number;
   imageUrl:string
 }
-
+export interface ProductProc {
+  id: string;
+  name: string;
+  price: number;
+  stock:number;
+  updatedAt:Date
+     
+     
+}
 interface ProductResponse {
   items: Product[];
   totalItems: number;
@@ -20,13 +28,30 @@ interface ProductResponse {
   pageSize: number;
 }
 
+interface ProductProcResponse {
+  productProcDto: ProductProc[];
+  totalRecords: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
 interface ProductState {
   products: Product[];
+  //
+  productProcDto: ProductProc[];
+  totalRecords: number;
+  pageProcNumber: number;
+  pageProcSize: number;
+   searchTerm:string|null;
+   minPrice: string | null;
+  maxPrice : string |null;
+  //
   loading: boolean;
   error: string |string []| null;
   success: string | null;
   sort: string;
   searchQuery: string | number | null;
+ 
   page: number;
   pageSize: number;
   totalCount: number;
@@ -38,11 +63,19 @@ interface ProductState {
 // ---------------------------
 const initialState: ProductState = {
   products: [],
+  productProcDto:[],
+  searchTerm:"",
+  minPrice: null,
+  maxPrice: null,
+  pageProcNumber:1,
+  pageProcSize:3,
+  totalRecords:0,
   loading: false,
   error: null,
   success: null,
   sort: localStorage.getItem("sort") || "",
   searchQuery: localStorage.getItem("searchQuery") || "",
+ 
   page: Number(localStorage.getItem("page")) || 1,
   pageSize: 6,
   totalCount: 0,
@@ -53,6 +86,13 @@ interface FetchProductsParams {
   page?: number;
   sort?: string;
   searchQuery?: string | null;
+}
+interface FetchProductsProcParams {
+  page?: number;
+  minPrice?: number| null;
+  maxPrice?: string| null;
+  searchTerm?: string | null;
+  pageSize?:number;
 }
 
 // ---------------------------
@@ -72,6 +112,25 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
     };
 
     const res = await api.get("/api/Products", { params });
+    return res.data;
+  }
+);
+
+export const fetchProcProducts = createAsyncThunk<ProductProcResponse, FetchProductsProcParams | undefined>(
+  "products/fetchProcProducts",
+  async (overrideParams, { getState }) => {
+    const state: any = getState();
+    const { searchTerm,minPrice,maxPrice ,pageProcNumber, pageProcSize } = state.products;
+
+    const params = {
+      searchTerm: overrideParams?.searchTerm ?? searchTerm ?? "",
+      minPrice: overrideParams?.minPrice ?? minPrice ?? null,
+      maxPrice: overrideParams?.maxPrice ?? maxPrice ?? null,
+      page: overrideParams?.page ?? pageProcNumber ?? 1,
+      pageProcSize,
+    };
+
+    const res = await api.get("/api/Test", { params });
     return res.data;
   }
 );
@@ -231,6 +290,18 @@ const productSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Error fetching products";
+      })
+
+       .addCase(fetchProcProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.productProcDto = action.payload.productProcDto;
+        state.totalRecords = action.payload.totalRecords;
+        state.pageProcNumber = action.payload.pageNumber;
+        state.pageProcSize = action.payload.pageSize || state.pageProcSize;
+      })
+      .addCase(fetchProcProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Error fetching products procedure";
       })
 
       .addCase(fetchAdminProducts.pending, (state) => {
