@@ -6,8 +6,9 @@ import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [errors, setErrors] = useState<{ username?: string; password?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ username?: string; password?: string;confirmPassword?: string; email?: string }>({});
   const dispatch = useAppDispatch();
 
   const { loading } = useAppSelector((state) => state.register);
@@ -17,16 +18,17 @@ const Register = () => {
     setErrors({});
 
     try {
-      await dispatch(registerUser({ username, password, email })).unwrap();
+      await dispatch(registerUser({ username, password,confirmPassword, email })).unwrap();
       setUsername("");
       setPassword("");
       setEmail("");
     } catch (err: any) {
-      if (err?.username || err?.email || err?.password) {
+      if (err?.username || err?.email || err?.password||err?.confirmPassword) {
         setErrors({
           username: Array.isArray(err.username) ? err.username[0] : undefined,
           email: Array.isArray(err.email) ? err.email[0] : undefined,
           password: Array.isArray(err.password) ? err.password[0] : undefined,
+            confirmPassword: Array.isArray(err.confirmPassword) ? err.confirmPassword[0] : undefined,
         });
       } else if (err?.message) {
         console.error(err.message);
@@ -86,6 +88,19 @@ const Register = () => {
                     required
                   />
                   {errors.password && <div className="text-danger">{errors.password}</div>}
+                </Form.Group>
+
+                 <Form.Group controlId="formconfirmPassword" className="mb-4">
+                  <Form.Label className="fw-semibold">Confirm Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="rounded-3 py-2"
+                    required
+                  />
+                  {errors.confirmPassword && <div className="text-danger">{errors.password}</div>}
                 </Form.Group>
 
                 <Button

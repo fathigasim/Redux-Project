@@ -22,8 +22,8 @@ import i18next from "i18next";
 import "./Products.css";
 import "./imagestyle.css"
 import Paginationbootstrap from "./Paginationbootstrap";
-import { addToBasket,GetBasket,type basketInput } from "../features/basketSlice";
-import Basket from "./Basket";
+// import { addToBasket,GetBasket,type basketInput } from "../features/basketSlice";
+// import Basket from "./Basket";
 
 
 
@@ -41,9 +41,9 @@ const Products= () => {
 
   const {error, success, totalCount, sort, searchQuery, page, pageSize,products } =
     useSelector((state: RootState) => state.products);
-    const { items} = useSelector((state: RootState) => state.basket);
+    //const { items} = useSelector((state: RootState) => state.basket);
   //const products = useSelector(selectFilteredProducts);
-  const {loading:basketLoading,error:basketError}=useSelector((state: RootState) => state.basket);
+  // const {loading:basketLoading,error:basketError}=useSelector((state: RootState) => state.basket);
  
   const [localSearch, setLocalSearch] = useState(searchQuery ?? "");
   const [debouncedSearch] = useDebounce(localSearch, 500);
@@ -58,7 +58,7 @@ useEffect(() => {
   // dispatch(filterBySearch(search));
   // dispatch(sortByPrice(sortParam));
   // dispatch(setPage(pageParam));
-   dispatch(GetBasket());
+  //  dispatch(GetBasket());
   dispatch(fetchProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
 }, [dispatch, searchParams]);
 
@@ -97,29 +97,29 @@ useEffect(() => {
 
 
 
- const  handleAddToCart = async (basket: basketInput) => { 
-    try{
-   await dispatch(addToBasket({prodId:basket.prodId,inputQnt:1})).unwrap();
-    toast.success("Product added to cart");
-    }
-    catch(err :any){
-      console.log(`some error ${err}`)
-      if(err.response.status===400)
-      alert(err.response.data)
-      toast.error(err.response.data)
-    }
-  };
+//  const  handleAddToCart = async (basket: basketInput) => { 
+//     try{
+//    await dispatch(addToBasket({prodId:basket.prodId,inputQnt:1})).unwrap();
+//     toast.success("Product added to cart");
+//     }
+//     catch(err :any){
+//       console.log(`some error ${err}`)
+//       if(err.response.status===400)
+//       alert(err.response.data)
+//       toast.error(err.response.data)
+//     }
+//   };
 
   const totalPages = Math.ceil(totalCount / pageSize);
   return (
     <>
-    {items.length>0 &&
+    {/* {items.length>0 &&
     <Container fluid="md" style={{marginTop:20,fontFamily:'intel-one-mono-roboto'}}>
       <h4>{t("cartItems")}: {items.length}</h4>
       <Basket />
     </Container>
     }
-    <div></div>
+    <div></div> */}
     <Container  fluid="md" style={{marginTop:30,fontFamily:'intel-one-mono-roboto'}}>
  <Form>
       <Row className="align-items-center">

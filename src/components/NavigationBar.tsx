@@ -3,7 +3,7 @@ import { Navbar, Nav, Form, Button, Container, Dropdown,Badge,NavDropdown } from
 import LangSelector from "../languagehelper/langselector";
 import { useBootstrapDirection } from "../languagehelper/useBootstrapDirection";
 
-import { logout } from '../features/authSlice';
+import { logout,logoutUser } from '../features/authSlice';
 import { useNavigate,Link } from 'react-router-dom';
 import { useSelector,useDispatch } from "react-redux";
 import { type RootState, type AppDispatch } from "../app/store";
@@ -35,16 +35,20 @@ const NavigationBar = () => {
     const navigate = useNavigate();
     useBootstrapDirection();
     
-      const {user,token} = useSelector((state: RootState) => state.auth);
-      const roles = token ? getUserRoles(token) : [];
+      const {user,accessToken} = useSelector((state: RootState) => state.auth);
+      const roles = accessToken ? getUserRoles(accessToken) : [];
       const adminRole=roles.includes("Admin");
       
   
       console.log("Current user in NavBar:", user);
-      const handleLogout = () => {
-        dispatch(logout());
-        navigate("/logins");
-      };
+     const handleLogout = async () => {
+    // Dispatch the thunk. 
+    // Since we handle state cleanup in extraReducers, this single line does everything.
+    await dispatch(logoutUser()); 
+    
+    // Redirect after cleanup is done
+    navigate("/login");
+};
     useEffect(() => {
       const s = String(debouncedSearch);
       const currentSearch = searchParams.get("search") || "";
@@ -99,7 +103,7 @@ const NavigationBar = () => {
       </div>
 
       {/* User Info */}
-      {token && (
+      {accessToken && (
         <div className="d-none d-lg-flex align-items-center">
           <span style={{ color: "blue" }} className="text-nowrap">
             {user} <BsPersonCircle />
@@ -109,7 +113,7 @@ const NavigationBar = () => {
 
       {/* Login Button (Only When Not Logged In) */}
       {!user&& 
-        <Link to="/logins" className="btn btn-outline-info btn-sm">
+        <Link to="/login" className="btn btn-outline-info btn-sm">
           Login
         </Link>
       }

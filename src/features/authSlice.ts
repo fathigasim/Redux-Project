@@ -1,205 +1,211 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
 import api from "../api/axios";
-import { isTokenExpired } from "../utils/jwtUtils";
 
-
+// 1. STATE INTERFACE
+// Correct: RefreshToken is removed (it lives in the cookie now)
 interface AuthState {
-  user: any | null;
-  token: string | null;
-  refreshToken: string | null;
+  user: string | null; // Changed 'any' to 'string' to match backend "ActiveUser" (UserName)
+  accessToken: string | null;
+  expiresAt: string | null;
   loading: boolean;
   error: string | null;
-   formErrors: { email?: string; password?: string; };
+  formErrors: { email?: string; password?: string; };
 }
 
 const initialState: AuthState = {
   user: null,
-  token: null,
-  refreshToken: null,
+  accessToken: null,
+  expiresAt: null,
   loading: false,
   error: null,
-  formErrors:{}
+  formErrors: {}
 };
-
-// Load from storage
 export const loadStoredAuth = createAsyncThunk(
   "auth/loadStoredAuth",
   async () => {
-    const stored = localStorage.getItem("auth");
-    if (!stored) return { token: null, refreshToken: null, activeUser: null };
+    try {
+      const stored = localStorage.getItem("auth");
+      if (!stored) return { accessToken: null, expiresAt: null, activeUser: null };
 
-    const parsed = JSON.parse(stored);
+      const parsed = JSON.parse(stored);
 
-    if (!parsed.token) {
-      localStorage.removeItem("auth");
-      return { token: null, refreshToken: null, activeUser: null };
-    }
-
-    // Token expired? Attempt refresh on app start
-    if (isTokenExpired(parsed.token)) {
-      if (!parsed.refreshToken) {
-        localStorage.removeItem("auth");
-        return { token: null, refreshToken: null, activeUser: null };
+      // SAFETY CHECK: Ensure accessToken is a clean string
+      if (parsed.accessToken) {
+        // Remove any accidental double quotes if backend sent JSON stringified string
+        parsed.accessToken = parsed.accessToken.replace(/^"|"$/g, '');
       }
 
-      return {
-        ...parsed,
-        needsRefresh: true,
-      };
+      return parsed;
+    } catch (e) {
+      // If JSON parse fails, clear storage
+      localStorage.removeItem("auth");
+      return { accessToken: null, expiresAt: null, activeUser: null };
     }
-
-    return parsed;
   }
 );
 
-// Login
 export const login = createAsyncThunk<
-  { token: string; refreshToken: string; activeUser: any },
-  { email: string; password: string },
-  { rejectValue: Record<string, string[] | string> }
+{ accessToken: string | null; activeUser?: string | null; expiresAt?: string | null }, // return
+ { email: string; password: string }, // arg (credentials)
+  { rejectValue: any } // thunkApi config
 >(
   "auth/login",
-  async (
-    credentials: { email: string; password: string },
-    { rejectWithValue }
-  ) => {
+  async (credentials, { rejectWithValue }) => {
     try {
       const res = await api.post("/api/auth/login", credentials);
+      const data = res.data.data; 
+
+      // SAFETY: Ensure we store clean strings
+      const accessToken = data.accessToken ? data.accessToken.replace(/^"|"$/g, '') : null;
+
       const payload = {
-        token: res.data.token,
-        refreshToken: res.data.refreshToken,
-        activeUser: res.data.activeUser,
+        accessToken: accessToken,
+        activeUser: data.activeUser,
+        expiresAt: data.expiresAt,
       };
 
       localStorage.setItem("auth", JSON.stringify(payload));
       return payload;
     } catch (err: any) {
-     console.log("Auth Slice Error:", err);
-      
-      // Access response from error object
+      // Error handling matches your backend validation responses
       const res = err.response;
-      
-      if (!res) {
-        // Network error or no response
-        return rejectWithValue({ general: "Network error" });
-      }
-
-      console.log("Error status:", res.status);
-      console.log("Error data:", res.data);
-
-      // --- Case 1: 400 Bad Request (user/pass error) ---
-      if (res.status === 400 && res.data?.error) {
-        console.log(`User or pass error: ${res.data.error}`);
-        return rejectWithValue({ passError: res.data.error });
-      }
-
-      // --- Case 2: ModelState validation errors ---
-      if (res.data?.errors) {
-        // { errors: { email: ["..."], password: ["..."] } }
-        console.log("Model validation errors:", res.data.errors);
-        return rejectWithValue(res.data.errors);
-      }
-
-      // --- Case 3: Backend localized message ---
-      if (res.data?.error) {
-        return rejectWithValue({ general: res.data.error });
-      }
-
-      // --- Fallback ---
+      if (!res) return rejectWithValue({ general: "Network error" });
+      if (res.status === 400 && res.data?.error) return rejectWithValue({ passError: res.data.error });
+      if (res.data?.errors) return rejectWithValue(res.data.errors);
+      if (res.data?.error) return rejectWithValue({ general: res.data.error });
       return rejectWithValue({ general: "Unexpected error" });
     }
   }
 );
 
-// Refresh token
-export const refreshTokenThunk = createAsyncThunk(
-  "auth/refreshToken",
-  async (refreshToken: string, { getState, rejectWithValue }) => {
+// 4. LOGOUT THUNK (CORRECTED)
+// Your Backend Controller: [HttpPost("revoke-token")] with [Authorize]
+// It gets the user from the Access Token header, NOT the body.
+// features/authSlice.ts
+
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_) => {
     try {
-      const state: any = getState();
-      let accessToken = state.auth.token;
+      // Just call the API to clear the HttpOnly cookie
+      await api.post(`/api/auth/revoke-token`);
+    } catch (err) {
+      console.error("Logout failed on server, but clearing frontend anyway");
+    }
+    // We return nothing. The extraReducers will listen for the end of this function.
+  }
+);
 
-      if (!accessToken) {
-        const stored = localStorage.getItem("auth");
-        if (stored) accessToken = JSON.parse(stored).token;
-      }
-
-      const response = await api.post("/api/auth/token/refresh", {
-        accessToken,
-        refreshToken,
-      });
+// 5. REFRESH TOKEN THUNK
+// Matches Backend: [HttpPost("refresh-token")]
+export const refreshTokenThunk = createAsyncThunk<
+  { accessToken: string; expiresAt: string; activeUser?: string }, 
+  { accessToken: string }, 
+  { rejectValue: any }
+>(
+  "auth/refreshToken",
+  async (payload, { rejectWithValue }) => {
+    try {
+      // Body: { accessToken: "expired_token..." } -> Matches RefreshTokenDto
+      // Cookie: sent automatically via withCredentials: true
+      const response = await api.post(
+        `/api/auth/refresh-token`, 
+        { accessToken: payload.accessToken }, 
+        { withCredentials: true }
+      );
+      
+      const data = response.data.data; 
 
       const newAuth = {
-        token: response.data.token,
-        refreshToken: response.data.refreshToken,
-        activeUser: response.data.activeUser,
+        accessToken: data.accessToken,
+        expiresAt: data.expiresAt,
+        activeUser: data.activeUser, 
       };
 
-      // SAVE NEW TOKENS IN LOCAL STORAGE
-      localStorage.setItem("auth", JSON.stringify(newAuth));
+      // Merge with existing state in LocalStorage
+      const stored = localStorage.getItem("auth");
+      const previousState = stored ? JSON.parse(stored) : {};
+      
+      const mergedState = {
+          ...previousState,
+          ...newAuth,
+          // Keep old username if backend didn't return it in refresh
+          activeUser: newAuth.activeUser || previousState.activeUser 
+      };
 
-      return newAuth;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data || "Refresh failed");
+      localStorage.setItem("auth", JSON.stringify(mergedState));
+
+      return mergedState;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data);
     }
   }
 );
 
-// Slice
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
     logout: (state) => {
-      state.token = null;
-      state.refreshToken = null;
+      state.accessToken = null;
+      state.expiresAt = null;
       state.user = null;
       localStorage.removeItem("auth");
     },
   },
   extraReducers: (builder) => {
     builder
-      // Load stored auth
+      // Load Stored Auth
       .addCase(loadStoredAuth.fulfilled, (state, action) => {
-        state.token = action.payload.token || null;
-        state.refreshToken = action.payload.refreshToken || null;
-        state.user = action.payload.activeUser || action.payload.user || null;
-
-        // If needsRefresh, let App.tsx trigger refresh
+        state.accessToken = action.payload.accessToken;
+        state.user = action.payload.activeUser;
+        state.expiresAt = action.payload.expiresAt;
         state.loading = false;
       })
 
       // Login
-      .addCase(login.fulfilled, (state, action) => {
-        state.token = action.payload.token;
-        state.refreshToken = action.payload.refreshToken;
-        state.user = action.payload.activeUser;
-        state.loading = false;
-        state.error = null;
-      })
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+      .addCase(login.fulfilled, (state, action) => {
+        state.accessToken = action.payload.accessToken;
+        state.user = action.payload.activeUser;
+        state.expiresAt = action.payload.expiresAt;
+        state.loading = false;
+        state.error = null;
+      })
       .addCase(login.rejected, (state) => {
         state.loading = false;
-       
       })
 
-      // Refresh
+      // Refresh Token
       .addCase(refreshTokenThunk.fulfilled, (state, action) => {
-        state.token = action.payload.token;
-        state.refreshToken = action.payload.refreshToken;
-        state.user = action.payload.activeUser;
-        //const parsedUser=localStorage.getItem("auth");
-        // if(parsedUser){
-        //   const userObj=JSON.parse(parsedUser);
-        //   state.user=userObj.activeUser;}
-        //   else{
-        //     state.user=null;
-        //   }
-        
+        state.accessToken = action.payload.accessToken;
+        state.expiresAt = action.payload.expiresAt;
+        if(action.payload.activeUser) {
+            state.user = action.payload.activeUser;
+        }
+      })
+      .addCase(refreshTokenThunk.rejected, (state) => {
+          // If refresh fails (cookie expired), force logout
+          state.accessToken = null;
+          state.user = null;
+          localStorage.removeItem("auth");
+      })
+      // 👇 HANDLE LOGOUT HERE 👇
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.accessToken = null;
+        state.expiresAt = null;
+        state.user = null;
+        localStorage.removeItem("auth");
+      })
+      // Even if server fails (e.g. 500 error), force logout on frontend
+      .addCase(logoutUser.rejected, (state) => {
+        state.accessToken = null;
+        state.expiresAt = null;
+        state.user = null;
+        localStorage.removeItem("auth");
       });
   },
 });

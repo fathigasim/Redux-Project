@@ -23,7 +23,7 @@ export interface ProductProc {
 }
 interface ProductResponse {
   items: Product[];
-  totalItems: number;
+  totalCount: number;
   pageNumber: number;
   pageSize: number;
 }
@@ -111,7 +111,7 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
       pageSize,
     };
 
-    const res = await api.get("/api/Products", { params });
+    const res = await api.get("/api/Products", { params});
     return res.data;
   }
 );

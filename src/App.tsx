@@ -1,129 +1,177 @@
-
-
- import WeatherTest from './components/WeatherTest';
-
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAppDispatch } from './app/hooks';
 import { loadStoredAuth } from './features/authSlice';
-/*import Login from './components/Login';*/
+
+// Auth Components
+import RequireAuth from './auth/RequireAuth';
 import Logins from './components/logins';
+import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import Unauthorized from './components/Unauthorized';
+
+// Public Components
+import Products from './components/Products';
+import ProductTest from './components/ProductTest';
+import WeatherTest from './components/WeatherTest';
+import Basket from './components/Basket';
+import NavigationBar from './components/NavigationBar';
+import NotFound from './components/NotFound';
+import Error from './components/Error';
+import Home from './components/Home';
+
+// Protected Components (Generic User)
+import Order from './components/Order';
+import Success from './components/Success';
+import Cancel from './components/Cancel';
+import PdfReport from './components/Reports/PdfReport';
+
+// Admin Components
 import Users from './components/Users';
 import Product from './components/Product';
-import Products from './components/Products';
-
- import Cancel from './components/Cancel';
- import Success from './components/Success'
-
-import Order from './components/Order';
-import OrderDates from './components/Reports/OrderDates';
 import OrderAnalytics from './components/OrderAnalytics';
-import ForgotPassword from './components/ForgotPassword';
- import ResetPassword from './components/ResetPassword';
- import NotFound from './components/NotFound';
-import {BrowserRouter ,Route,Routes } from "react-router-dom";
-import { setupAxiosInterceptors } from './api/axios';
-
-
-
-import NavigationBar from './components/NavigationBar';
-import Register from './components/Register';
-import RequireAuth from './auth/RequireAuth';
+import OrderDates from './components/Reports/OrderDates';
 import OrderTotals from './components/Reports/OrderTotals';
-
-import Unauthorized from './components/Unauthorized';
-import Error from './components/Error';
-import Basket from './components/Basket';
-
-
 import RechartAnalysis from './components/Reports/RechartAnalysis';
-import PdfReport from './components/Reports/PdfReport';
-import ProductTest from './components/ProductTest';
-
+import ConfirmEmail from './components/ConfirmEmail';
 
 function App() {
-const dispatch = useAppDispatch();
- const [isInitialized, setIsInitialized] = useState(false);
+  const dispatch = useAppDispatch();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // STEP 1: Load stored auth first
-       await dispatch(loadStoredAuth()).unwrap();
-       // STEP 2: Setup axios after auth is in Redux
-        setupAxiosInterceptors(); // <-- setup interceptors AFTER auth is loaded
-
-        
-        console.log('✅ App initialized: Interceptors setup & auth loaded');
-      } catch (error:any) {
-        console.log('⚠️ No stored auth found or error loading auth');
+        // We only load auth here. 
+        // Interceptors are already set up in main.tsx
+        await dispatch(loadStoredAuth()); 
+        console.log('✅ Auth state loaded from storage');
+      } catch (error) {
+        console.warn('⚠️ Failed to load auth state', error);
       } finally {
-        // Always set initialized to true, even if no auth found
         setIsInitialized(true);
       }
     };
 
     initializeApp();
-   
-     // dispatch(GetBasket()); // Load cart once on login
-   
-  }, [dispatch]); // Run only once on mount
+  }, [dispatch]);
 
-  // Show loading screen while initializing
+  // Loading Screen
   if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Initializing...</p>
+          <p className="mt-4 text-gray-600">Initializing Application...</p>
         </div>
       </div>
     );
   }
 
   return (
-<>
-{/* <Users /> */}
-    
-      <BrowserRouter>
-        {/* <Header/> */}
-        {/* <NewNav/> */}
-        <NavigationBar />
-     <Routes>
-      <Route path="/users" element={<Users />} />
-      <Route path="/" element={<Products />} />
-      <Route path="/testWeather" element={<WeatherTest />} />
-      <Route path='/product' element={<RequireAuth allowedRoles={['Admin']}>< Product /></RequireAuth>}/>
-      <Route path='/products' element={<Products />}/>
-      <Route path='/productTest' element={<ProductTest />}/>
-      <Route path='/forgot' element={<ForgotPassword/>}/>
-      <Route path='/reset' element={<ResetPassword/>}/>
+    <BrowserRouter>
+      {/* ✅ NavigationBar must be inside BrowserRouter to use <Link> */}
+      <NavigationBar />
       
-      <Route path='/orders' element={<RequireAuth><Order /></RequireAuth>}/>
-      <Route path='/analytics' element={<OrderAnalytics/>}/>
-      <Route path='/charts' element={<RechartAnalysis/>}/>
-      <Route path='/orderByDateRep' element={<OrderDates/>}/>
-      <Route path='/ordertotals' element={<OrderTotals/>}/>
-      <Route path='/printPdf' element={<PdfReport/>}/>
-      <Route path='/success' element={<Success/>}/>
-      <Route path='/cancel' element={<Cancel/>}/>
-      <Route path='/logins' element={<Logins/>}/>
-      <Route path='/register' element={<Register/>}/>
-      <Route path='basket' element={<Basket/>}/>
-      <Route path='/unauthorized' element={<Unauthorized/>}/>
-      <Route path='/error' element={<Error/>}/>
-      <Route path='*' element={<NotFound/>}/>
-      
-    </Routes>
-    
-     </BrowserRouter>
+      <div className="container mx-auto p-4">
+        <Routes>
+          {/* ================= PUBLIC ROUTES ================= */}
+          <Route path="/" element={<Home />} />
+           
+            
+          <Route path="/login" element={<Logins />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot" element={<ForgotPassword />} />
+          <Route path="/reset" element={<ResetPassword />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/error" element={<Error />} />
+          <Route path="/basket" element={<Basket />} />
+          <Route path="/confirm-email" element={<ConfirmEmail />} />
+          
+          {/* Testing Routes (Public?) */}
+          <Route path="/testWeather" element={<WeatherTest />} />
+          <Route path="/productTest" element={<ProductTest />} />
 
-</>
-  )
-  
-    
-    {/* {user ? <><Profile /><Dashboard /><Weather /> <WeatherTest/></> : <Login />} */}
-    
-    
+
+          {/* ================= PROTECTED ROUTES (Logged In Users) ================= */}
+          <Route element={<RequireAuth> <div /> </RequireAuth>}> 
+             {/* Note: You can wrap multiple routes like this or individually */}
+          </Route>
+
+          <Route path="/orders" element={
+            <RequireAuth>
+              <Order />
+            </RequireAuth>
+          } />
+          
+          <Route path="/success" element={
+            <RequireAuth>
+              <Success />
+            </RequireAuth>
+          } />
+
+          <Route path="/cancel" element={
+            <RequireAuth>
+              <Cancel />
+            </RequireAuth>
+          } />
+
+           <Route path="/printPdf" element={
+             <RequireAuth>
+               <PdfReport />
+             </RequireAuth>
+           } />
+              {/* ================= USER  ROUTES ================= */}
+             <Route path="/products" element={<RequireAuth allowedRoles={['Admin','User']}> 
+              <Products />
+              </RequireAuth>} />
+
+          {/* ================= ADMIN ROUTES ================= */}
+          {/* Ensure these require specific roles */}
+          <Route path="/users" element={
+            <RequireAuth allowedRoles={['Admin']}>
+              <Users />
+            </RequireAuth>
+          } />
+
+          <Route path="/product" element={
+            <RequireAuth allowedRoles={['Admin']}>
+              <Product />
+            </RequireAuth>
+          } />
+
+          <Route path="/analytics" element={
+            <RequireAuth allowedRoles={['Admin']}>
+              <OrderAnalytics />
+            </RequireAuth>
+          } />
+
+          <Route path="/charts" element={
+            <RequireAuth allowedRoles={['Admin']}>
+              <RechartAnalysis />
+            </RequireAuth>
+          } />
+
+          <Route path="/orderByDateRep" element={
+            <RequireAuth allowedRoles={['Admin']}>
+              <OrderDates />
+            </RequireAuth>
+          } />
+
+          <Route path="/ordertotals" element={
+            <RequireAuth allowedRoles={['Admin']}>
+              <OrderTotals />
+            </RequireAuth>
+          } />
+
+          {/* ================= 404 ================= */}
+          <Route path="*" element={<NotFound />} />
+          
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
 }
 
 export default App;

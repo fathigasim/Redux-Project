@@ -5,6 +5,7 @@ interface Register {
   username: string;
   email: string;
   password: string;
+  confirmPassword:string;
 }
 
 interface RegisterState {
@@ -16,7 +17,7 @@ interface RegisterState {
 }
 
 const initialState: RegisterState = {
-  register: { username: "", password: "", email: "" },
+  register: { username: "", password: "",confirmPassword:"", email: "" },
   loading: false,
   success: null,
   error: null,
@@ -25,7 +26,7 @@ const initialState: RegisterState = {
 
 export const registerUser = createAsyncThunk<
   { register: Register; message: string }, // response type
-  { username: string; email: string; password: string }, // input type
+  { username: string; email: string; password: string;confirmPassword:string }, // input type
   { rejectValue: Record<string, string[] | string> } // error payload type
 >("register/register", async (userentry, { rejectWithValue }) => {
   try {
