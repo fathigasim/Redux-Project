@@ -1,30 +1,71 @@
+// pages/LoginForm.tsx
 import React, { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { login } from "../features/authSlice";
+import { login, clearError } from "../features/authSlice";
 import { toast } from "react-toastify";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Form, Button, Container, Row, Col, Card, Alert } from "react-bootstrap";
 import i18next from "i18next";
+
+interface LocationState {
+  from?: string;
+  message?: string;
+}
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/";
-  
+  const location = useLocation();
+  const dispatch = useAppDispatch();
+
+  // ✅ Get return URL from location state (set by RequireAuth)
+  const state = location.state as LocationState;
+  const returnUrl = state?.from || "/"; // Default to dashboard
+  const redirectMessage = state?.message;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [formErrors, setFormErrors] = useState<{ email?: string; password?: string; }>({});
-  
-  const dispatch = useAppDispatch();
-  // FIXED: Destructure accessToken correctly (was token)
+  const [formErrors, setFormErrors] = useState<{ 
+    email?: string; 
+    password?: string; 
+  }>({});
+
   const { loading, accessToken } = useAppSelector((state) => state.auth);
 
-  // Optional: Redirect if already logged in
+  // ✅ Clear errors when component unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
+
+  // ✅ Redirect if already logged in
   useEffect(() => {
     if (accessToken) {
-      navigate(redirect, { replace: true });
+      console.log(`✅ Already logged in - Redirecting to: ${returnUrl}`);
+      navigate(returnUrl, { replace: true });
     }
-  }, [accessToken, navigate, redirect]);
+  }, [accessToken, navigate, returnUrl]);
+// useEffect(() => {
+//   // Save return URL to sessionStorage
+//   if (returnUrl && returnUrl !== "/dashboard") {
+//     sessionStorage.setItem("returnUrl", returnUrl);
+//   }
+// }, [returnUrl]);
+
+// // In handleSubmit after successful login:
+// const savedReturnUrl = sessionStorage.getItem("returnUrl");
+// const finalRedirect = savedReturnUrl || returnUrl || "/";
+// sessionStorage.removeItem("returnUrl");
+// navigate(finalRedirect, { replace: true });
+//   // ✅ Show redirect message as toast
+//   useEffect(() => {
+//     if (redirectMessage) {
+//       toast.info(redirectMessage, {
+//         position: "top-center",
+//         autoClose: 4000
+//       });
+//     }
+//   }, [redirectMessage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,19 +73,31 @@ export default function LoginForm() {
 
     try {
       await dispatch(login({ email, password })).unwrap();
-      console.log("Login successful");
       
-      const safeRedirect = redirect && redirect.startsWith("/") ? redirect : "/products";
+      console.log(`✅ Login successful - Redirecting to: ${returnUrl}`);
+      
+      // ✅ Validate return URL (prevent open redirect vulnerability)
+      const safeRedirect = returnUrl && returnUrl.startsWith("/") 
+        ? returnUrl 
+        : "/dashboard";
+      
+      toast.success(
+        i18next.language === "ar" 
+          ? "تم تسجيل الدخول بنجاح" 
+          : "Login successful"
+      );
+      
+      // ✅ Navigate to return URL
       navigate(safeRedirect, { replace: true });
       
     } catch (err: any) {
-      console.log("Login failed:", err);
+      console.error("❌ Login failed:", err);
 
-      // Case 1: Field-level validation errors (email, password)
-      if (err?.email || err?.password) {
+      // Case 1: Field-level validation errors from backend
+      if (err?.Email || err?.Password) {
         setFormErrors({
-          email: Array.isArray(err.email) ? err.email[0] : err.email,
-          password: Array.isArray(err.password) ? err.password[0] : err.password,
+          email: Array.isArray(err.Email) ? err.Email[0] : err.Email,
+          password: Array.isArray(err.Password) ? err.Password[0] : err.Password,
         });
       }
       // Case 2: Bad credentials error
@@ -53,11 +106,30 @@ export default function LoginForm() {
       }
       // Case 3: General error message
       else if (err?.general) {
-        toast.error(typeof err.general === 'string' ? err.general : err.general[0]);
+        toast.error(
+          typeof err.general === 'string' 
+            ? err.general 
+            : err.general[0]
+        );
       }
-      // Case 4: Fallback
+      // Case 4: Session invalidated (logged in elsewhere)
+      else if (
+        err?.message?.toLowerCase().includes('invalidated') ||
+        err?.message?.toLowerCase().includes('logged in elsewhere')
+      ) {
+        toast.error(
+          i18next.language === "ar"
+            ? "تم تسجيل الدخول من جهاز آخر"
+            : "Your session was invalidated. Please log in again."
+        );
+      }
+      // Case 5: Fallback
       else {
-        toast.error(i18next.language === "ar" ? "خطأ غير متوقع" : "Unexpected error");
+        toast.error(
+          i18next.language === "ar" 
+            ? "خطأ غير متوقع" 
+            : "Unexpected error"
+        );
       }
     }
   };
@@ -72,24 +144,45 @@ export default function LoginForm() {
         <Col xs={11} sm={8} md={6} lg={4}>
           <Card className="shadow-lg border-0 rounded-4">
             <Card.Body className="p-4">
-              <h3 className="text-center mb-4 fw-semibold">Welcome User</h3>
+              <h3 className="text-center mb-4 fw-semibold">
+                {i18next.language === "ar" ? "مرحباً بك" : "Welcome Back"}
+              </h3>
+
+              {/* ✅ Show info about where they'll be redirected */}
+              {returnUrl && returnUrl !== "/dashboard" && (
+                <Alert variant="info" className="mb-3">
+                  <small>
+                    {i18next.language === "ar" 
+                      ? `سيتم توجيهك إلى: ${returnUrl}` 
+                      : `You'll be redirected to: ${returnUrl}`}
+                  </small>
+                </Alert>
+              )}
 
               <Form onSubmit={handleSubmit}>
                 
                 {/* EMAIL INPUT */}
                 <Form.Group controlId="formEmail" className="mb-3">
-                  <Form.Label className="fw-semibold">Email address</Form.Label>
+                  <Form.Label className="fw-semibold">
+                    {i18next.language === "ar" ? "البريد الإلكتروني" : "Email address"}
+                  </Form.Label>
                   <Form.Control
-                    type="email" // Changed to 'email' for better validation
-                    placeholder="name@example.com"
+                    type="email"
+                    placeholder={
+                      i18next.language === "ar" 
+                        ? "name@example.com" 
+                        : "name@example.com"
+                    }
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      // Clear error when user types
-                      if(formErrors.email) setFormErrors(prev => ({...prev, email: undefined}));
+                      if (formErrors.email) {
+                        setFormErrors(prev => ({ ...prev, email: undefined }));
+                      }
                     }}
                     className="rounded-3 py-2"
-                    isInvalid={!!formErrors.email} // Bootstrap Validation Styling
+                    isInvalid={!!formErrors.email}
+                    disabled={loading}
                   />
                   <Form.Control.Feedback type="invalid">
                     {formErrors.email}
@@ -98,17 +191,22 @@ export default function LoginForm() {
 
                 {/* PASSWORD INPUT */}
                 <Form.Group controlId="formPassword" className="mb-4">
-                  <Form.Label className="fw-semibold">Password</Form.Label>
+                  <Form.Label className="fw-semibold">
+                    {i18next.language === "ar" ? "كلمة المرور" : "Password"}
+                  </Form.Label>
                   <Form.Control
                     type="password"
-                    placeholder="Password"
+                    placeholder={i18next.language === "ar" ? "كلمة المرور" : "Password"}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      if(formErrors.password) setFormErrors(prev => ({...prev, password: undefined}));
+                      if (formErrors.password) {
+                        setFormErrors(prev => ({ ...prev, password: undefined }));
+                      }
                     }}
                     className="rounded-3 py-2"
-                    isInvalid={!!formErrors.password} // Bootstrap Validation Styling
+                    isInvalid={!!formErrors.password}
+                    disabled={loading}
                   />
                   <Form.Control.Feedback type="invalid">
                     {formErrors.password}
@@ -123,23 +221,29 @@ export default function LoginForm() {
                 >
                   {loading ? (
                     <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Logging in...
+                      <span 
+                        className="spinner-border spinner-border-sm me-2" 
+                        role="status" 
+                        aria-hidden="true"
+                      />
+                      {i18next.language === "ar" ? "جاري تسجيل الدخول..." : "Logging in..."}
                     </>
-                  ) : "Login"}
+                  ) : (
+                    i18next.language === "ar" ? "تسجيل الدخول" : "Login"
+                  )}
                 </Button>
               </Form>
 
               <div className="text-center mt-3 d-flex justify-content-between">
                 <small className="text-muted">
-                  <Link to="/forgot" className="text-decoration-none">
-                    Forgot password?
+                  <Link to="/forgot-password" className="text-decoration-none">
+                    {i18next.language === "ar" ? "نسيت كلمة المرور؟" : "Forgot password?"}
                   </Link>
                 </small>
                 <small className="text-muted">
-                  No account?{" "}
+                  {i18next.language === "ar" ? "لا تملك حساب؟ " : "No account? "}
                   <Link to="/register" className="text-decoration-none fw-bold">
-                    Register
+                    {i18next.language === "ar" ? "سجل الآن" : "Register"}
                   </Link>
                 </small>
               </div>

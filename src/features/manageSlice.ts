@@ -23,11 +23,12 @@ export const forgotPassword = createAsyncThunk<
   "auth/forgotPassword",
   async ( {email} , { rejectWithValue }) => {
     try {
-      const res = await api.post("/api/Auth/forgot",  {email} );
+      const res = await api.post("/api/Auth/forgot-password",  {email} );
       return { message: res.data.message };
     } catch (err: any) {
       console.log(err.response);
       if(err.response?.data){
+        
             // const errorData = err.response?.data?.errors.email;
         return rejectWithValue({mailerror:err.response?.data.errors.email[0]}    );
       }
@@ -44,26 +45,29 @@ export const forgotPassword = createAsyncThunk<
 // =============== 🔹 RESET PASSWORD ===============
 export const resetPassword = createAsyncThunk<
   { message: string },
-  { token: string; newPassword: string },
+  { token: string; userId: string; newPassword: string; confirmPassword?:string },
   { rejectValue: { message: string } }
 >(
   "auth/resetPassword",
-  async ({ token, newPassword }, { rejectWithValue }) => {
+  async ({ token,userId, newPassword,confirmPassword }, { rejectWithValue }) => {
     try {
-      const res = await api.post("/api/Auth/reset", {
+      const res = await api.post("/api/Auth/reset-password", {
         token,
+        userId,
         newPassword,
+        confirmPassword
       });
       return { message: res.data.message };
     } catch (err: any) {
       console.log(err);
      
-            if(err.response?.data?.errors?.newPassword[0]&&err.response?.data?.errors?.newPassword[1]){
+            if(err.response?.data?.errors?.newPassword[0]){
         return rejectWithValue({ message: err.response?.data.errors.newPassword[0] +''+err.response?.data.errors.newPassword[1] });
             }
-            else if(err.response?.data?.errors?.newPassword[0]){
+          
+            else if(err.response?.data?.errors?.confirmPassword[0]){
       
-              return rejectWithValue({ message:err.response?.data.errors.newPassword[0] });
+              return rejectWithValue({ message:err.response?.data.errors.confirmPassword[0] });
             
       }
             else if(err.response?.data?.errors?.newPassword[1]){

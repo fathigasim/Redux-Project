@@ -14,13 +14,25 @@ import 'react-toastify/dist/ReactToastify.css';
 // import 'bootstrap-rtl/dist/css/bootstrap-rtl.min.css';
 
 import "./i18n";
+import i18next from './i18n'
 
 
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode>
     <Provider store={store}>
-  <ToastContainer position="top-right" autoClose={3000} />
+  
+  <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={i18next.language === 'ar'}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <ThemeProvider>
         
         
@@ -28,5 +40,6 @@ createRoot(document.getElementById('root')!).render(
     
     </ThemeProvider>
     </Provider>
-  </StrictMode>,
+  //</StrictMode> 
+  ,
 )

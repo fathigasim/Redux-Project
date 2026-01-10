@@ -49,42 +49,7 @@ const NavigationBar = () => {
     // Redirect after cleanup is done
     navigate("/login");
 };
-    useEffect(() => {
-      const s = String(debouncedSearch);
-      const currentSearch = searchParams.get("search") || "";
-    
-      if (s !== currentSearch) {
-        const params = {
-          ...Object.fromEntries(searchParams),
-          search: s,
-          page: "1",
-        };
-        setSearchParams(params);
-      }
-    }, [debouncedSearch]);
-
-    useEffect(() => {
-
-       try{
-                      dispatch(BasketSummery()).unwrap();
-      
-                  console.log("Basket summery loaded")
-                          
-                }
-      
-                catch(err:any){
-                       alert(err)
-                }
-    },[dispatch,items]);
-
-    useEffect(() => {
-
-       try{
-                      dispatch(GetBasket());  
-       }
-                catch(err:any){
-                       alert(err)
-                }},[dispatch]);
+   
   return (
 <Navbar expand="lg" className="bg-light" style={{fontFamily:'intel-one-mono-roboto'}} >
   {/* === Top Row === */}
@@ -165,7 +130,7 @@ const NavigationBar = () => {
                     fontSize="20px"
                     className="text-danger mt-1"
                     style={{ cursor: "pointer" }}
-                    onClick={() => dispatch(removeFromCart(prod.id))}
+                    onClick={() => dispatch(removeFromCart(prod.id.toString()))}
                   />
                 </div>
               ))}

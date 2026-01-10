@@ -18,6 +18,7 @@ import {
 import { type RootState, type AppDispatch } from "../app/store";
 import { useTranslation } from "react-i18next";
 import { Container } from "react-bootstrap";
+import { GetCategory } from "../features/CategorySlice";
 import i18next from "i18next";
 import "./Products.css";
 import "./imagestyle.css"
@@ -41,17 +42,32 @@ const Products= () => {
 
   const {error, success, totalCount, sort, searchQuery, page, pageSize,products } =
     useSelector((state: RootState) => state.products);
+       const {loading:categoryLoading,error:categoryError,category:categoryDto}=useSelector((state:RootState)=>state.category);
     //const { items} = useSelector((state: RootState) => state.basket);
   //const products = useSelector(selectFilteredProducts);
   // const {loading:basketLoading,error:basketError}=useSelector((state: RootState) => state.basket);
  
   const [localSearch, setLocalSearch] = useState(searchQuery ?? "");
   const [debouncedSearch] = useDebounce(localSearch, 500);
+  const category = searchParams.get("category") || "";
 
   // --- Initial load
-  
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        await dispatch(GetCategory() as any).unwrap();
+      }
+      catch(err:any){
+        console.log(`some error ${err}`)
+        toast.error(err);
+      }
+    };
+    fetchCategories();
+  }, [dispatch]); 
+
 useEffect(() => {
   const search = searchParams.get("search") || "";
+  const selectedCategory = Number(searchParams.get("category")) || 0;
   const sortParam = searchParams.get("sort") || "";
   const pageParam = Number(searchParams.get("page")) || 1;
 
@@ -59,7 +75,7 @@ useEffect(() => {
   // dispatch(sortByPrice(sortParam));
   // dispatch(setPage(pageParam));
   //  dispatch(GetBasket());
-  dispatch(fetchProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
+  dispatch(fetchProducts({ searchQuery: search, category: selectedCategory, sort: sortParam, page: pageParam }));
 }, [dispatch, searchParams]);
 
 
@@ -155,6 +171,23 @@ useEffect(() => {
           <option value="lowToHigh">{i18next.language === "ar" ? "السعر: من الأقل إلى الأعلى" : "Price: Low → High"}</option>
           <option value="highToLow">{i18next.language === "ar" ? "السعر: من الأعلى إلى الأقل" : "Price: High → Low"}</option>
           </Form.Select>
+        </Col>
+        <Col xs="auto">
+            <Form.Select value={category} onChange={(e) => {
+    const categoryValue = e.target.value;
+    const params = {
+        ...Object.fromEntries(searchParams),
+        category: categoryValue,
+        page: "1",
+    };
+    setSearchParams(params);
+  }}
+        className="form-control-sm">
+          <option value="">{i18next.language === "ar" ? "الفئة" : "Category"}</option>
+          {categoryDto && categoryDto.map((cat:any,index:number)=>
+            <option key={index} value={cat.id}>{i18next.language === "ar" ? cat.name : cat.name}</option>
+          ) }
+        </Form.Select>
         </Col>
         {/* <Col xs="auto">
           <Form.Check

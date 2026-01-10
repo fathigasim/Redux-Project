@@ -1,80 +1,82 @@
-import { jwtDecode } from "jwt-decode";
+// utils/jwtUtils.ts
+import { jwtDecode } from 'jwt-decode';
 
-// 1. Define .NET Identity Claim Types
-// These are the long URLs .NET Core puts in your token by default
-const CLAIM_TYPES = {
-  name: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
-  email: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-  id: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-  role: "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
-};
-
-// 2. Define the expected payload interface
-interface CustomJwtPayload {
-  exp?: number;
-  [CLAIM_TYPES.name]?: string;
-  [CLAIM_TYPES.email]?: string;
-  [CLAIM_TYPES.id]?: string;
-  [CLAIM_TYPES.role]?: string | string[];
-  // Allow other string keys
-  [key: string]: any; 
+interface JwtPayload {
+  exp: number;
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string | string[];
+  role?: string | string[];
+  sessionId?: string;
 }
 
-// ------------------------------------------------------------------
-
-export function isTokenExpired(token: string | null): boolean {
-  if (!token) return true;
+/**
+ * Check if JWT token is expired
+ */
+export function isTokenExpired(token: string): boolean {
   try {
-    // Use the library (safer than atob)
-    const decoded = jwtDecode<CustomJwtPayload>(token);
+    const decoded = jwtDecode<JwtPayload>(token);
+    const currentTime = Date.now() / 1000; // Convert to seconds
     
-    if (!decoded.exp) return false; // If no expiry, assume valid? Or invalid? Usually valid.
-    
-    // Check if current time is past expiry (exp is in seconds, Date.now is ms)
-    return Date.now() >= decoded.exp * 1000;
+    // Add 30 second buffer to refresh before actual expiry
+    return decoded.exp < currentTime + 30;
   } catch (error) {
-    return true; // If decode fails, consider it expired
+    console.error('Error decoding token:', error);
+    return true; // Treat invalid tokens as expired
   }
 }
 
-export const decodeUser = (token: string) => {
+/**
+ * Extract user roles from JWT token
+ * Handles both ASP.NET Core Identity claim format and simple 'role' claim
+ */
+export function getUserRoles(token: string): string[] {
   try {
-    const decoded = jwtDecode<CustomJwtPayload>(token);
+    const decoded = jwtDecode<JwtPayload>(token);
     
-    // Return a clean object with friendly names
-    return {
-      id: decoded[CLAIM_TYPES.id],
-      username: decoded[CLAIM_TYPES.name],
-      email: decoded[CLAIM_TYPES.email],
-    };
-  } catch {
-    return null;
-  }
-};
-
-export const getUserRoles = (token: string): string[] => {
-  try {
-    const decoded = jwtDecode<CustomJwtPayload>(token);
-
-    // .NET sometimes sends 'role' as a simple key, sometimes as the schema URL
-    const roleClaim = decoded[CLAIM_TYPES.role] || decoded['role'];
-
-    if (!roleClaim) return [];
-
-    // If there is only one role, .NET sends a string. If multiple, an array.
-    // We normalize this to always return an Array.
-    return Array.isArray(roleClaim) ? roleClaim : [roleClaim];
-  } catch {
+    // Check for ASP.NET Core Identity role claim format
+    const aspNetRoles = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+    
+    if (aspNetRoles) {
+      // Role claim can be a string or array
+      return Array.isArray(aspNetRoles) ? aspNetRoles : [aspNetRoles];
+    }
+    
+    // Fallback to simple 'role' claim
+    const simpleRoles = decoded.role;
+    if (simpleRoles) {
+      return Array.isArray(simpleRoles) ? simpleRoles : [simpleRoles];
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error extracting roles from token:', error);
     return [];
   }
-};
+}
 
-// Generic decoder if you need raw access
-export function decodeToken(token: string): CustomJwtPayload | null {
+/**
+ * Get session ID from token (for single session enforcement)
+ */
+export function getSessionId(token: string): string | null {
   try {
-    return jwtDecode<CustomJwtPayload>(token);
+    const decoded = jwtDecode<JwtPayload>(token);
+    return decoded.sessionId || null;
   } catch (error) {
-    console.error("Error decoding token:", error);
+    console.error('Error extracting session ID:', error);
     return null;
+  }
+}
+
+/**
+ * Check if token will expire soon (within 2 minutes)
+ */
+export function isTokenExpiringSoon(token: string): boolean {
+  try {
+    const decoded = jwtDecode<JwtPayload>(token);
+    const currentTime = Date.now() / 1000;
+    const timeUntilExpiry = decoded.exp - currentTime;
+    
+    return timeUntilExpiry < 120; // Less than 2 minutes  prevents race conditioning
+  } catch (error:any) {
+    return true;
   }
 }

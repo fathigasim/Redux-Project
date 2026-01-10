@@ -82,8 +82,8 @@ function App() {
             
           <Route path="/login" element={<Logins />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/forgot" element={<ForgotPassword />} />
-          <Route path="/reset" element={<ResetPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/error" element={<Error />} />
           <Route path="/basket" element={<Basket />} />

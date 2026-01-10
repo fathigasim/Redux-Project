@@ -13,23 +13,10 @@ import registerReducer from '../features/registerSlice'
 import suggestionReducer from '../features/suggestionSlice'
 import orderstatReducer from '../features/orderstatSlice'
 import basketReducer from '../features/basketSlice'
+import categoryReducer from '../features/CategorySlice'
 
 
-// Load cart from localStorage
-// const loadCart = (): CartState | undefined => {
-//   try {
-//     const serializedCart = localStorage.getItem('cart')
-//     if (!serializedCart) return undefined
-//     return { items: JSON.parse(serializedCart) }
-//   } catch (e) {
-//     console.error('Failed to load cart from localStorage', e)
-//     return undefined
-//   }
-// }
-// Preload cart state
-// const preloadedState = {
-//   cart: loadCart() || { items: [] }
-// }
+
 export const store = configureStore({
   reducer: {
 
@@ -46,7 +33,8 @@ export const store = configureStore({
       register:registerReducer,
       seggessions:suggestionReducer,
       orderstats:orderstatReducer,
-      basket:basketReducer
+      basket:basketReducer,
+      category:categoryReducer,
   },
    // preloadedState
 });

@@ -39,7 +39,9 @@ const Products= () => {
 
   const { loading, error, success, totalCount, sort, searchQuery, page, pageSize,products } =
     useSelector((state: RootState) => state.products);
-   const {loading:basketLoading,error:basketError}=useSelector((state:RootState)=>state.basket);
+    const {loading:basketLoading,error:basketError}=useSelector((state:RootState)=>state.basket);
+
+
     
   //const products = useSelector(selectFilteredProducts);
  const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,7 +58,7 @@ const Products= () => {
   const [debouncedSearch] = useDebounce(localSearch, 500);
 
   // --- Initial load
-  
+ 
 useEffect(() => {
   const search = searchParams.get("search") || "";
   const sortParam = searchParams.get("sort") || "";
@@ -292,7 +294,10 @@ useEffect(() => {
           <option value="lowToHigh">{i18next.language === "ar" ? "السعر: من الأقل إلى الأعلى" : "Price: Low → High"}</option>
           <option value="highToLow">{i18next.language === "ar" ? "السعر: من الأعلى إلى الأقل" : "Price: High → Low"}</option>
         </select>
+
+      
       </div>
+      
 
       {/* PRODUCTS TABLE */}
       {loading ? (

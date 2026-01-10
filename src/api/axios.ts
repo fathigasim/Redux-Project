@@ -1,179 +1,51 @@
-// import axios from "axios";
-// import { store } from "../app/store"; 
-// import { refreshTokenThunk, logout } from "../features/authSlice";
-// import i18n from "../i18n"; 
-
-// const apiUrl = import.meta.env.VITE_API_URL;
-
-// const axiosInstance = axios.create({
-//   baseURL: apiUrl,
-//   headers: { 'accept-language': i18n.language },
-//   withCredentials: true, // <--- CRITICAL: Ensures cookies are sent
-// });
-
-// let isRefreshing = false;
-// let failedQueue = [];
-
-// const processQueue = (error, token = null) => {
-//   failedQueue.forEach((prom) => {
-//     if (error) {
-//       prom.reject(error);
-//     } else {
-//       prom.resolve(token);
-//     }
-//   });
-//   failedQueue = [];
-// };
-
-// export const setupAxiosInterceptors = () => {
-//   // Request Interceptor
-//   axiosInstance.interceptors.request.use(
-//     (config) => {
-//       const token = store.getState().auth.accessToken;
-//       if (token) {
-//         config.headers.Authorization = `Bearer ${token}`;
-//       }
-      
-//       const lang = localStorage.getItem("lang") || "en";
-//       config.headers["Accept-Language"] = i18n.language || lang;
-      
-//       return config;
-//     },
-//     (error) => Promise.reject(error)
-//   );
-
-//   // Response Interceptor
-//   axiosInstance.interceptors.response.use(
-//     (response) => response,
-//     async (error) => {
-//       const originalRequest = error.config;
-
-//       // Skip refresh logic for auth endpoints
-//       // Note: We check '/refresh' specifically to prevent infinite loops
-//       const isAuthEndpoint = originalRequest.url?.includes('/login') || 
-//                              originalRequest.url?.includes('/register') ||
-//                              originalRequest.url?.includes('/refresh-token'); // Match your backend route exactly
-
-//       // Handle 500 errors
-//       if (error.response?.status === 500) {
-//         console.error("❌ Server error (500) encountered.");
-//         window.location.href="/error";
-//         return Promise.reject(error);
-//       }
-
-//       // Handle 401 Unauthorized
-//       if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
-        
-//         // --- MODIFICATION START ---
-//         // We REMOVED the check for "if (!refreshToken)"
-//         // because JS cannot see the HttpOnly cookie. 
-//         // We simply assume the cookie might be there and try to refresh.
-//         // --------------------------
-
-//         if (isRefreshing) {
-//           return new Promise((resolve, reject) => {
-//             failedQueue.push({ resolve, reject });
-//           })
-//             .then((token) => {
-//               originalRequest.headers.Authorization = `Bearer ${token}`;
-//               return axiosInstance(originalRequest);
-//             })
-//             .catch((err) => Promise.reject(err));
-//         }
-
-//         originalRequest._retry = true;
-//         isRefreshing = true;
-
-//         try {
-//           console.log("🔄 401 detected - Attempting silent refresh via Cookie...");
-
-//           // --- MODIFICATION: PASSING EXPIRED ACCESS TOKEN ---
-//           // Based on your backend code (AuthService), it needs the 
-//           // expired AccessToken to extract the User Claims.
-//           const expiredToken = store.getState().auth.accessToken;
-
-//           // We pass the expired access token to the thunk. 
-//           // The Refresh Token is NOT passed (it's in the cookie).
-//           const result = await store.dispatch(refreshTokenThunk({ 
-//               accessToken: expiredToken 
-//           })).unwrap();
-          
-//           console.log("✅ Token refresh successful");
-          
-//           processQueue(null, result.accessToken);
-          
-//           // Retry original request
-//           originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
-//           return axiosInstance(originalRequest);
-          
-//         } catch (err) {
-//           console.error("❌ Refresh failed or Session expired");
-          
-//           processQueue(err, null);
-//           store.dispatch(logout());
-          
-//           return Promise.reject(err);
-//         } finally {
-//           isRefreshing = false;
-//         }
-//       }
-
-//       return Promise.reject(error);
-//     }
-//   );
-// };
-
-// export default axiosInstance;
-
+// api/axiosInstance.ts (or .js)
 import axios from "axios";
-import { store } from "../app/store"; // Adjust path to your store
-import { refreshTokenThunk, logout } from "../features/authSlice";
-import i18n from "../i18n"; 
+import { store } from "../app/store";
+import { setCredentials, logout } from "../features/authSlice";
+import { refreshTokenThunk } from "../features/authSlice";
+import i18n from "../i18n";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const axiosInstance = axios.create({
   baseURL: apiUrl,
-  headers: { 'accept-language': i18n.language },
-  withCredentials: true, 
+  headers: { 
+    'Accept-Language': i18n.language,
+    'Content-Type': 'application/json'
+  },
+  withCredentials: true, // ✅ CRITICAL: Sends HttpOnly cookies
 });
-let isRefreshing = false;
-let failedQueue = [];
 
-const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+const processQueue = (error: any = null, token: string | null = null) => {
+  failedQueue.forEach((promise) => {
     if (error) {
-      prom.reject(error);
+      promise.reject(error);
     } else {
-      prom.resolve(token);
+      promise.resolve(token);
     }
   });
   failedQueue = [];
 };
 
-// 👇 DELETE "export const setupAxiosInterceptors = () => {"
-// 👇 JUST RUN THE CODE DIRECTLY IN THE FILE:
-
-// 1. Request Interceptor (Attaches Token)
+// ===== REQUEST INTERCEPTOR =====
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Get token from Redux
-    let token = store.getState().auth.accessToken;
-
+    // Attach access token from Redux
+    const token = store.getState().auth.accessToken;
+    
     if (token) {
-      // Clean quotes just in case
-      token = token.replace(/^"|"$/g, '');
-      
-      // Attach Header
-      config.headers.Authorization = `Bearer ${token}`;
-      
-      // Debug log - CHECK YOUR CONSOLE FOR THIS
-      console.log("🚀 Attaching Token:", config.headers.Authorization);
-    } else {
-      console.warn("⚠️ No Access Token found in Redux - Sending request without Auth header");
+      // Remove any accidental quotes
+      const cleanToken = token.replace(/^"|"$/g, '');
+      config.headers.Authorization = `Bearer ${cleanToken}`;
     }
     
-    // Language handling
+    // Update language header
     const lang = localStorage.getItem("lang") || "en";
     config.headers["Accept-Language"] = i18n.language || lang;
     
@@ -182,86 +54,121 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 2. Response Interceptor (Handles Refresh)
+// ===== RESPONSE INTERCEPTOR =====
 axiosInstance.interceptors.response.use(
-     (response) => response,
-    async (error) => {
-      const originalRequest = error.config;
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
 
-      // Skip refresh logic for auth endpoints
-      // Note: We check '/refresh' specifically to prevent infinite loops
-      const isAuthEndpoint = originalRequest.url?.includes('/login') || 
-                             originalRequest.url?.includes('/register') ||
-                             originalRequest.url?.includes('/refresh-token'); // Match your backend route exactly
+    // Auth endpoints that should NOT trigger refresh logic
+    const authEndpoints = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/refresh-token',
+      '/auth/confirm-email',
+      '/auth/resend-confirmation',
+      '/auth/forgot-password',
+      '/auth/reset-password',
+      '/auth/validate-reset-token'
+    ];
+    
+    const isAuthEndpoint = authEndpoints.some(endpoint => 
+      originalRequest.url?.includes(endpoint)
+    );
 
-      // Handle 500 errors
-      if (error.response?.status === 500) {
-        console.error("❌ Server error (500) encountered.");
-        window.location.href="/error";
-        return Promise.reject(error);
-      }
-
-      // Handle 401 Unauthorized
-      if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
-        
-        // --- MODIFICATION START ---
-        // We REMOVED the check for "if (!refreshToken)"
-        // because JS cannot see the HttpOnly cookie. 
-        // We simply assume the cookie might be there and try to refresh.
-        // --------------------------
-
-        if (isRefreshing) {
-          return new Promise((resolve, reject) => {
-            failedQueue.push({ resolve, reject });
-          })
-            .then((token) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              return axiosInstance(originalRequest);
-            })
-            .catch((err) => Promise.reject(err));
-        }
-
-        originalRequest._retry = true;
-        isRefreshing = true;
-
-        try {
-          console.log("🔄 401 detected - Attempting silent refresh via Cookie...");
-
-          // --- MODIFICATION: PASSING EXPIRED ACCESS TOKEN ---
-          // Based on your backend code (AuthService), it needs the 
-          // expired AccessToken to extract the User Claims.
-          const expiredToken = store.getState().auth.accessToken;
-
-          // We pass the expired access token to the thunk. 
-          // The Refresh Token is NOT passed (it's in the cookie).
-          const result = await store.dispatch(refreshTokenThunk({ 
-              accessToken: expiredToken 
-          })).unwrap();
-          
-          console.log("✅ Token refresh successful");
-          
-          processQueue(null, result.accessToken);
-          
-          // Retry original request
-          originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
-          return axiosInstance(originalRequest);
-          
-        } catch (err) {
-          console.error("❌ Refresh failed or Session expired");
-          
-          processQueue(err, null);
-          store.dispatch(logout());
-          
-          return Promise.reject(err);
-        } finally {
-          isRefreshing = false;
-        }
-      }
-      // ... keep your existing refresh logic here ...
-      // (Copy the rest of your response interceptor logic here)
+    // ===== HANDLE SERVER ERRORS (500) =====
+    if (error.response?.status === 500) {
+      console.error("❌ Server error (500) encountered");
+      
+      // Optional: Show user-friendly error page
+      window.location.href = "/error";
       
       return Promise.reject(error);
     }
+
+    // ===== HANDLE UNAUTHORIZED (401) =====
+    if (
+      error.response?.status === 401 && 
+      !originalRequest._retry && 
+      !isAuthEndpoint
+    ) {
+      // If already refreshing, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        console.log("🔄 401 detected - Attempting silent token refresh...");
+
+        // ✅ Call refresh endpoint (NO body - cookie-based)
+        const result = await store.dispatch(refreshTokenThunk()).unwrap();
+        
+        console.log("✅ Token refresh successful");
+
+        // ✅ Update Redux with new credentials
+        store.dispatch(setCredentials({
+          accessToken: result.accessToken,
+          activeUser: result.activeUser,
+          expiresAt: result.expiresAt
+        }));
+        
+        // Process all queued requests
+        processQueue(null, result.accessToken);
+        
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
+        return axiosInstance(originalRequest);
+        
+      } catch (refreshError: any) {
+        console.error("❌ Token refresh failed");
+        
+        // Fail all queued requests
+        processQueue(refreshError, null);
+        
+        // ✅ Check if session was invalidated (single session enforcement)
+        const errorMessage = refreshError?.message?.toLowerCase() || '';
+        
+        if (
+          errorMessage.includes('invalidated') || 
+          errorMessage.includes('logged in elsewhere') ||
+          errorMessage.includes('another device')
+        ) {
+          // ✅ User-friendly message for session invalidation
+          console.warn("⚠️ You've been logged in from another device");
+          
+          // Optional: Show toast/alert before redirect
+          if (window.confirm) {
+            alert("You've been logged in from another device. Please log in again.");
+          }
+        } else {
+          console.warn("⚠️ Session expired - Please log in again");
+        }
+        
+        // Clear auth state
+        store.dispatch(logout());
+        
+        // Redirect to login
+        window.location.href = "/login";
+        
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // ===== HANDLE OTHER ERRORS =====
+    return Promise.reject(error);
+  }
 );
 
 export default axiosInstance;

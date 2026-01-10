@@ -1,5 +1,4 @@
 // components/RequireAuth.tsx
-
 import { type ReactNode, useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,73 +11,146 @@ interface RequireAuthProps {
   allowedRoles?: string[];
 }
 
-export default function RequireAuth({ children, allowedRoles }: RequireAuthProps): ReactNode {
+export default function RequireAuth({ 
+  children, 
+  allowedRoles 
+}: RequireAuthProps): ReactNode {
   const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
 
-  // Get auth state AND loading state from Redux
-  const { accessToken, loading: reduxLoading } = useSelector((state: RootState) => state.auth);
+  // Get auth state from Redux
+  const { accessToken, loading: authLoading } = useSelector(
+    (state: RootState) => state.auth
+  );
   
   const [isVerifying, setIsVerifying] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    // 1. If Redux is still loading stored auth, DO NOTHING yet.
-    if (reduxLoading) return;
-
     let isMounted = true;
 
     const verifyAuth = async () => {
-      // --- Scenario A: Valid Token ---
-      if (accessToken && !isTokenExpired(accessToken)) {
+      try {
+        // ✅ SCENARIO 1: No token at all → Redirect to login
+        if (!accessToken) {
+          console.warn("⚠️ No access token found - Redirecting to login");
+          if (isMounted) {
+            setIsAuthorized(false);
+            setIsVerifying(false);
+          }
+          return;
+        }
+
+        // ✅ SCENARIO 2: Token exists and is valid → Allow access
+        if (!isTokenExpired(accessToken)) {
+          console.log("✅ Valid token found - Granting access");
+          if (isMounted) {
+            setIsAuthorized(true);
+            setIsVerifying(false);
+          }
+          return;
+        }
+
+        // ✅ SCENARIO 3: Token expired → Try to refresh
+        console.log("🔄 Token expired - Attempting refresh...");
+        
+        try {
+          await dispatch(refreshTokenThunk()).unwrap();
+          
+          console.log("✅ Token refresh successful - Granting access");
+          if (isMounted) {
+            setIsAuthorized(true);
+          }
+        } catch (refreshError: any) {
+          console.error("❌ Token refresh failed:", refreshError);
+          
+          // Check if session was invalidated (single session enforcement)
+          const errorMessage = refreshError?.message?.toLowerCase() || '';
+          
+          if (
+            errorMessage.includes('invalidated') || 
+            errorMessage.includes('logged in elsewhere')
+          ) {
+            console.warn("⚠️ Session invalidated - User logged in elsewhere");
+          } else {
+            console.warn("⚠️ Session expired");
+          }
+          
+          if (isMounted) {
+            setIsAuthorized(false);
+          }
+        }
+      } finally {
         if (isMounted) {
-          setIsAuthorized(true);
           setIsVerifying(false);
         }
-        return;
-      }
-
-      // --- Scenario B: Refresh Needed ---
-      console.log("🔄 Token missing/expired. Refreshing...");
-      try {
-        await dispatch(refreshTokenThunk({ accessToken: accessToken || "" })).unwrap();
-        if (isMounted) setIsAuthorized(true);
-      } catch (err) {
-        if (isMounted) setIsAuthorized(false);
-      } finally {
-        if (isMounted) setIsVerifying(false);
       }
     };
 
-    verifyAuth();
+    // Only run verification after initial auth loading is complete
+    if (!authLoading) {
+      verifyAuth();
+    }
 
-    return () => { isMounted = false; };
-  }, [accessToken, reduxLoading, dispatch]);
+    return () => {
+      isMounted = false;
+    };
+  }, [accessToken, authLoading, dispatch]);
 
-  // Show spinner while Redux loads OR we are verifying token
-  if (reduxLoading || isVerifying) {
+  // ✅ Show loading spinner during initial auth load OR verification
+  if (authLoading || isVerifying) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-sm">Verifying authentication...</p>
+        </div>
       </div>
     );
   }
 
-  // Redirect if not authorized
+  // ✅ Redirect to login if not authorized (with return URL)
   if (!isAuthorized) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const fullPath = `${location.pathname}${location.search}`;
+      console.log(`🔐 Redirecting to login`);
+  console.log(`   From: ${fullPath}`); // Should show: /products?sort=lowToHigh&page=2
+    return (
+      <Navigate 
+        to="/login" 
+        state={{ 
+          from: location.pathname + location.search, // ✅ Include query params
+          message: "Please log in to access this page" 
+        }} 
+        replace 
+      />
+    );
   }
 
-  // RBAC Check
-  // Note: We use the helper to extract the role from the long URL
+  // ✅ RBAC (Role-Based Access Control) Check
   if (allowedRoles && allowedRoles.length > 0 && accessToken) {
-    const userRoles = getUserRoles(accessToken); 
+    const userRoles = getUserRoles(accessToken);
     const hasPermission = allowedRoles.some((role) => userRoles.includes(role));
 
     if (!hasPermission) {
-      return <Navigate to="/unauthorized" replace />;
+      console.warn(
+        `⚠️ Access denied - Required roles: ${allowedRoles.join(', ')}, User roles: ${userRoles.join(', ')}`
+      );
+      return (
+        <Navigate 
+          to="/unauthorized" 
+          state={{ 
+            requiredRoles: allowedRoles,
+            userRoles: userRoles,
+            attemptedPath: location.pathname
+          }}
+          replace 
+        />
+      );
     }
+
+    console.log(`✅ Role check passed - User has role(s): ${userRoles.join(', ')}`);
   }
 
+  // ✅ All checks passed - Render protected content
   return <>{children}</>;
 }

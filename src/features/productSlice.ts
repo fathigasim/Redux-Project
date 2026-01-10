@@ -26,6 +26,8 @@ interface ProductResponse {
   totalCount: number;
   pageNumber: number;
   pageSize: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }
 
 interface ProductProcResponse {
@@ -42,8 +44,8 @@ interface ProductState {
   totalRecords: number;
   pageProcNumber: number;
   pageProcSize: number;
-   searchTerm:string|null;
-   minPrice: string | null;
+  searchTerm:string|null;
+  minPrice: string | null;
   maxPrice : string |null;
   //
   loading: boolean;
@@ -51,10 +53,12 @@ interface ProductState {
   success: string | null;
   sort: string;
   searchQuery: string | number | null;
- 
+  category:number;
   page: number;
   pageSize: number;
   totalCount: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
     formErrors: { name?: string; price?: string; image?:File|null  };
 }
 
@@ -65,6 +69,7 @@ const initialState: ProductState = {
   products: [],
   productProcDto:[],
   searchTerm:"",
+
   minPrice: null,
   maxPrice: null,
   pageProcNumber:1,
@@ -75,7 +80,8 @@ const initialState: ProductState = {
   success: null,
   sort: localStorage.getItem("sort") || "",
   searchQuery: localStorage.getItem("searchQuery") || "",
- 
+  category:0,
+  
   page: Number(localStorage.getItem("page")) || 1,
   pageSize: 6,
   totalCount: 0,
@@ -86,6 +92,7 @@ interface FetchProductsParams {
   page?: number;
   sort?: string;
   searchQuery?: string | null;
+  category?: number | null;
 }
 interface FetchProductsProcParams {
   page?: number;
@@ -102,10 +109,11 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
   "products/fetchProducts",
   async (overrideParams, { getState }) => {
     const state: any = getState();
-    const { searchQuery, sort, page, pageSize } = state.products;
+    const { searchQuery,category ,sort, page, pageSize } = state.products;
 
     const params = {
       q: overrideParams?.searchQuery ?? searchQuery ?? "",
+      category: overrideParams?.category ?? category ?? 0,
       sort: overrideParams?.sort ?? sort ?? "",
       page: overrideParams?.page ?? page ?? 1,
       pageSize,
@@ -283,7 +291,9 @@ const productSlice = createSlice({
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload.items;
-        state.totalCount = action.payload.totalItems;
+        state.totalCount = action.payload.totalCount;
+        state.hasPreviousPage = action.payload.hasPreviousPage;
+        state.hasNextPage = action.payload.hasNextPage;
         state.page = action.payload.pageNumber;
         state.pageSize = action.payload.pageSize || state.pageSize;
       })
