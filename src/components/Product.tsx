@@ -59,17 +59,6 @@ const Products= () => {
 
   // --- Initial load
  
-useEffect(() => {
-  const search = searchParams.get("search") || "";
-  const sortParam = searchParams.get("sort") || "";
-  const pageParam = Number(searchParams.get("page")) || 1;
-
-  // dispatch(filterBySearch(search));
-  // dispatch(sortByPrice(sortParam));
-  // dispatch(setPage(pageParam));
-
-  dispatch(fetchAdminProducts({ searchQuery: search, sort: sortParam, page: pageParam }));
-}, [dispatch, searchParams]);
 
 
 useEffect(() => {

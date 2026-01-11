@@ -12,15 +12,7 @@ export interface Product {
   price: number;
   imageUrl:string
 }
-export interface ProductProc {
-  id: string;
-  name: string;
-  price: number;
-  stock:number;
-  updatedAt:Date
-     
-     
-}
+
 interface ProductResponse {
   items: Product[];
   totalCount: number;
@@ -30,20 +22,10 @@ interface ProductResponse {
   hasNextPage: boolean;
 }
 
-interface ProductProcResponse {
-  productProcDto: ProductProc[];
-  totalRecords: number;
-  pageNumber: number;
-  pageSize: number;
-}
 
 interface ProductState {
   products: Product[];
-  //
-  productProcDto: ProductProc[];
   totalRecords: number;
-  pageProcNumber: number;
-  pageProcSize: number;
   searchTerm:string|null;
   minPrice: string | null;
   maxPrice : string |null;
@@ -53,7 +35,7 @@ interface ProductState {
   success: string | null;
   sort: string;
   searchQuery: string | number | null;
-  category:number;
+  searchCategory:string|null;
   page: number;
   pageSize: number;
   totalCount: number;
@@ -67,23 +49,21 @@ interface ProductState {
 // ---------------------------
 const initialState: ProductState = {
   products: [],
-  productProcDto:[],
+  
   searchTerm:"",
-
   minPrice: null,
   maxPrice: null,
-  pageProcNumber:1,
-  pageProcSize:3,
+
   totalRecords:0,
   loading: false,
   error: null,
   success: null,
   sort: localStorage.getItem("sort") || "",
   searchQuery: localStorage.getItem("searchQuery") || "",
-  category:0,
+  searchCategory: localStorage.getItem("searchCategory") || "",
   
   page: Number(localStorage.getItem("page")) || 1,
-  pageSize: 6,
+  pageSize: 8,
   totalCount: 0,
   formErrors: {},
 };
@@ -92,15 +72,9 @@ interface FetchProductsParams {
   page?: number;
   sort?: string;
   searchQuery?: string | null;
-  category?: number | null;
+  searchCategory?: string | null;
 }
-interface FetchProductsProcParams {
-  page?: number;
-  minPrice?: number| null;
-  maxPrice?: string| null;
-  searchTerm?: string | null;
-  pageSize?:number;
-}
+
 
 // ---------------------------
 // Async Thunks
@@ -109,11 +83,11 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
   "products/fetchProducts",
   async (overrideParams, { getState }) => {
     const state: any = getState();
-    const { searchQuery,category ,sort, page, pageSize } = state.products;
+    const { searchQuery, searchCategory, sort, page, pageSize } = state.products;
 
     const params = {
       q: overrideParams?.searchQuery ?? searchQuery ?? "",
-      category: overrideParams?.category ?? category ?? 0,
+      category: overrideParams?.searchCategory ?? searchCategory ?? "",
       sort: overrideParams?.sort ?? sort ?? "",
       page: overrideParams?.page ?? page ?? 1,
       pageSize,
@@ -124,42 +98,7 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
   }
 );
 
-export const fetchProcProducts = createAsyncThunk<ProductProcResponse, FetchProductsProcParams | undefined>(
-  "products/fetchProcProducts",
-  async (overrideParams, { getState }) => {
-    const state: any = getState();
-    const { searchTerm,minPrice,maxPrice ,pageProcNumber, pageProcSize } = state.products;
 
-    const params = {
-      searchTerm: overrideParams?.searchTerm ?? searchTerm ?? "",
-      minPrice: overrideParams?.minPrice ?? minPrice ?? null,
-      maxPrice: overrideParams?.maxPrice ?? maxPrice ?? null,
-      page: overrideParams?.page ?? pageProcNumber ?? 1,
-      pageProcSize,
-    };
-
-    const res = await api.get("/api/Test", { params });
-    return res.data;
-  }
-);
-
-export const fetchAdminProducts = createAsyncThunk<ProductResponse, FetchProductsParams | undefined>(
-  "products/fetchAdminProducts",
-  async (overrideParams, { getState }) => {
-    const state: any = getState();
-    const { searchQuery, sort, page, pageSize } = state.products;
-
-    const params = {
-      q: overrideParams?.searchQuery ?? searchQuery ?? "",
-      sort: overrideParams?.sort ?? sort ?? "",
-      page: overrideParams?.page ?? page ?? 1,
-      pageSize,
-    };
-
-    const res = await api.get("/api/Products/AdminProduct", { params });
-    return res.data;
-  }
-);
 
 
 export const fetchSuggestions = createAsyncThunk(
@@ -302,34 +241,34 @@ const productSlice = createSlice({
         state.error = action.error.message || "Error fetching products";
       })
 
-       .addCase(fetchProcProducts.fulfilled, (state, action) => {
-        state.loading = false;
-        state.productProcDto = action.payload.productProcDto;
-        state.totalRecords = action.payload.totalRecords;
-        state.pageProcNumber = action.payload.pageNumber;
-        state.pageProcSize = action.payload.pageSize || state.pageProcSize;
-      })
-      .addCase(fetchProcProducts.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || "Error fetching products procedure";
-      })
+      //  .addCase(fetchProcProducts.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   state.productProcDto = action.payload.productProcDto;
+      //   state.totalRecords = action.payload.totalRecords;
+      //   state.pageProcNumber = action.payload.pageNumber;
+      //   state.pageProcSize = action.payload.pageSize || state.pageProcSize;
+      // })
+      // .addCase(fetchProcProducts.rejected, (state, action) => {
+      //   state.loading = false;
+      //   state.error = action.error.message || "Error fetching products procedure";
+      // })
 
-      .addCase(fetchAdminProducts.pending, (state) => {
-        state.loading = true;
-        state.error=null;
-        state.success=null;
-      })
-      .addCase(fetchAdminProducts.fulfilled, (state, action) => {
-        state.loading = false;
-        state.products = action.payload.items;
-        state.totalCount = action.payload.totalItems;
-        state.page = action.payload.pageNumber;
-        state.pageSize = action.payload.pageSize || state.pageSize;
-      })
-      .addCase(fetchAdminProducts.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || "Error fetching products";
-      })
+      // .addCase(fetchAdminProducts.pending, (state) => {
+      //   state.loading = true;
+      //   state.error=null;
+      //   state.success=null;
+      // })
+      // .addCase(fetchAdminProducts.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   state.products = action.payload.items;
+      //   state.totalCount = action.payload.totalItems;
+      //   state.page = action.payload.pageNumber;
+      //   state.pageSize = action.payload.pageSize || state.pageSize;
+      // })
+      // .addCase(fetchAdminProducts.rejected, (state, action) => {
+      //   state.loading = false;
+      //   state.error = action.error.message || "Error fetching products";
+      // })
 
       // Add
       .addCase(addProduct.fulfilled, (state, action) => {

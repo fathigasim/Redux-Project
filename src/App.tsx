@@ -13,7 +13,7 @@ import Unauthorized from './components/Unauthorized';
 
 // Public Components
 import Products from './components/Products';
-import ProductTest from './components/ProductTest';
+
 import WeatherTest from './components/WeatherTest';
 import Basket from './components/Basket';
 import NavigationBar from './components/NavigationBar';
@@ -91,7 +91,7 @@ function App() {
           
           {/* Testing Routes (Public?) */}
           <Route path="/testWeather" element={<WeatherTest />} />
-          <Route path="/productTest" element={<ProductTest />} />
+          
 
 
           {/* ================= PROTECTED ROUTES (Logged In Users) ================= */}
@@ -135,11 +135,11 @@ function App() {
             </RequireAuth>
           } />
 
-          <Route path="/product" element={
+          {/* <Route path="/product" element={
             <RequireAuth allowedRoles={['Admin']}>
               <Product />
             </RequireAuth>
-          } />
+          } /> */}
 
           <Route path="/analytics" element={
             <RequireAuth allowedRoles={['Admin']}>
