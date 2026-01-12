@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hook";
 import { setLanguage } from "../features/languageSlice";
 
 export default function LanguageSelector() {

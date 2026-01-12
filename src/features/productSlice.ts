@@ -222,11 +222,7 @@ const productSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Fetch
-      .addCase(fetchProducts.pending, (state) => {
-        state.loading = true;
-        state.error=null;
-        state.success=null;
-      })
+    
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload.items;
@@ -235,6 +231,11 @@ const productSlice = createSlice({
         state.hasNextPage = action.payload.hasNextPage;
         state.page = action.payload.pageNumber;
         state.pageSize = action.payload.pageSize || state.pageSize;
+      })
+        .addCase(fetchProducts.pending, (state) => {
+        state.loading = true;
+        state.error=null;
+        state.success=null;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;

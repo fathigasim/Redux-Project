@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { useAppDispatch, useAppSelector } from '../app/hook';
 import { fetchWeather } from '../features/weatherSlice';
 import { useTheme } from '../context/themeContext';
 

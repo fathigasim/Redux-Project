@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hook";
 import { registerUser } from "../features/registerSlice";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 

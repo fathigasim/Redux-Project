@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { useAppDispatch } from './app/hooks';
+import { useAppDispatch } from './app/hook';
 import { loadStoredAuth } from './features/authSlice';
 
 // Auth Components
@@ -30,6 +30,7 @@ import PdfReport from './components/Reports/PdfReport';
 // Admin Components
 import Users from './components/Users';
 import Product from './components/Product';
+import ProductFilter from './components/ProductsFilter';
 import OrderAnalytics from './components/OrderAnalytics';
 import OrderDates from './components/Reports/OrderDates';
 import OrderTotals from './components/Reports/OrderTotals';
@@ -125,6 +126,9 @@ function App() {
               {/* ================= USER  ROUTES ================= */}
              <Route path="/products" element={<RequireAuth allowedRoles={['Admin','User']}> 
               <Products />
+              </RequireAuth>} />
+              <Route path="/productfilter" element={<RequireAuth allowedRoles={['Admin','User']}> 
+              <ProductFilter />
               </RequireAuth>} />
 
           {/* ================= ADMIN ROUTES ================= */}

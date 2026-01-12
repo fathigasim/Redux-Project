@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {type RootState } from '../../app/store';
-import { useAppDispatch } from '../../app/hooks';
+import { useAppDispatch } from '../../app/hook';
 import { useSelector } from 'react-redux';
 import { setPage } from '../../features/orderstatSlice';
 import { fetchOrderStats } from '../../features/orderstatSlice';

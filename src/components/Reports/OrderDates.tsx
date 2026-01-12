@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import {OrderByDate} from '../../features/orderSlice'
-import { useAppDispatch } from '../../app/hooks'
+import { useAppDispatch } from '../../app/hook'
 import {type RootState } from '../../app/store';
 import { useSelector } from 'react-redux';
 import Accordion from 'react-bootstrap/Accordion';

@@ -1,5 +1,5 @@
 // import React from 'react';
-import { useAppDispatch } from '../app/hooks';
+import { useAppDispatch } from '../app/hook';
 import { logout } from '../features/authSlice';
 import { useTheme } from '../context/themeContext';
 

@@ -15,7 +15,7 @@
 
 // export default Dashboard;
  import  { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { useAppDispatch, useAppSelector } from '../app/hook';
 import { fetchUserProfile } from '../features/userSlice';
 
 const Dashboard = () => {

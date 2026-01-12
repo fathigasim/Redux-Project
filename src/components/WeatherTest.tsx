@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import {  useAppSelector } from '../app/hooks';
+import {  useAppSelector } from '../app/hook';
 import { fetchWeather } from '../features/testSlice';
 import { useTheme } from '../context/themeContext';
 import { useDispatch } from 'react-redux';
