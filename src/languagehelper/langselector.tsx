@@ -17,15 +17,10 @@ export default function LangSelector() {
     <Container className="container"   >
       <Button className="btn btn-primary" size="sm" onClick={toggleLanguage}>
         {t("Switchto")} {i18next.language === "ar" ? t("English") : t("Arabic")}
-        {/* Switchto {i18next.language === "ar" ? "English" : "Arabic"} */}
+       
       </Button>
 
-      {/* <div className="mt-4">
-        <div className="d-flex justify-content-between">
-          <span className="text-start">Start</span>
-          <span className="text-end">End</span>
-        </div>
-      </div> */}
+   
     </Container>
   );
 }

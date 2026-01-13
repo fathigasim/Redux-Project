@@ -4,42 +4,36 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import Backend from "i18next-http-backend";
 
 i18n
-  .use(LanguageDetector) // detects browser or saved language
-  .use(initReactI18next).use(Backend) // passes i18n down to react-i18next
+  .use(Backend) // ← Load translations from JSON files
+  .use(LanguageDetector) // ← Detect user language
+  .use(initReactI18next) // ← Pass i18n instance to react-i18next
   .init({
     fallbackLng: "en",
     supportedLngs: ["en", "ar"],
+    
     ns: ["navbar", "translation"],
     defaultNS: "translation",
+    
     backend: {
-      loadPath: "/locales/{{lng}}/{{ns}}.json", // 👈 correct path
+      loadPath: "/locales/{{lng}}/{{ns}}.json",
     },
+    
     detection: {
-      order: ["localStorage", "navigator"],
-      caches: ["localStorage"],
+      order: ["localStorage", "navigator"], // Check localStorage first, then browser
+      caches: ["localStorage"], // Save detected language to localStorage
+      lookupLocalStorage: "lang", // ← Match the key you use in useBootstrapDirection
     },
-    interpolation: { escapeValue: false },
-    // resources: {
-    //   en: {
-    //     translation: {
-    //       "Add Product": "Add Product",
-    //       "Name is required": "Name is required",
-    //       "Price is required": "Price is required",
-    //       "Unexpected error": "Unexpected error",
-    //       "Filters":"Filter Query"
-    //     },
-    //   },
-    //   ar: {
-    //     translation: {
-    //       "Add Product": "إضافة المنتج",
-    //       "Name is required": "الاسم مطلوب",
-    //       "Price is required": "السعر مطلوب",
-    //       "Unexpected error": "خطأ غير متوقع",
-    //       "Filters":"تصفية",
-    //       "SAR":"ريال سعودي"
-    //     },
-    //   },
-    // },
+    
+    interpolation: {
+      escapeValue: false, // React already escapes
+    },
+
+    react: {
+      useSuspense: true, // ← Enable Suspense (optional but recommended)
+    },
+
+    // Remove debug in production
+    debug: process.env.NODE_ENV === "development",
   });
 
 export default i18n;

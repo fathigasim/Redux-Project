@@ -1,31 +1,21 @@
-import { useAppDispatch, useAppSelector } from "../app/hook";
-import { setLanguage } from "../features/languageSlice";
+import { useTranslation } from "react-i18next";
+import { Button, Container } from "react-bootstrap";
 
-export default function LanguageSelector() {
-  const dispatch = useAppDispatch();
-  const { lang } = useAppSelector((state) => state.language);
+export default function LangSelector() {
+  const { i18n, t } = useTranslation("navbar");
 
-  const handleChange = (newLang: string) => {
-    dispatch(setLanguage(newLang));
-    window.location.reload(); // reload page to apply new backend language
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "ar" ? "en" : "ar";
+    i18n.changeLanguage(newLang);
   };
 
+  const isArabic = i18n.language === "ar";
+
   return (
-    <div style={{ marginBottom: "1rem" }}>
-      <span>Language: </span>
-      <button
-        onClick={() => handleChange("en")}
-        disabled={lang === "en"}
-      >
-        English
-      </button>
-      <button
-        onClick={() => handleChange("ar")}
-        disabled={lang === "ar"}
-        style={{ marginLeft: "0.5rem" }}
-      >
-        Arabic
-      </button>
-    </div>
+    <Container className="container">
+      <Button className="btn btn-primary" size="sm" onClick={toggleLanguage}>
+        {t("Switchto")} {isArabic ? t("English") : t("Arabic")}
+      </Button>
+    </Container>
   );
 }

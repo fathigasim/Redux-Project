@@ -1,39 +1,34 @@
 import { useEffect } from "react";
 import i18next from "i18next";
 
+type LanguageCode = "en" | "ar" | string;
 
 export function useBootstrapDirection() {
   useEffect(() => {
-    // Load last saved language from localStorage (if exists)
-    const savedLang = localStorage.getItem("lang");
-    if (savedLang && i18next.language !== savedLang) {
-      i18next.changeLanguage(savedLang);
-    }
-
-    const updateDirection = (lang:any) => {
+    const updateDirection = (lang: LanguageCode) => {
       const isRTL = lang === "ar";
 
-      // Save language to localStorage
-      localStorage.setItem("lang", lang);
+      // i18next-browser-languagedetector already saves to localStorage("lang")
+      // so we don't need to manually do it here anymore ✅
 
-      // Remove existing bootstrap CSS
+      // Remove existing bootstrap CSS (if any)
       const head = document.head;
       const existingLink = document.getElementById("bootstrap-css");
-      if (existingLink) head.removeChild(existingLink);
+      if (existingLink?.parentNode) {
+        existingLink.parentNode.removeChild(existingLink);
+      }
 
       // Add the proper Bootstrap CSS file (RTL or LTR)
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.id = "bootstrap-css";
       link.href = isRTL
-       ? 
-       
-         "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
+        ? "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
         : "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
       link.crossOrigin = "anonymous";
       head.appendChild(link);
 
-      // Set direction
+      // Set document direction
       document.documentElement.dir = isRTL ? "rtl" : "ltr";
       document.body.dir = isRTL ? "rtl" : "ltr";
 
@@ -41,7 +36,7 @@ export function useBootstrapDirection() {
       document.body.classList.remove("rtl", "ltr");
       document.body.classList.add(isRTL ? "rtl" : "ltr");
 
-      // Optional inline text direction
+      // Optional text alignment
       document.body.style.textAlign = isRTL ? "right" : "left";
     };
 
