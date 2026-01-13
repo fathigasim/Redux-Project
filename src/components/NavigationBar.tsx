@@ -20,19 +20,19 @@ import logo from '../assets/transperantCommers.png';
 
 const NavigationBar = () => {
   const { i18n, t } = useTranslation('navbar');
-  const [searchParams, setSearchParams] = useSearchParams();
+  // const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   useBootstrapDirection();
 
   // Selectors
   const { items, basketSummery } = useSelector((state: RootState) => state.basket);
-  const { searchQuery } = useSelector((state: RootState) => state.products);
+  //const { searchQuery } = useSelector((state: RootState) => state.products);
   const { user, accessToken } = useSelector((state: RootState) => state.auth);
 
   // Local state
-  const [localSearch, setLocalSearch] = useState(searchQuery ?? '');
-  const [debouncedSearch] = useDebounce(localSearch, 500);
+  // const [localSearch, setLocalSearch] = useState(searchQuery ?? '');
+  // const [debouncedSearch] = useDebounce(localSearch, 500);
 
   // Derived values
   const roles = accessToken ? getUserRoles(accessToken) : [];
@@ -55,26 +55,26 @@ const NavigationBar = () => {
     navigate('/login');
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (debouncedSearch.trim()) {
-      setSearchParams({ q: debouncedSearch });
-      navigate(`/products?q=${debouncedSearch}`);
-    }
-  };
+  // const handleSearch = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (debouncedSearch.trim()) {
+  //     setSearchParams({ q: debouncedSearch });
+  //     navigate(`/products?q=${debouncedSearch}`);
+  //   }
+  // };
 
   const handleRemoveFromCart = (productId: string) => {
     dispatch(removeFromCart(productId));
   };
 
   // Update search params when debounced search changes
-  useEffect(() => {
-    if (debouncedSearch) {
-      setSearchParams({ q: debouncedSearch });
-    } else {
-      setSearchParams({});
-    }
-  }, [debouncedSearch, setSearchParams]);
+  // useEffect(() => {
+  //   if (debouncedSearch) {
+  //     setSearchParams({ q: debouncedSearch });
+  //   } else {
+  //     setSearchParams({});
+  //   }
+  // }, [debouncedSearch, setSearchParams]);
 
   return (
     <Navbar expand="lg" className="bg-light" style={{ fontFamily: 'intel-one-mono-roboto' }}>
@@ -238,7 +238,7 @@ const NavigationBar = () => {
           </Nav>
 
           {/* Search Bar */}
-          <Form className="d-flex mt-2 mt-lg-0" onSubmit={handleSearch}>
+          {/* <Form className="d-flex mt-2 mt-lg-0" onSubmit={handleSearch}>
             <Form.Control
               type="search"
               placeholder={t('Search_Placeholder')}
@@ -250,7 +250,7 @@ const NavigationBar = () => {
             <Button variant="outline-primary" type="submit" className="ms-2">
               {t('Search')}
             </Button>
-          </Form>
+          </Form> */}
         </Navbar.Collapse>
       </Container>
     </Navbar>

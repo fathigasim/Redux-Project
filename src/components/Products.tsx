@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 
 import { fetchProducts, clearMessages } from "../features/productSlice";
-import { GetCategory, type CategoryDto } from "../features/CategorySlice";
+import { GetCategory,  categoryDto } from "../features/CategorySlice";
 import { GetBasket } from "../features/basketSlice";
 import { type RootState, type AppDispatch } from "../app/store";
 

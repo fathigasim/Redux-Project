@@ -36,9 +36,9 @@ import OrderDates from './components/Reports/OrderDates';
 import OrderTotals from './components/Reports/OrderTotals';
 import RechartAnalysis from './components/Reports/RechartAnalysis';
 import ConfirmEmail from './components/ConfirmEmail';
-import { useBootstrapDirection } from './languagehelper/useBootstrapDirection';
+// import { useBootstrapDirection } from './languagehelper/useBootstrapDirection';
 function App() {
-    useBootstrapDirection();
+    // useBootstrapDirection();
   const dispatch = useAppDispatch();
   const [isInitialized, setIsInitialized] = useState(false);
 
