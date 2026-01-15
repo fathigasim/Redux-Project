@@ -40,14 +40,14 @@ const NavigationBar = () => {
   const isLoggedIn = Boolean(user && accessToken);
 
   // Calculate cart total
-  const cartTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  //const cartTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   // Format currency
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat(i18n.language, {
-      style: 'currency',
-      currency: 'SAR',
-    }).format(amount);
+  // const formatCurrency = (amount: number) =>
+  //   new Intl.NumberFormat(i18n.language, {
+  //     style: 'currency',
+  //     currency: 'SAR',
+  //   }).format(amount);
 
   // Handlers
   const handleLogout = async () => {
@@ -109,7 +109,7 @@ const NavigationBar = () => {
           )}
 
           {/* Cart Dropdown */}
-          {isLoggedIn && (
+          {/* {isLoggedIn && (
             <Dropdown align="end">
               <Dropdown.Toggle
                 variant="success"
@@ -183,7 +183,7 @@ const NavigationBar = () => {
                 )}
               </Dropdown.Menu>
             </Dropdown>
-          )}
+          )} */}
 
           {/* Account Dropdown */}
           {isLoggedIn && (

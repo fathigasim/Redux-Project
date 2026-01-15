@@ -69,18 +69,25 @@ const Products = () => {
   };
 
   // Load categories on mount
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        await dispatch(GetCategory()).unwrap();
-      } catch (err: any) {
-        console.error("Failed to load categories:", err);
-        toast.error(err.message || "Failed to load categories");
-      }
-    };
-    fetchCategories();
-  }, [dispatch]);
+// Load categories on mount
+useEffect(() => {
+  const fetchCategories = async () => {
+    const timeoutId = setTimeout(() => {
+      toast.error("Loading categories is taking too long. Please check your connection.");
+    }, 2000);
 
+    try {
+      await dispatch(GetCategory()).unwrap();
+      clearTimeout(timeoutId); // Cancel timeout if successful
+    } catch (err: any) {
+      clearTimeout(timeoutId); // Cancel timeout on error
+      console.error("Failed to load categories:", err);
+      toast.error(err.message || "Failed to load categories");
+    }
+  };
+
+  fetchCategories();
+}, [dispatch]);
   // Load basket on mount
   useEffect(() => {
     dispatch(GetBasket());

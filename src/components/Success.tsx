@@ -1,50 +1,12 @@
-// import { useEffect } from "react";
-// import { Alert, Container } from "react-bootstrap"
-// import { Link } from "react-router"
-// import { clearCart } from "../features/cartSlice";
-// import { useDispatch } from "react-redux";
-// import { useSearchParams } from "react-router";
 
-// const Success = () => {
-//   const dispatch=useDispatch();
-//   const [searchParams] = useSearchParams();
-//   const sessionId = searchParams.get('session_id');
-//   // In your Success.tsx page
-// useEffect(() => {
-//   const sessionId = new URLSearchParams(window.location.search).get('session_id');
-  
-//   if (sessionId) {
-//     // Optionally verify with your backend
-//     fetch(`/api/payment/verify-session/${sessionId}`)
-//       .then(res => res.json())
-//       .then(data => {
-//         console.log('Payment verified:', data);
-//       });
-//   }
-    
-//   dispatch(clearCart());
-//     localStorage.setItem('cart','')
-// }, [dispatch]);
-
-    
-//   return (
-//    <Container style={{marginTop:100}}>
-//     <Alert variant="success" className="text-center">
-//       Successfull Payment session Id :{sessionId}
-//     </Alert>
-//      <Link to="/products">Back To Product</Link>
-//     </Container>
-   
-//   )
-// }
-
-// export default Success
 import {useState,useEffect} from 'react'
+import { Link } from 'react-router';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import api from '../api/axios';
+import { useDispatch } from 'react-redux';
 import { useSearchParams } from "react-router";
-import { useDispatch } from "react-redux";
- import { clearCart } from "../features/cartSlice";
+import { AppDispatch   } from "../app/store";
+import { BasketRemove } from "../features/basketSlice"
 
 type OrderItem = {
   name: string;
@@ -58,25 +20,19 @@ interface OrderStatus {
   items?: OrderItem[];
 }
 const Success = () => {
-  const dispatch=useDispatch();
+  // const dispatch=useDispatch();
   
-  
+  const dispatch=useDispatch<AppDispatch>();
 
 const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
-
+   const orderRef = searchParams.get('order_ref');
   useEffect(() => {
     const verifyPayment = async () => {
-      // Get session_id from URL
-      // const urlParams = new URLSearchParams(window.location.search).get('session_id');
-      // const sessionId = urlParams;
-      const sessionId = searchParams.get('session_id');
-      const orderRef = searchParams.get('order_ref');
-      // Get order reference from storage
-      //const orderRef = sessionStorage.getItem('pendingOrderRef');
+   
 
       if (!orderRef) {
         setError('Order reference not found');
@@ -85,7 +41,6 @@ const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
       }
 
       try {
-       // const token = localStorage.getItem('authToken');
         
         const response = await api.get(
           `/api/payment/order/${orderRef}`
@@ -97,7 +52,13 @@ const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
              console.log('Payment verification response:', response.data);
        // const data = await response.json();
         setOrderStatus(response.data);
-          dispatch(clearCart());
+       try {
+  await dispatch(BasketRemove()).unwrap();
+  console.log("basket removed successfully");
+} catch (err: any) {
+  console.error("failed to remove basket", err);
+}
+
     localStorage.setItem('cart','')
         // // Clear pending order
         // sessionStorage.removeItem('pendingOrderRef');
@@ -109,7 +70,7 @@ const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
       }
     };
 
-    verifyPayment();
+  setTimeout(() => verifyPayment(), 2000);
   }, [searchParams, dispatch]);
 
   if (loading) {
@@ -170,12 +131,9 @@ const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
         A confirmation email has been sent to your email address.
       </p>
 
-      <button
-        onClick={() => window.location.href = '/'}
-        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
-      >
-        Continue Shopping
-      </button>
+   
+        <Link className='bg-blue-300' to="/products">Continue Shopping</Link>
+   
     </div>
   );
 }

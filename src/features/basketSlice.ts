@@ -150,7 +150,23 @@ console.log(`response error ${res?.data}`)
   }
 );
 
-
+export const BasketRemove = createAsyncThunk(
+"basket/RemoveBasket",
+async (message,{rejectWithValue}
+     ) => {
+        try{
+    const res = await api.delete("/api/Basket/RemoveBasket");
+    console.log();
+    return message=res.data;
+    }
+    catch(err:any){
+      const res= err.response;
+console.log(`response error ${res?.data}`)
+      return rejectWithValue(res?.data || "not able to remove basket");
+      
+    }
+  }
+)
 // ---------------------------
 // Slice
 // ---------------------------
@@ -248,7 +264,16 @@ const basketSlice = createSlice({
         state.error=null;
        
       })
-      
+       .addCase(BasketRemove.fulfilled, (state, action) => {
+        state.message=action.payload;
+        state.loading=false;
+       
+      }) 
+      .addCase(BasketRemove.rejected, (state) => {
+      // state.message=action.payload;
+        state.loading=false;
+       
+      }) 
     
 
   },
