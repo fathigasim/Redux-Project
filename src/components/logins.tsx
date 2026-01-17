@@ -20,7 +20,7 @@ export default function LoginForm() {
   // ✅ Get return URL from location state (set by RequireAuth)
   const state = location.state as LocationState;
   const returnUrl = state?.from || "/"; // Default to dashboard
-  const redirectMessage = state?.message;
+  // const redirectMessage = state?.message;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

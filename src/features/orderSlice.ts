@@ -6,7 +6,7 @@ import api from "../api/axios";
 // ---------------------------
 
 export interface OrderItems {
-  itemId: string;
+
   orderId: string;
   name:string
   price: number;
@@ -17,6 +17,8 @@ export interface Order {
   createdAt: string;
   orderItems: OrderItems[];
   totalAmount: number;
+  status: string;
+  paymentMethod: string | null;
 }
 
 interface  OrderResponse {

@@ -3,8 +3,10 @@ import {OrderByDate} from '../../features/orderSlice'
 import { useAppDispatch } from '../../app/hook'
 import {type RootState } from '../../app/store';
 import { useSelector } from 'react-redux';
-import Accordion from 'react-bootstrap/Accordion';
-import { Alert,Card,CardBody,CardHeader,CardFooter, Button } from 'react-bootstrap';
+
+import { Alert,Card, Button,Container, Row,Col,Spinner } from 'react-bootstrap';
+import { formatters } from '../../utils/formatters';
+import { Link } from 'react-router-dom';
 const OrderDates =  () => {
       const { loading, error, order } = useSelector((state: RootState) => state.orders);
         const dispatch=useAppDispatch()
@@ -15,72 +17,85 @@ const OrderDates =  () => {
     }
   return (
     <>
-   <div style={{marginTop:'100px'}}>
-    {error&&<span>error </span>}
-    <div style={{display:'flex',flexWrap:"wrap",flexDirection:'row',width:'80%',marginLeft:'auto',marginRight:'auto',marginBottom:'20px',padding:'10px'}}>
-        <form onSubmit={handleSubmit} style={{display:"flex",flexGrow:"1",gap:"10px",alignItems:'center',justifyContent:'start'}}>
+     <Container>
+      <Row>
+        <Col>
+          <Alert variant='primary'>Order Reports By Date</Alert>
+
+        </Col>
+     
+      </Row>
+      <Row>
+        <Col>
+           <form onSubmit={handleSubmit} style={{display:"flex",flexGrow:"1",gap:"10px",alignItems:'center',justifyContent:'start'}}>
             <span>Search by date</span><input type='date' value={date} onChange={(e:any)=>setDate(e.target.value)} />
             <Button size={"sm"} type='submit'>{loading? "Searching": "Search"}</Button>
         </form>
  
-          </div>
+        </Col>
+       
+      
+      </Row>
+   
+    {error&&<span>error </span>}
+    </Container>
+    {loading ? (
+      <div style={{display:"flex",justifyContent:"center"}}>
+      <Spinner animation="border" role="status">
+      <span className="visually-hidden">Loading...</span>
+    </Spinner>
     </div>
-    {
-        order.length>0 ?(
-        <div style={{display:'flex',flexDirection:'column',width:'80%',marginLeft:'auto',marginRight:'auto',marginBottom:'50px'}}>
-        <Accordion style={{flex:"1"}}>
-          <div >
-      <Accordion.Item eventKey="0">
-        
-        <Accordion.Header>Order Details</Accordion.Header>
-        <Accordion.Body>
-          <>
-          {order.map((ord:any,index:number)=>(
-            <>
-            <div key={index} style={{borderBottom:'1px solid gray',marginBottom:'10px',paddingBottom:'10px'}}>
-              <p><strong>Order ID:</strong> {ord.id}</p>
-              <p><strong>Order Date:</strong> {new Date(ord.createdAt).toLocaleDateString()}</p>
-              <div style={{justifyContent:"end",justifyItems:"self-start",display:"flex"}}>
-              <Button >Print</Button>
-             </div>
-              </div>
-             
-                <div style={{display:'flex',flexDirection:'row',flexWrap:'wrap',gap:'20px'}}>
+    ) : (
+        order.length>0 ? (
+          <Container>
+           <Row>
+        <Col>
+           {order.map((ord:any,index:number)=>(
+         <Card key={index} style={{borderBottom:'1px solid gray',marginBottom:'10px',paddingBottom:'10px'}}>
+              <Card.Header className='bg-white'><strong>Order ID:</strong> {ord.id}</Card.Header>
+              <Card.Body>
+                <p><strong>Order Date:</strong> {new Date(ord.createdAt).toLocaleDateString()}</p>
+                <div style={{justifyContent:"end",justifyItems:"self-start",display:"flex"}}>
+                  <table className='table table-borderless text-center' style={{width:'80%'}}>
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                  { ord.orderItems.map((item:any,idx:number)=>(
+                    <tr key={idx} >
+                      <td>
+                        {item.name}</td>
+                        <td>
+                       {item.quantity}</td> 
+                        <td>{item.price}</td>
+                      <td>{`${formatters.currency(item.quantity*item.price)}`}</td>
+                    </tr>
+                  ))}
+                  </table>
                   
-                 { ord.orderItems.map((item:any,idx:number)=>(
-                  <Card key={idx} style={{marginLeft:'20px',marginBottom:'5px'}}>
-                
-                  <CardHeader><strong>Product:</strong> {item.name}</CardHeader>
-                  <CardBody><table><td><strong>Quantity:</strong> {item.quantity}</td> <td><strong>Price:</strong> {item.price}</td></table></CardBody>
-                  <CardFooter>{`Total : ${item.quantity*item.price}`}</CardFooter>
-                
-                  </Card>
-                ))
-                
-                  }
-                
-                 
-                </div>
-              
-                <div>
-                   <Alert variant='info'><span>{`Order Number ${ord.id} Total Is`}</span> <span>{ord.orderItems.reduce((sum:number,i:any)=> sum+i.quantity*i.price,0)}</span></Alert>
-                </div>
-                
-            
-        
-              </>
-            ))}
-                  </>
-        </Accordion.Body>
-
-      </Accordion.Item>
-             </div>
-    </Accordion>
-    </div>
-):(
+                </div>  
+              </Card.Body>
+              <Card.Footer className='bg-white'>
+                <div style={{display:"flex",justifyContent:"space-between"}}><Link to="/printOrderByDate">Print</Link> <span>{`Order Total : ${formatters.currency(ord.totalAmount)}`}</span></div>
+                </Card.Footer>
+              </Card>
+           ))}
+        </Col>
+       
+      
+      </Row>
+    </Container>
+   
+  
+) : (
     <Alert style={{display:'flex',width:'80%',justifyContent:'center',marginRight:'auto',marginLeft:'auto'}}> No Data</Alert>
 )
-    }
+    )}
+   
    
    
    </>

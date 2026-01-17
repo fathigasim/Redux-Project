@@ -10,16 +10,16 @@ const Basket = () => {
       const {items} = useSelector((state: RootState) => state.basket)
       //const token = useSelector((state: RootState) => state.auth.token)
       const dispatch = useDispatch<AppDispatch>()
-    useEffect(()=>{
-    
+    useEffect( ()=>{
+    const fetchBasket=async()=>{
               try{
-            dispatch(GetBasket());
+          await  dispatch(GetBasket()).unwrap();
             }
             catch(err:any){
                 console.log(err)
             }
-       
-       
+          }
+       fetchBasket();
 
     },[dispatch])
 

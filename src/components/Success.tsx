@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { useSearchParams } from "react-router";
 import { AppDispatch   } from "../app/store";
 import { BasketRemove } from "../features/basketSlice"
+import { ListGroup } from 'react-bootstrap';
 
 type OrderItem = {
   name: string;
@@ -75,7 +76,7 @@ const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div style={{display:"flex",justifyContent:"center"}}>
         <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
       </div>
     );
@@ -92,48 +93,81 @@ const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-lg shadow-lg">
-      <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-      <h2 className="text-2xl font-bold text-center mb-4">Payment Successful!</h2>
+        // Outer container for full-page centering
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center  p-4">
       
-      {orderStatus && (
-        <div className="space-y-3 mb-6">
-          <div className="bg-gray-50 p-4 rounded">
-            <p className="text-sm text-gray-600">Order Reference</p>
-            <p className="font-mono font-bold">{orderStatus.orderReference}</p>
+      {/* Card Container */}
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        
+        {/* Header Section */}
+        <div className="p-8 text-center mt-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6 animate-bounce-slow">
+            <CheckCircle className="w-10 h-10 text-green-600 bg-green-100" />
           </div>
-          
-          <div className="bg-gray-50 p-4 rounded">
-            <p className="text-sm text-gray-600">Status</p>
-            <p className="font-semibold text-green-600">{orderStatus.status}</p>
-          </div>
-          
-          <div className="bg-gray-50 p-4 rounded">
-            <p className="text-sm text-gray-600">Total Amount</p>
-            <p className="font-bold text-xl">{orderStatus.totalAmount} SAR</p>
-          </div>
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Payment Successful!</h2>
+          <p className="text-gray-500">Thank you for your purchase.</p>
+        </div>
 
-          <div className="mt-4">
-            <h3 className="font-semibold mb-2">Order Items:</h3>
-            <div className="space-y-2">
+        {/* Order Details Section */}
+        {orderStatus && (
+          <div style={{display:"flex",justifyContent:"center"}} className="px-8 pb-8">
+           <div
+  style={{
+    maxWidth: "500px",
+    display: "flex",
+    flexGrow: 1,
+    flexDirection: "column",
+    alignItems: "stretch"
+  }}
+  className="bg-gray-50 rounded-xl p-6 border border-gray-100"
+>
+
+              <ListGroup variant='flush'>
+      <ListGroup.Item className="border-bottom-0">Order Ref {`: ${orderStatus.orderReference}`}</ListGroup.Item>
+      <ListGroup.Item className="border-bottom-0">Status {`: ${orderStatus.status}`}</ListGroup.Item>
+      <ListGroup.Item className="border-bottom-0">Total Amount {`: ${orderStatus.totalAmount} SAR`}</ListGroup.Item>
+ 
+    </ListGroup>
+        <table className="table-auto w-full mt-4">
+            <thead>
+              <tr>
+                <th className="px-4 py-2 text-left">Product Name</th>
+                <th className="px-4 py-2 text-left">Quantity</th>
+                <th className="px-4 py-2 text-left">Price (SAR)</th>
+              </tr>
+            </thead>
+            <tbody>
               {orderStatus.items?.map((item, index) => (
-                <div key={index} className="flex justify-between text-sm">
-                  <span>{item.name} x{item.quantity}</span>
-                  <span className="font-semibold">{item.price * item.quantity} SAR</span>
-                </div>
+                <tr key={index}>
+                  <td className="px-4 py-2 text-left">{item.name}</td>
+                  <td className="px-4 py-2 text-left">{item.quantity}</td>
+                  <td className="px-4 py-2 text-left">{item.price * item.quantity} SAR</td>
+                </tr>
               ))}
+            </tbody>
+          </table>
+
+              
+
+              
             </div>
           </div>
+        )}
+
+        {/* Footer / Action Section */}
+        <div className="px-8 pb-8">
+          <p className="text-center text-sm text-gray-500 mb-6">
+            A confirmation email has been sent to your inbox.
+          </p>
+
+          <Link 
+            to="/products"
+            className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-semibold py-3.5 px-4 rounded-xl transition duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+          >
+            Continue Shopping
+          </Link>
         </div>
-      )}
-
-      <p className="text-center text-gray-600 mb-6">
-        A confirmation email has been sent to your email address.
-      </p>
-
-   
-        <Link className='bg-blue-300' to="/products">Continue Shopping</Link>
-   
+      </div>
     </div>
   );
 }

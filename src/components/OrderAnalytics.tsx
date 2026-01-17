@@ -50,7 +50,7 @@ const monthlyData = useMemo(() => {
     if (isNaN(date.getTime())) return;
     
     const month = date.toLocaleString("default", { month: "short" });
-    const monData = item.orderItems?.reduce((sum: number, i: any) => 
+    const monData = item.orderItems?.reduce((sum: number, i: { quantity: number; price: number }) => 
       sum + (i.quantity * i.price), 0
     ) || 0;
     

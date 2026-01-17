@@ -36,6 +36,8 @@ import OrderDates from './components/Reports/OrderDates';
 import OrderTotals from './components/Reports/OrderTotals';
 import RechartAnalysis from './components/Reports/RechartAnalysis';
 import ConfirmEmail from './components/ConfirmEmail';
+import { OrderByDate } from './features/orderSlice';
+import OrderByDatePdfReport from './components/Reports/OrderByDatePdfReport';
 // import { useBootstrapDirection } from './languagehelper/useBootstrapDirection';
 function App() {
     // useBootstrapDirection();
@@ -74,7 +76,7 @@ function App() {
   return (
     <BrowserRouter>
       {/* ✅ NavigationBar must be inside BrowserRouter to use <Link> */}
-      <NavigationBar />
+     {  <NavigationBar />}
       
       <div className="container mx-auto p-4">
         <Routes>
@@ -122,8 +124,14 @@ function App() {
            <Route path="/printPdf" element={
              <RequireAuth>
                <PdfReport />
+               
              </RequireAuth>
-           } />
+            } />
+            <Route path="/printOrderByDate" element={
+             <RequireAuth>
+               
+               <OrderByDatePdfReport /> 
+             </RequireAuth>}/>
               {/* ================= USER  ROUTES ================= */}
              <Route path="/products" element={<RequireAuth allowedRoles={['Admin','User']}> 
               <Products />

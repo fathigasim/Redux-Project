@@ -19,7 +19,7 @@ export interface Formatters {
 }
 
 export const formatters: Formatters = {
-    currency: (value, currency = 'USD') =>
+    currency: (value, currency = 'SAR') =>
         new Intl.NumberFormat(i18n.language || navigator.language, {
             style: 'currency',
             currency,
