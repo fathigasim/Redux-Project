@@ -10,7 +10,7 @@ import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import Unauthorized from './components/Unauthorized';
-
+import ProductManagement from './components/ProductManagement';
 // Public Components
 import Products from './components/Products';
 
@@ -29,15 +29,16 @@ import PdfReport from './components/Reports/PdfReport';
 
 // Admin Components
 import Users from './components/Users';
-import Product from './components/Product';
+
 import ProductFilter from './components/ProductsFilter';
 import OrderAnalytics from './components/OrderAnalytics';
 import OrderDates from './components/Reports/OrderDates';
 import OrderTotals from './components/Reports/OrderTotals';
 import RechartAnalysis from './components/Reports/RechartAnalysis';
 import ConfirmEmail from './components/ConfirmEmail';
-import { OrderByDate } from './features/orderSlice';
+
 import OrderByDatePdfReport from './components/Reports/OrderByDatePdfReport';
+import Profile from './components/Profile';
 // import { useBootstrapDirection } from './languagehelper/useBootstrapDirection';
 function App() {
     // useBootstrapDirection();
@@ -81,7 +82,7 @@ function App() {
       <div className="container mx-auto p-4">
         <Routes>
           {/* ================= PUBLIC ROUTES ================= */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Products />} />
            
             
           <Route path="/login" element={<Logins />} />
@@ -90,7 +91,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/error" element={<Error />} />
-          <Route path="/basket" element={<Basket />} />
+          
           <Route path="/confirm-email" element={<ConfirmEmail />} />
           
           {/* Testing Routes (Public?) */}
@@ -102,7 +103,16 @@ function App() {
           <Route element={<RequireAuth> <div /> </RequireAuth>}> 
              {/* Note: You can wrap multiple routes like this or individually */}
           </Route>
-
+          <Route path="/basket" element={
+            // <RequireAuth>
+            <Basket />
+          
+          } />
+    <Route path="/profile" element={
+            <RequireAuth>
+              <Profile />
+            </RequireAuth>
+          } />
           <Route path="/orders" element={
             <RequireAuth>
               <Order />
@@ -133,9 +143,9 @@ function App() {
                <OrderByDatePdfReport /> 
              </RequireAuth>}/>
               {/* ================= USER  ROUTES ================= */}
-             <Route path="/products" element={<RequireAuth allowedRoles={['Admin','User']}> 
+             {/* <Route path="/products" element={<RequireAuth allowedRoles={['Admin','User']}> 
               <Products />
-              </RequireAuth>} />
+              </RequireAuth>} /> */}
               <Route path="/productfilter" element={<RequireAuth allowedRoles={['Admin','User']}> 
               <ProductFilter />
               </RequireAuth>} />
@@ -146,8 +156,14 @@ function App() {
             <RequireAuth allowedRoles={['Admin']}>
               <Users />
             </RequireAuth>
-          } />
 
+            
+          } />
+              <Route path="/productManagement" element={
+            <RequireAuth allowedRoles={['Admin']}>
+              <ProductManagement />
+            </RequireAuth>
+          } />
           {/* <Route path="/product" element={
             <RequireAuth allowedRoles={['Admin']}>
               <Product />

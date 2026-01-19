@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 
 import { fetchProducts, clearMessages } from "../features/productSlice";
-import { GetCategory,  categoryDto } from "../features/CategorySlice";
+import { GetCategory, type CategoryDto } from "../features/CategorySlice";
 import { GetBasket } from "../features/basketSlice";
 import { type RootState, type AppDispatch } from "../app/store";
 
@@ -160,7 +160,7 @@ useEffect(() => {
           fluid="md" 
           style={{ marginTop: 20, fontFamily: 'intel-one-mono-roboto' }}
         >
-          <h4>{t("cartItems")}: {items.length}</h4>
+          {/* <h4>{t("cartItems")}: {items.length}</h4> */}
           <Basket />
         </Container>
       )}
@@ -219,7 +219,7 @@ useEffect(() => {
                 <option value="">
                   {i18next.language === "ar" ? "جميع الفئات" : "All Categories"}
                 </option>
-                {categoryDto?.map((cat: CategoryDto) => (
+                {categoryDto?.map((cat: any) => (
                   <option key={cat.id} value={cat.name}>
                     {i18next.language === "ar" ? cat.name : cat.name}
                   </option>

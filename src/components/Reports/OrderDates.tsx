@@ -7,10 +7,16 @@ import { useSelector } from 'react-redux';
 import { Alert,Card, Button,Container, Row,Col,Spinner } from 'react-bootstrap';
 import { formatters } from '../../utils/formatters';
 import { Link } from 'react-router-dom';
+import { FaSearch } from "react-icons/fa";
+import { BiSolidError } from "react-icons/bi";
+import i18n from '../../i18n';
 const OrderDates =  () => {
       const { loading, error, order } = useSelector((state: RootState) => state.orders);
         const dispatch=useAppDispatch()
-            const[date,setDate]=useState<string>('');
+        const today = new Date().toISOString().split("T")[0];
+const [date, setDate] = useState(today);
+
+           // const[date,setDate]=useState<string>('');
     const handleSubmit=(e:React.FormEvent)=>{
         e.preventDefault()
        dispatch(OrderByDate(date))
@@ -20,24 +26,24 @@ const OrderDates =  () => {
      <Container>
       <Row>
         <Col>
-          <Alert variant='primary'>Order Reports By Date</Alert>
+          <h2 className='text-align-center offset-4 mb-5'>Order Reports By Date</h2>
 
         </Col>
      
       </Row>
       <Row>
         <Col>
-           <form onSubmit={handleSubmit} style={{display:"flex",flexGrow:"1",gap:"10px",alignItems:'center',justifyContent:'start'}}>
-            <span>Search by date</span><input type='date' value={date} onChange={(e:any)=>setDate(e.target.value)} />
-            <Button size={"sm"} type='submit'>{loading? "Searching": "Search"}</Button>
+           <form className='form-group col-md-6' onSubmit={handleSubmit} style={{display:"flex",flexGrow:"1",gap:"10px",alignItems:'center',justifyContent:'start'}}>
+            <label className='form-label col-sm-3 mr-0'>Search by date</label><input  className='form-control md-3' type='date' value={date} onChange={(e:any)=>setDate(e.target.value)} />
+            <Button className='col-md-2' size={"sm"} type='submit'><span><FaSearch /> {loading? "Searching": "Search"}</span></Button>
         </form>
  
         </Col>
        
-      
+      {error&&<span className="offset-4 mt-5 mb-5"><BiSolidError color='red' size={20} /> error </span>}
       </Row>
    
-    {error&&<span>error </span>}
+    
     </Container>
     {loading ? (
       <div style={{display:"flex",justifyContent:"center"}}>
@@ -49,13 +55,26 @@ const OrderDates =  () => {
         order.length>0 ? (
           <Container>
            <Row>
+            
+            
+            
         <Col>
+        <Link className='btn btn-info mb-2' to="/printOrderByDate">Print Report</Link>
+ <div style={{justifyContent:"start",flexDirection:"column",display:"flex",flexWrap:"wrap",gap:"10px"}}>
            {order.map((ord:any,index:number)=>(
+           
          <Card key={index} style={{borderBottom:'1px solid gray',marginBottom:'10px',paddingBottom:'10px'}}>
-              <Card.Header className='bg-white'><strong>Order ID:</strong> {ord.id}</Card.Header>
+              <Card.Header className='bg-white'><div style={{display:"flex",justifyContent:"space-between"}}><p><strong>Order ID:</strong> {ord.id}</p>   <p><strong>Order Date:</strong> {new Date(ord.createdAt).toLocaleDateString(i18n.language, {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+})}</p></div></Card.Header>
               <Card.Body>
-                <p><strong>Order Date:</strong> {new Date(ord.createdAt).toLocaleDateString()}</p>
-                <div style={{justifyContent:"end",justifyItems:"self-start",display:"flex"}}>
+              
+                <div style={{justifyItems:"start"}}>
                   <table className='table table-borderless text-center' style={{width:'80%'}}>
                     <thead>
                       <tr>
@@ -65,6 +84,7 @@ const OrderDates =  () => {
                         <th>Total</th>
                       </tr>
                     </thead>
+                    <tbody>
                   { ord.orderItems.map((item:any,idx:number)=>(
                     <tr key={idx} >
                       <td>
@@ -75,15 +95,18 @@ const OrderDates =  () => {
                       <td>{`${formatters.currency(item.quantity*item.price)}`}</td>
                     </tr>
                   ))}
+                    </tbody>
                   </table>
                   
                 </div>  
               </Card.Body>
               <Card.Footer className='bg-white'>
-                <div style={{display:"flex",justifyContent:"space-between"}}><Link to="/printOrderByDate">Print</Link> <span>{`Order Total : ${formatters.currency(ord.totalAmount)}`}</span></div>
+                <div style={{display:"flex",justifyContent:"space-between"}}> <span><strong>{`Order Total : ${formatters.currency(ord.totalAmount)}`}</strong></span></div>
                 </Card.Footer>
               </Card>
+              
            ))}
+           </div>
         </Col>
        
       
@@ -92,7 +115,7 @@ const OrderDates =  () => {
    
   
 ) : (
-    <Alert style={{display:'flex',width:'80%',justifyContent:'center',marginRight:'auto',marginLeft:'auto'}}> No Data</Alert>
+    <Alert style={{display:'flex',width:'40%',justifyContent:'center',marginRight:'auto',marginLeft:'auto'}}> No Data</Alert>
 )
     )}
    

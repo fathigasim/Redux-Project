@@ -4,11 +4,14 @@ import { GetBasket,RemoveFromBasket,ClearBasket} from '../features/basketSlice'
 import {type RootState,type AppDispatch } from '../app/store'
 import i18n from '../i18n'
 import { toast } from 'react-toastify'
+import { FaInfoCircle } from "react-icons/fa";
+import { Alert } from 'react-bootstrap'
 import api from '../api/axios'
 const Basket = () => {
       
       const {items} = useSelector((state: RootState) => state.basket)
-      //const token = useSelector((state: RootState) => state.auth.token)
+      const { user, accessToken } = useSelector((state: RootState) => state.auth);
+       const isLoggedIn = Boolean(user && accessToken);
       const dispatch = useDispatch<AppDispatch>()
     useEffect( ()=>{
     const fetchBasket=async()=>{
@@ -45,10 +48,14 @@ const Basket = () => {
        if (error.response) {
       // Server responded with an error status
       if (error.response.status === 401) {
+        if(!isLoggedIn ){
         console.log("❌ 401 Unauthorized: User must log in again");
-        
+        toast.error("User must log in to proceed to checkout");
+         window.location.href = `/logins?redirect=/basket`;
+    return;
+        }
         // Redirect to login with redirect parameter
-        window.location.href = `/logins?redirect=/cart`;
+        window.location.href = `/logins?redirect=/basket`;
         return;
       }
 
@@ -70,12 +77,17 @@ const Basket = () => {
     <>
     
  
-
+    {items.length !==0 && 
+    <>
+     
     <div style={{display:'flex',flexDirection:'column', maxWidth:"400px",margin:"auto",boxShadow:"5px 5px 10px rgba(0,0,0,0.5)",borderRadius:'1rem',padding:'3px'}} >
+       <Alert variant="danger"><span><FaInfoCircle /> login first to proceed to checkout</span></Alert>
       {items&&
-      <table className='table table-bordered' style={{justifyContent:'center'}}>
+      <table className='table table-borderless' style={{justifyContent:'center'}}>
         <thead><th>Image</th><th>Name</th><th>Price</th><th>Quantity</th><th></th></thead>
+        <tbody>
       {items.map((basket)=>(
+     
          <tr key={basket.productId}>
         <td ><img src={basket.image} style={{width:'50px',height:'50px'}} className='img img-thumbnail' alt='default.png'/> </td><td>{basket.productName}</td><td>{basket.price}</td>
         <td>{basket.quantity}</td><td>
@@ -88,6 +100,7 @@ const Basket = () => {
       
       ))
       }
+         </tbody>
       </table>
     }
      <div className='alert alert-danger' style={{display:'flex',justifyContent:'center',height:'2rem',justifyItems:'center',padding:'2px'}}><p>Total:{new Intl.NumberFormat(i18n.language, {
@@ -101,12 +114,14 @@ const Basket = () => {
           if(confirmation)
           dispatch(clearTheBasket)}}>Remove Basket</button></div>
            <div style={{color:"blue",justifyItems:'end'}} >
-            <button onClick={()=>handleCheckout()}>Pay</button></div>
+            <button 
+             disabled={!isLoggedIn}
+             className='btn btn-primary' onClick={()=>handleCheckout()}>Pay</button></div>
     </div>
     </div>
 
-   
-    
+   </>
+}
     </>
   )
 }

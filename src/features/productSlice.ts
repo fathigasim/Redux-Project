@@ -41,7 +41,7 @@ interface ProductState {
   totalCount: number;
   hasPreviousPage?: boolean;
   hasNextPage?: boolean;
-    formErrors: { name?: string; price?: string; image?:File|null  };
+  formErrors: { name?: string; price?: string; image?:File|null  };
 }
 
 // ---------------------------
@@ -145,16 +145,30 @@ export const addProduct = createAsyncThunk<
 );
 
 
-export const updateProduct = createAsyncThunk<Product, Partial<Product>>(
+export const updateProduct = createAsyncThunk<
+  Product,
+  { id: string; formData: FormData },
+  { rejectValue: Record<string, string[] | string> }
+>(
   "products/updateProduct",
-  async (productData) => {
-    const { id, ...updatedFields } = productData;
-    if (!id) throw new Error("Product ID is required for update.");
-    const res = await api.put(`/Products/${id}`, updatedFields);
-    return res.data;
+  async ({ id, formData }, { rejectWithValue }) => {
+    try {
+      const res = await api.put(`/api/Products/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return res.data;
+    } catch (err: any) {
+      const res = err.response;
+      if (res?.status === 400 && res.data?.errors) {
+        return rejectWithValue(res.data.errors);
+      }
+      if (res?.data?.message) {
+        return rejectWithValue({ general: res.data.message });
+      }
+      return rejectWithValue({ general: "Error updating product" });
+    }
   }
 );
-
 export const deleteProduct = createAsyncThunk<
   string,
   string,

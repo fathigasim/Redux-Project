@@ -40,14 +40,14 @@ const NavigationBar = () => {
   const isLoggedIn = Boolean(user && accessToken);
 
   // Calculate cart total
-  //const cartTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+   const cartTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Format currency
-  // const formatCurrency = (amount: number) =>
-  //   new Intl.NumberFormat(i18n.language, {
-  //     style: 'currency',
-  //     currency: 'SAR',
-  //   }).format(amount);
+  //Format currency
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat(i18n.language, {
+      style: 'currency',
+      currency: 'SAR',
+    }).format(amount);
 
   // Handlers
   const handleLogout = async () => {
@@ -109,7 +109,7 @@ const NavigationBar = () => {
           )}
 
           {/* Cart Dropdown */}
-          {/* {isLoggedIn && (
+          {isLoggedIn && (
             <Dropdown align="end">
               <Dropdown.Toggle
                 variant="success"
@@ -119,7 +119,7 @@ const NavigationBar = () => {
               >
                 <FaShoppingCart color="white" fontSize="22px" />
                 <Badge bg="light" text="dark" className="ms-1">
-                  {basketSummery.basketCount}
+                  {items.length}
                 </Badge>
               </Dropdown.Toggle>
               <Dropdown.Menu
@@ -183,7 +183,7 @@ const NavigationBar = () => {
                 )}
               </Dropdown.Menu>
             </Dropdown>
-          )} */}
+          )}
 
           {/* Account Dropdown */}
           {isLoggedIn && (
@@ -215,7 +215,7 @@ const NavigationBar = () => {
 
           {/* Product Management (Admin Only) */}
           {isAdmin && (
-            <NavDropdown title={t('Product_Management')} id="nav-dropdown-admin">
+            <NavDropdown title={t('ProductManagement')} id="nav-dropdown-admin">
               <NavDropdown.Item as={Link} to="/product">
                 {t('ProductManagement')}
               </NavDropdown.Item>
@@ -232,7 +232,7 @@ const NavigationBar = () => {
         <Navbar.Toggle aria-controls="navbarMain" />
         <Navbar.Collapse id="navbarMain">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/products">
+            <Nav.Link as={Link} to="/">
               {t('Products')}
             </Nav.Link>
           </Nav>
