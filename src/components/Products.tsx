@@ -74,7 +74,7 @@ useEffect(() => {
   const fetchCategories = async () => {
     const timeoutId = setTimeout(() => {
       toast.error("Loading categories is taking too long. Please check your connection.");
-    }, 2000);
+    }, 5000); // 5 seconds timeout
 
     try {
       await dispatch(GetCategory()).unwrap();

@@ -10,7 +10,10 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  image: File | null;
   imageUrl:string
+  stock:number;
+  categoryId:number;
 }
 
 interface ProductResponse {
@@ -32,6 +35,7 @@ interface ProductState {
   //
   loading: boolean;
   error: string |string []| null;
+  message: string | null;
   success: string | null;
   sort: string;
   searchQuery: string | number | null;
@@ -41,8 +45,8 @@ interface ProductState {
   totalCount: number;
   hasPreviousPage?: boolean;
   hasNextPage?: boolean;
-  formErrors: { name?: string; price?: string; image?:File|null  };
-}
+  formErrors: { name?: string; price?: string; image?:File|null,stock?:number|null }; };
+
 
 // ---------------------------
 // Initial State
@@ -56,6 +60,7 @@ const initialState: ProductState = {
 
   totalRecords:0,
   loading: false,
+  message: null,
   error: null,
   success: null,
   sort: localStorage.getItem("sort") || "",
@@ -111,17 +116,17 @@ export const fetchSuggestions = createAsyncThunk(
 
 
 export const addProduct = createAsyncThunk<
-  { product: Product; message: string },
+  { message: string },
   // { name: string; price: number },
   { formData: FormData },
   { rejectValue: Record<string, string[] | string> }
 >(
   "products/addProduct",
-  async (formData, { rejectWithValue }) => {
+  async  (formData, { rejectWithValue }) => {
     try {
       const res = await api.post("/api/Products", formData, {headers :{ 'Content-Type':'multipart/form-data'}} );
       return {
-        product: res.data.product,
+       // product: res.data.product,
         message: res.data.message,
       };
     } catch (err: any) {
@@ -146,7 +151,7 @@ export const addProduct = createAsyncThunk<
 
 
 export const updateProduct = createAsyncThunk<
-  Product,
+  { message: string},
   { id: string; formData: FormData },
   { rejectValue: Record<string, string[] | string> }
 >(
@@ -256,38 +261,12 @@ const productSlice = createSlice({
         state.error = action.error.message || "Error fetching products";
       })
 
-      //  .addCase(fetchProcProducts.fulfilled, (state, action) => {
-      //   state.loading = false;
-      //   state.productProcDto = action.payload.productProcDto;
-      //   state.totalRecords = action.payload.totalRecords;
-      //   state.pageProcNumber = action.payload.pageNumber;
-      //   state.pageProcSize = action.payload.pageSize || state.pageProcSize;
-      // })
-      // .addCase(fetchProcProducts.rejected, (state, action) => {
-      //   state.loading = false;
-      //   state.error = action.error.message || "Error fetching products procedure";
-      // })
+    
 
-      // .addCase(fetchAdminProducts.pending, (state) => {
-      //   state.loading = true;
-      //   state.error=null;
-      //   state.success=null;
-      // })
-      // .addCase(fetchAdminProducts.fulfilled, (state, action) => {
-      //   state.loading = false;
-      //   state.products = action.payload.items;
-      //   state.totalCount = action.payload.totalItems;
-      //   state.page = action.payload.pageNumber;
-      //   state.pageSize = action.payload.pageSize || state.pageSize;
-      // })
-      // .addCase(fetchAdminProducts.rejected, (state, action) => {
-      //   state.loading = false;
-      //   state.error = action.error.message || "Error fetching products";
-      // })
-
+    
       // Add
       .addCase(addProduct.fulfilled, (state, action) => {
-        state.products.push(action.payload.product);
+        //state.products.push(action.payload.product);
         state.success = action.payload.message;
         state.error = null;
         state.loading=false;
@@ -318,10 +297,22 @@ const productSlice = createSlice({
 
       // Update
       .addCase(updateProduct.fulfilled, (state, action) => {
-        const index = state.products.findIndex((p) => p.id === action.payload.id);
-        if (index >= 0) state.products[index] = action.payload;
+        // const index = state.products.findIndex((p) => p.id === action.payload.id);
+        // if (index >= 0) state.products[index] = action.payload;
+        state.message = action.payload.message;
+        state.error = null;
+        state.loading=false;
       })
-
+      .addCase(updateProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = null;
+        state.formErrors = {}; // reset previous validation errors
+      })
+      .addCase(updateProduct.rejected, (state) => {
+        state.loading = false;
+        state.success = null;
+      })
      
       // Delete
       .addCase(deleteProduct.fulfilled, (state, action) => {
