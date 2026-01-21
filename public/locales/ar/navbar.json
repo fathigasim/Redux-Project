@@ -12,5 +12,8 @@
     "Orders": "الطلبات",
     "ProductManagement": "إدارة المنتجات",
     "Products": "المنتجات",
-    "Cart_is_Empty": "السلة فارغة"
+    "Cart_is_Empty": "السلة فارغة",
+    "Analytics": "التحليلات",
+    "Order_By_Date": "الطلب حسب التاريخ",
+    "Operations": "العمليات"
 }

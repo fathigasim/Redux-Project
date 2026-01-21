@@ -49,7 +49,7 @@ const ProductCart = ({ product }: { product: Product }) => {
                           </span></Card.Footer>
              
             </Card.Body>
-             <Button variant="primary"  className="mt-2" onClick={()=>handleAddToCart({prodId:product.id,inputQnt:1})}><span>{t("addToCart")} <BsCartPlus size="1.5em" /></span></Button>
+             <Button variant="primary"  className="mt-2 amiri-bold" onClick={()=>handleAddToCart({prodId:product.id,inputQnt:1})}><span>{t("addToCart")} <BsCartPlus size="1.5em" /></span></Button>
       {/* ... */}
     </Card>
     

@@ -137,16 +137,16 @@ export default function LoginForm() {
   return (
     <Container
       fluid
-      className="d-flex justify-content-center align-items-center bg-light"
-      style={{ minHeight: "100vh" }}
+      className="d-flex justify-content-center align-items-center bg-light amiri-regular"
+      style={{ minHeight: "100vh",maxWidth: '500vw' }}
     >
       <Row className="w-100 justify-content-center">
-        <Col xs={11} sm={8} md={6} lg={4}>
+        <Col xs={11} sm={10} md={8} lg={6}>
           <Card className="shadow-lg border-0 rounded-4">
             <Card.Body className="p-4">
-              <h3 className="text-center mb-4 fw-semibold">
+              {/* <h3 className="text-center mb-4 fw-semibold">
                 {i18next.language === "ar" ? "مرحباً بك" : "Welcome Back"}
-              </h3>
+              </h3> */}
 
               {/* ✅ Show info about where they'll be redirected */}
               {returnUrl && returnUrl !== "/dashboard" && (
@@ -159,7 +159,7 @@ export default function LoginForm() {
                 </Alert>
               )}
 
-              <Form onSubmit={handleSubmit}>
+              <Form noValidate onSubmit={handleSubmit}>
                 
                 {/* EMAIL INPUT */}
                 <Form.Group controlId="formEmail" className="mb-3">
@@ -168,6 +168,7 @@ export default function LoginForm() {
                   </Form.Label>
                   <Form.Control
                     type="email"
+                      dir={i18next.language === 'ar' ? 'rtl' : 'ltr'}
                     placeholder={
                       i18next.language === "ar" 
                         ? "name@example.com" 
@@ -180,7 +181,8 @@ export default function LoginForm() {
                         setFormErrors(prev => ({ ...prev, email: undefined }));
                       }
                     }}
-                    className="rounded-3 py-2"
+                    // className="rounded-3 py-2 "
+                    className={`rounded-3 py-2 ${i18next.language === 'ar' ? 'text-end' : 'text-start'}`}
                     isInvalid={!!formErrors.email}
                     disabled={loading}
                   />

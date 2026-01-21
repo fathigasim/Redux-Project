@@ -1,0 +1,10 @@
+{
+    "register":"Register",
+    "username":"Username",
+    "password":"Password",
+    "confirm_password":"Confirm Password",
+    "register_title": "Register New Account",
+    "registering":"Registering...",
+    "email":"Email",
+    "login":"Already have an account? Login"
+}

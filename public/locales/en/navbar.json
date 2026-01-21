@@ -12,6 +12,9 @@
     "Orders": "Orders",
     "ProductManagement": "Product Management",
     "Products": "Products",
-    "Cart_is_Empty": "Cart is Empty"
+    "Cart_is_Empty": "Cart is Empty",
+    "Analytics": "Analytics",
+    "Order_By_Date": "Order By Date",
+    "Operations": "Operations"
 
 }

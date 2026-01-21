@@ -215,12 +215,12 @@ const NavigationBar = () => {
 
           {/* Product Management (Admin Only) */}
           {isAdmin && (
-            <NavDropdown title={t('ProductManagement')} id="nav-dropdown-admin">
-              <NavDropdown.Item as={Link} to="/product">
+            <NavDropdown title={t('Operations')} id="nav-dropdown-admin">
+              <NavDropdown.Item as={Link} to="/productManagement">
                 {t('ProductManagement')}
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/orderByDateRep">
-                {t('Order_By_Date')}
+              <NavDropdown.Item as={Link} to="/analytics">
+                {t('Analytics')}
               </NavDropdown.Item>
             </NavDropdown>
           )}

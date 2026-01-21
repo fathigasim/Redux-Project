@@ -91,7 +91,7 @@ useEffect(() => {
   // Load basket on mount
   useEffect(() => {
     dispatch(GetBasket());
-  }, [dispatch]);
+  }, [dispatch,items.length]);
 
   // Sync local search with URL on mount/URL change
   useEffect(() => {

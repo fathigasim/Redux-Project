@@ -477,12 +477,12 @@ const authSlice = createSlice({
         state.error = action.payload?.general || "Login failed";
 
         // Handle form-specific errors
-        if (action.payload?.email) {
-          state.formErrors.email = action.payload.email;
-        }
-        if (action.payload?.password) {
-          state.formErrors.password = action.payload.password;
-        }
+        // if (action.payload?.email) {
+        //   state.formErrors.email = action.payload.email;
+        // }
+        // if (action.payload?.password) {
+        //   state.formErrors.password = action.payload.password;
+        // }
       })
 
       // ===== REFRESH TOKEN =====
