@@ -11,15 +11,14 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import Unauthorized from './components/Unauthorized';
 import ProductManagement from './components/ProductManagement';
+
 // Public Components
 import Products from './components/Products';
-
 import WeatherTest from './components/WeatherTest';
 import Basket from './components/Basket';
 import NavigationBar from './components/NavigationBar';
 import NotFound from './components/NotFound';
 import Error from './components/Error';
-import Home from './components/Home';
 
 // Protected Components (Generic User)
 import Order from './components/Order';
@@ -29,7 +28,6 @@ import PdfReport from './components/Reports/PdfReport';
 
 // Admin Components
 import Users from './components/Users';
-
 import ProductFilter from './components/ProductsFilter';
 import OrderAnalytics from './components/OrderAnalytics';
 import OrderDates from './components/Reports/OrderDates';
@@ -39,6 +37,7 @@ import ConfirmEmail from './components/ConfirmEmail';
 
 import OrderByDatePdfReport from './components/Reports/OrderByDatePdfReport';
 import Profile from './components/Profile';
+
 // import { useBootstrapDirection } from './languagehelper/useBootstrapDirection';
 function App() {
     // useBootstrapDirection();
@@ -75,14 +74,14 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter >
       {/* ✅ NavigationBar must be inside BrowserRouter to use <Link> */}
      {  <NavigationBar />}
       
       <div className="container mx-auto p-4">
         <Routes>
           {/* ================= PUBLIC ROUTES ================= */}
-          <Route path="/" element={<Products />} />
+          <Route path="/" element={<Products/>} />
            
             
           <Route path="/login" element={<Logins />} />

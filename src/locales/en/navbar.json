@@ -9,12 +9,13 @@
     "English": "English",
     "Arabic": "Arabic",
     "Account": "Account",
-    "Orders": "Orders",
+    "Orders": "Orders Report",
     "ProductManagement": "Product Management",
     "Products": "Products",
     "Cart_is_Empty": "Cart is Empty",
     "Analytics": "Analytics",
     "Order_By_Date": "Order By Date",
-    "Operations": "Operations"
+    "Operations": "Operations",
+     "Login_nav":" Login"
 
 }

@@ -1,18 +1,24 @@
-﻿import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+﻿import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
-// https://vite.dev/config/
 export default defineConfig({
-    plugins: [react()],
-    // root: "./",
-    // build: {
-    //     outDir: "../wwwroot",   // ✅ build output directly into .NET wwwroot
-    //     emptyOutDir: true,      // clears old files
-    // },
-    // server: {
-    //     port: 3000,
-    //     proxy: {
-    //         "/api": "http://localhost:7171", // proxy API calls to backend during dev
-    //     },
-    // },
-})
+  base: "/", // MUST match IIS folder
+  plugins: [react()],
+  build: {
+    outDir: path.resolve(
+      "C:/Users/USER/source/repos/fathigasim/EbasketRepo/wwwroot"
+    ),
+    emptyOutDir: true,
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      "/api": {
+        target: "https://localhost:7000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+});

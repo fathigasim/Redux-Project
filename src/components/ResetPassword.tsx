@@ -1,10 +1,10 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate ,useSearchParams} from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { resetPassword, clearMessages } from "../features/manageSlice";
 import { type RootState, type AppDispatch } from "../app/store";
-
+import { Alert, Col, Row } from 'react-bootstrap'
 
 export default function ResetPassword() {
   const [resetError, setResetError] = useState<{newPassword:string, newPasswordConfirm?:string}>
@@ -59,10 +59,13 @@ export default function ResetPassword() {
   }, [dispatch,navigate,error, success]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-      <form noValidate onSubmit={handleSubmit} className="p-6 bg-white shadow rounded w-96">
+    <Row lg={6} md={8} sm={12} >
+      <Col className="p-4">
+      <form noValidate onSubmit={handleSubmit} className="bg-white shadow rounded w-96">
+   
         <h2 className="text-xl font-semibold mb-4">Reset Password</h2>
     {resetError && <p style={{ color: "red" }}>{resetError.newPassword}</p>}
+     <Row className="mt-3">
         <label className="block mb-2 text-sm font-medium">New Password</label>
         <input
           type="password"
@@ -72,8 +75,9 @@ export default function ResetPassword() {
           required
           minLength={6}
         />
-        
+        </Row>
     {resetError && <p style={{ color: "red" }}>{resetError.newPassword}</p>}
+       <Row className="mt-3">
         <label className="block mb-2 text-sm font-medium">Confirm Password</label>
         <input
           type="password"
@@ -83,15 +87,19 @@ export default function ResetPassword() {
           required
           minLength={6}
         />
-
+</Row>
+<Row className="mt-3">
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 text-white w-full py-2 rounded hover:bg-blue-700"
+          className="btn btn-primary"
         >
           {loading ? "Resetting..." : "Reset Password"}
         </button>
+        </Row>
       </form>
-    </div>
+      
+      </Col>
+    </Row>
   );
 }

@@ -289,7 +289,7 @@ export const login = createAsyncThunk<
   { rejectValue: any }
 >("auth/login", async (credentials, { rejectWithValue }) => {
   try {
-    const res = await api.post("/api/auth/login", credentials);
+    const res = await api.post("/auth/login", credentials);
     const data = res.data.data;
 
     // Clean access token
@@ -350,7 +350,7 @@ export const refreshTokenThunk = createAsyncThunk<
 
     // ✅ CRITICAL: Empty body - refresh token comes from HttpOnly cookie
     const response = await api.post(
-      "/api/auth/refresh-token",
+      "/auth/refresh-token",
       {}, // Empty body
       { withCredentials: true } // Sends cookie
     );
@@ -398,7 +398,7 @@ export const logoutUser = createAsyncThunk<
     console.log("🚪 Logging out...");
 
     // Call backend to clear HttpOnly cookie
-    await api.post("/api/auth/revoke-token", {}, { withCredentials: true });
+    await api.post("/auth/revoke-token", {}, { withCredentials: true });
 
     // Clear localStorage
     localStorage.removeItem("auth");

@@ -98,7 +98,7 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
       pageSize,
     };
 
-    const res = await api.get("/api/Products", { params});
+    const res = await api.get("/Products", { params});
     return res.data;
   }
 );
@@ -109,7 +109,7 @@ export const fetchProducts = createAsyncThunk<ProductResponse, FetchProductsPara
 export const fetchSuggestions = createAsyncThunk(
   "products/fetchSuggestions",
   async (query: string) => {
-    const res = await api.get(`/api/products/suggest?query=${query}`);
+    const res = await api.get(`/products/suggest?query=${query}`);
     return res.data; // e.g. a list of top 5 names
   }
 );
@@ -124,7 +124,7 @@ export const addProduct = createAsyncThunk<
   "products/addProduct",
   async  (formData, { rejectWithValue }) => {
     try {
-      const res = await api.post("/api/Products", formData, {headers :{ 'Content-Type':'multipart/form-data'}} );
+      const res = await api.post("/Products", formData, {headers :{ 'Content-Type':'multipart/form-data'}} );
       return {
        // product: res.data.product,
         message: res.data.message,
@@ -158,7 +158,7 @@ export const updateProduct = createAsyncThunk<
   "products/updateProduct",
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const res = await api.put(`/api/Products/${id}`, formData, {
+      const res = await api.put(`/Products/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       return res.data;
@@ -186,7 +186,7 @@ export const deleteProduct = createAsyncThunk<
     }
 
     try {
-      await api.delete(`/api/products/${id}`);
+      await api.delete(`/products/${id}`);
       return id;
     } catch (error) {
       return rejectWithValue({ 

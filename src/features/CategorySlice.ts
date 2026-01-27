@@ -42,7 +42,7 @@ export const GetCategory = createAsyncThunk(
   async (
      ) => {
          try{
-        const res=await  api.get("/api/Category");
+        const res=await  api.get("/Category");
         console.log(`category data `+res.data)
         return res.data
          }

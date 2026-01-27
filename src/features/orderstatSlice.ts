@@ -91,7 +91,7 @@ export const fetchOrderStats= createAsyncThunk<ResponseOrderTotalState,FetchOrde
     };
 
     // const res = await api.get("/api/Order",{ params });
-     const res = await api.get("/api/Order/OrderSum",{ params });
+     const res = await api.get("/Order/OrderSum",{ params });
     console.log("fetchOrderStats -> response", res.data);
     return res.data as ResponseOrderTotalState;
   }
@@ -103,7 +103,7 @@ export const fetchAllOrders= createAsyncThunk<ChartData[],void>(
 
 
 
-     const res = await api.get("/api/Order/GetAllOrders");
+     const res = await api.get("/Order/GetAllOrders");
     console.log("fetchOrderStats -> response", res.data);
     return res.data as ChartData[];
   }

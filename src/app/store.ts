@@ -14,6 +14,7 @@ import suggestionReducer from '../features/suggestionSlice'
 import orderstatReducer from '../features/orderstatSlice'
 import basketReducer from '../features/basketSlice'
 import categoryReducer from '../features/CategorySlice'
+import profileReducer from '../features/profileSlice'
 
 
 
@@ -35,6 +36,7 @@ export const store = configureStore({
       orderstats:orderstatReducer,
       basket:basketReducer,
       category:categoryReducer,
+      profile:profileReducer,
   },
    // preloadedState
 });

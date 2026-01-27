@@ -62,7 +62,7 @@ export const GetBasket = createAsyncThunk(
   async (
      ) => {
          try{
-        const res=await  api.get("/api/Basket/BasketItems",{withCredentials:true});
+        const res=await  api.get("/Basket/BasketItems",{withCredentials:true});
         console.log(res.data)
         return res.data
          }
@@ -76,7 +76,7 @@ export const GetBasketSummery = createAsyncThunk(
   async (
      ) => {
          try{
-        const res=await  api.get("/api/Basket/BasketSummery",{withCredentials:true});
+        const res=await  api.get("/Basket/BasketSummery",{withCredentials:true});
         console.log(res.data)
         return res.data
          }
@@ -91,7 +91,7 @@ export const GetBasketSummery = createAsyncThunk(
   async (rmbasketitem:basketRemove) => {
       
          try{
-        const res=await  api.delete(`/api/Basket/RemoveFromBasket?productId=${rmbasketitem.productId}&&quantity=${rmbasketitem.quantity}`);
+        const res=await  api.delete(`/Basket/RemoveFromBasket?productId=${rmbasketitem.productId}&&quantity=${rmbasketitem.quantity}`);
         console.log(res.data)
         return res.data
          }
@@ -106,7 +106,7 @@ export const addToBasket = createAsyncThunk(
   async ({prodId,inputQnt}:basketInput,{rejectWithValue}
      ) => {
         try{
-    const res = await api.post("/api/Basket/", {prodId,inputQnt});
+    const res = await api.post("/Basket/", {prodId,inputQnt});
     return res.data;
     }
     catch(err:any){
@@ -123,7 +123,7 @@ export const BasketSummery = createAsyncThunk<basketSummery,void,{rejectValue:st
   async ( _,{rejectWithValue}
      ) => {
         try{
-    const res = await api.get("/api/Basket/BasketSummery");
+    const res = await api.get("/Basket/BasketSummery");
     console.log();
     return res.data as basketSummery;
         }
@@ -137,7 +137,7 @@ export const ClearBasket = createAsyncThunk(
   async (message,{rejectWithValue}
      ) => {
         try{
-    const res = await api.delete("/api/Basket/ClearBasket");
+    const res = await api.delete("/Basket/ClearBasket");
     console.log();
     return message=res.data;
     }
@@ -155,7 +155,7 @@ export const BasketRemove = createAsyncThunk(
 async (message,{rejectWithValue}
      ) => {
         try{
-    const res = await api.delete("/api/Basket/RemoveBasket");
+    const res = await api.delete("/Basket/RemoveBasket");
     console.log();
     return message=res.data;
     }

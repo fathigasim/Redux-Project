@@ -3,10 +3,14 @@ import { useSearchParams } from "react-router";
 import { useSelector,useDispatch } from "react-redux";
 import {type AppDispatch, type RootState } from "../app/store";
 import {fetchOrders} from "../features/orderSlice"
-import { Card, Container } from "react-bootstrap";
+import { Card, Col, Container, ListGroup, Row } from "react-bootstrap";
 import { setPage } from "../features/orderSlice";
 import './styles.css'
+import Paginationbootstrap from "./Paginationbootstrapold";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 const Order = () => {
+    const { t } = useTranslation("order");
    // const [currentPage, setCurrentPage] = useState<number>(1);
       const { loading, error, order,page,pageSize,totalCount } = useSelector((state: RootState) => state.orders);
       const [searchParams, setSearchParams] = useSearchParams();
@@ -18,29 +22,53 @@ const Order = () => {
    }, [searchParams,dispatch]);
      const totalPages = Math.ceil(totalCount / pageSize);
       return (
-    <Container style={{marginTop:100}}>
+        <>
+    <Container style={{marginTop:20}}>
+
       {loading &&<div>...Loading</div>}
         {error &&
             <p>{error}</p>}
         
-          <div className="maindiv" style={{display:"flex",top:"5px"}}>
+          <div>
+            <Row md={8} className="g-4">
             {order&&order.length >0 ?(
                    order.map((ord)=>(
-              <Card key={ord.id} style={{width:"300px" ,padding:15,margin:10,boxShadow:' 5px 2px 2px black',flexWrap:"wrap",gap:"20px",justifyContent:"center"}}>
+                   
+              <Card  key={ord.id} style={{boxShadow:' 5px 2px 2px black'}}>
                 <>
-                 <strong>Order Date:{new Date(ord.createdAt).toLocaleDateString() }</strong>
+                         <Row style={{marginTop:10,marginBottom:10,marginLeft:10}}>
+                   <Col sm={12} md={6} lg={8}>
+                 <strong>{t("Order_Date")}:{new Date(ord.createdAt).toLocaleDateString() }</strong>
+         
+                    <table className="col-md-6 mt-4 mb-4"> 
                    {ord.orderItems.map((item: any) => (
-                        <table key={item.id} >
-                            
-                            <td style={{width:"50%"}}>{item.name}</td>
-                            <td style={{width:"25%"}}>{item.quantity}</td>
-                            <td style={{width:"25%"}}>{item.price}</td>
-                        </table>
+                       <tbody>
+                        
+                       <tr key={item.id}> 
+                            <td >{t("Product")} {`:  ${item.name}`}</td>
+                           
+                     
+                            <td>{t("Quantity")} {`:  ${item.quantity}`}</td>
+                   
+
+                            <td>{t("Price")} {`:  ${item.price}`}</td>
+                    </tr>
+                       
+                     </tbody>
                     ))}
-                   <strong>Total: {ord.orderItems.reduce((sum, i:any) => sum + i.price * i.quantity, 0)}</strong>
+                    </table>
+                     <strong>Total: {new Intl.NumberFormat(i18n.language, {
+                                             style: "currency",
+                                             currency: "SAR",
+                                           }).format(ord.orderItems.reduce((sum, i:any) => sum + i.price * i.quantity, 0))}</strong>
+                   </Col>
+                     </Row>
+                  
                       
                 </>
                 </Card>
+           
+                    
             )))
             :(
                 <div>On Orders</div>
@@ -51,11 +79,11 @@ const Order = () => {
                  
               
 
-            
+            </Row>
           </div>
         
          {/* PAGINATION */}
-      {totalPages > 1 && (
+      {/* {totalPages > 1 && (
         <div className="pagination">
           {[...Array(totalPages)].map((_, i) => {
             const num = i + 1;
@@ -77,8 +105,19 @@ const Order = () => {
             );
           })}
         </div>
-      )}
+      )} */}
+
     </Container>
+    
+              <Container fluid="md" className="mt-2 d-flex justify-content-center">
+                <Paginationbootstrap
+                  page={searchParams.has("page") ? Number(searchParams.get("page")) : 1 }
+                  totalPages={totalPages}
+                  searchParams={searchParams}
+                  setSearchParams={setSearchParams}
+                />
+              </Container>
+              </>
   )
 }
 

@@ -19,6 +19,7 @@ import i18next from "i18next";
 import "./Products.css";
 import {Row,Col} from "react-bootstrap";
   import { fromMainValueToError } from "recharts/types/state/selectors/axisSelectors";
+import Paginationbootstrap from "./Paginationbootstrapold";
 
 const ProductManagement = () => {
   const { t } = useTranslation("product");
@@ -95,17 +96,8 @@ const ProductManagement = () => {
     }
   }, [debouncedSearch, searchParams, setSearchParams]);
 
-  // Toast notifications
-  // useEffect(() => {
-  //   if (error && typeof error === 'string') {
-  //     toast.error(error);
-  //     dispatch(clearMessages());
-  //   }
-  //   if (success) {
-  //     toast.success(success);
-  //     dispatch(clearMessages());
-  //   }
-  // }, [dispatch, error, success]);
+  // Load categories with error handling
+  
 useEffect(() => {
   const fetchCategories = async () => {
     const timeoutId = setTimeout(() => {
@@ -248,7 +240,8 @@ useEffect(() => {
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
-    <Container style={{ marginTop: 10 }}>
+    <>
+    <Container style={{ marginTop: 10 }} className="neucha-regular">
       <h2 className="title">
         {i18next.language === "ar" ? "إدارة المنتجات" : "Product Management"} 
       </h2>
@@ -314,7 +307,7 @@ useEffect(() => {
                     // aria-label="Filter by category"
                    >
                      <option value="">
-                       {i18next.language === "ar" ? "All Categories" : "All Categories"}
+                       {i18next.language === "ar" ? "جميع الفئات" : "All Categories"}
                      </option>
                      {categoryDto?.map((cat: any) => (
                        <option key={cat.id} value={cat.id}>
@@ -325,36 +318,36 @@ useEffect(() => {
                         </select>
         </Col>
         <Col>
-        <label className="file-upload" style={{ cursor: "pointer" }}>
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            fill="none" 
-            stroke="currentColor"
-            strokeWidth="2" 
-            viewBox="0 0 24 24"
-            style={{ width: 20, height: 20 }}
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              d="M12 4v16m8-8H4" 
-            />
-          </svg>
-          {image ? image.name : (i18next.language === "ar" ? "اختر صورة" : "Choose File")}
-          <input 
-            ref={fileInputRef} 
-            type="file" 
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const files = e.target.files;
-              if (files && files.length > 0) {
-                setImage(files[0]);
-              }
-            }}
-          />
-        </label>
-             </Col> 
+  <label className="btn btn-outline-secondary btn d-inline-flex align-items-center gap-2">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+
+    {image
+      ? image.name
+      : i18next.language === "ar"
+      ? "اختر صورة"
+      : "Choose Image"}
+
+    <input
+      type="file"
+      accept="image/*"
+      hidden
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) setImage(file);
+      }}
+    />
+  </label>
+</Col>
      </Row>
      
       <Col>
@@ -603,7 +596,7 @@ useEffect(() => {
       )}
 
       {/* PAGINATION */}
-      {totalPages > 1 && (
+      {/* {totalPages > 1 && (
         <div className="pagination justify-content-center">
           {[...Array(totalPages)].map((_, i) => {
             const num = i + 1;
@@ -624,8 +617,20 @@ useEffect(() => {
             );
           })}
         </div>
-      )}
+      )} */}
+        <Paginationbootstrap
+              page={currentPage}
+              totalPages={totalPages}
+              searchParams={searchParams}
+              setSearchParams={setSearchParams}
+            />
     </Container>
+ 
+          <Container fluid="md" className="mt-2 d-flex justify-content-center">
+          
+          </Container>
+      </>
+      
   );
 };
 

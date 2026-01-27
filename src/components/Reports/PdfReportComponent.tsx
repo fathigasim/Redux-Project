@@ -1,17 +1,17 @@
 
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
-import {Font } from '@react-pdf/renderer';
+//import {Font } from '@react-pdf/renderer';
 
 import i18n from "../../i18n";
 
 interface Order {
   orders: any[];
 }
-Font.register({
-  family: "NotoNaskhArabic",
+// Font.register({
+//   family: "NotoNaskhArabic",
  
-  src: "/fonts/NotoNaskhArabic-Regular.ttf",
-});
+//   src: "/fonts/NotoNaskhArabic-Regular.ttf",
+// });
 const PdfReportComponent = ({orders}:Order) => {
     
 const locale = i18n.language === "ar" ? "ar-SA" : i18n.language;
@@ -43,7 +43,9 @@ const locale = i18n.language === "ar" ? "ar-SA" : i18n.language;
               <Text style={styles.heading}>Items:</Text>
               {order.orderItems && order.orderItems.map((item:any, idx:number) => (
                 <View key={idx} style={styles.section}>
-                  <Text style={styles.text}>
+                  <Text
+                   style={styles.text}
+                   >
                     - {item.name}: {item.quantity} x ${item.price}
                   </Text>
                   <Text style={styles.text}>
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 12,
    
-    fontFamily: "NotoNaskhArabic",  
+    //fontFamily: "NotoNaskhArabic",  
  
   },
 });

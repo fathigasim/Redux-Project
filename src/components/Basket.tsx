@@ -7,12 +7,14 @@ import { toast } from 'react-toastify'
 import { FaInfoCircle } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import { FaRegMoneyBillAlt } from "react-icons/fa";
-import { Alert } from 'react-bootstrap'
+import { Alert, Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import api from '../api/axios'
+import Contrainer from 'react-bootstrap/Container'
 const Basket = () => {
       const { t } = useTranslation("basket");
-      const {items} = useSelector((state: RootState) => state.basket)
+      const {loading} = useSelector((state: RootState) => state.basket)
+     const { items } = useSelector((state: RootState) => state.basket) || {};
       const { user, accessToken } = useSelector((state: RootState) => state.auth);
        const isLoggedIn = Boolean(user && accessToken);
       const dispatch = useDispatch<AppDispatch>()
@@ -45,7 +47,7 @@ const Basket = () => {
   const handleCheckout = async () => {
     
     try {
-      const res = await api.post('/api/payment/create-checkout-session',items)
+      const res = await api.post('/payment/create-checkout-session',items)
       window.location.href = res.data.url
     } catch (error:any) {
        if (error.response) {
@@ -72,10 +74,13 @@ const Basket = () => {
   
     }
   }
-         
-    const total = items.reduce((sum:number, i:any) => sum + i.price * i.quantity, 0)
+         const safeItems = Array.isArray(items) ? items : [];
+    const total = safeItems.reduce((sum:number, i:any) => sum + i.price * i.quantity, 0)
 
 
+    if(loading){
+        return <div>{t("loading")}</div>
+    }
   return (
     <>
     
@@ -83,10 +88,15 @@ const Basket = () => {
     {items.length !==0 && 
     <>
      
-    <div style={{display:'flex',flexDirection:'column', maxWidth:"400px",margin:"auto",boxShadow:"5px 5px 10px rgba(0,0,0,0.5)",borderRadius:'1rem',padding:'3px'}} >
+    <Contrainer className='neucha-regular border rounded p-3 mt-3' style={{boxShadow:"5px 5px 10px rgba(0,0,0,0.5)"}}>
+      <Row>
+        <Col md={8} sm={12} style={{margin:'auto'}}> 
+    {/* style={{display:'flex',flexDirection:'column', maxWidth:"400px",margin:"auto",boxShadow:"5px 5px 10px rgba(0,0,0,0.5)",borderRadius:'1rem',padding:'3px'}}  */}
+    
        {isLoggedIn ? null : <Alert variant="danger"><span><FaInfoCircle /> {t("login_first")}</span></Alert>}
       {items&&
-      <table className='table table-borderless' style={{justifyContent:'center'}}>
+      
+      <table className='table table-borderless text-center' style={{justifyContent:'center'}}>
         <thead><th>Image</th><th>Name</th><th>Price</th><th>Quantity</th><th></th></thead>
         <tbody>
       {items.map((basket)=>(
@@ -94,7 +104,7 @@ const Basket = () => {
          <tr key={basket.productId}>
         <td ><img src={basket.image} style={{width:'50px',height:'50px'}} className='img img-thumbnail' alt='default.png'/> </td><td>{basket.productName}</td><td>{basket.price}</td>
         <td>{basket.quantity}</td><td>
-            <button className='btn btn-danger' onClick={()=>{
+            <button style={{boxShadow:"5px 5px 10px rgba(0,0,0,0.5)"}} className='btn btn-danger' onClick={()=>{
               dispatch(RemoveFromBasket({productId:basket.productId,quantity:1})
             )
          
@@ -105,6 +115,7 @@ const Basket = () => {
       }
          </tbody>
       </table>
+      
     }
      <div className='alert alert-danger' style={{display:'flex',justifyContent:'center',height:'2rem',justifyItems:'center',padding:'2px'}}><p>Total:{new Intl.NumberFormat(i18n.language, {
                         style: "currency",
@@ -116,12 +127,15 @@ const Basket = () => {
           const confirmation=window.confirm('Are you sure you want to delete');
           if(confirmation)
           dispatch(clearTheBasket)}}><span><MdDeleteForever /> {t("remove_basket")}</span></button></div>
-           <div style={{color:"blue",justifyItems:'end'}} >
+           <div style={{justifyItems:'end'}} >
             <button 
+            style={{boxShadow:"5px 5px 10px rgba(0,0,0,0.5)"}}
              disabled={!isLoggedIn}
-             className='btn btn-primary rounded-pill' onClick={()=>handleCheckout()}><span><FaRegMoneyBillAlt /> Pay</span></button></div>
+             className='btn btn-primary rounded-pill' onClick={()=>handleCheckout()}><span><FaRegMoneyBillAlt className='mr-2'/> {t("Pay")}</span></button></div>
     </div>
-    </div>
+    </Col>
+    </Row>
+    </Contrainer>
 
    </>
 }

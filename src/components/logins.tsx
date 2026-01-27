@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Form, Button, Container, Row, Col, Card, Alert } from "react-bootstrap";
 import i18next from "i18next";
+import { useTranslation } from "react-i18next";
+
 
 interface LocationState {
   from?: string;
@@ -13,13 +15,16 @@ interface LocationState {
 }
 
 export default function LoginForm() {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  console.log("API URL:", apiUrl);
+  const { t } = useTranslation("login");
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
 
   // ✅ Get return URL from location state (set by RequireAuth)
   const state = location.state as LocationState;
-  const returnUrl = state?.from || "/"; // Default to dashboard
+  const returnUrl = state?.from || "/"; // Default to proudcts
   // const redirectMessage = state?.message;
 
   const [email, setEmail] = useState("");
@@ -45,27 +50,7 @@ export default function LoginForm() {
       navigate(returnUrl, { replace: true });
     }
   }, [accessToken, navigate, returnUrl]);
-// useEffect(() => {
-//   // Save return URL to sessionStorage
-//   if (returnUrl && returnUrl !== "/dashboard") {
-//     sessionStorage.setItem("returnUrl", returnUrl);
-//   }
-// }, [returnUrl]);
 
-// // In handleSubmit after successful login:
-// const savedReturnUrl = sessionStorage.getItem("returnUrl");
-// const finalRedirect = savedReturnUrl || returnUrl || "/";
-// sessionStorage.removeItem("returnUrl");
-// navigate(finalRedirect, { replace: true });
-//   // ✅ Show redirect message as toast
-//   useEffect(() => {
-//     if (redirectMessage) {
-//       toast.info(redirectMessage, {
-//         position: "top-center",
-//         autoClose: 4000
-//       });
-//     }
-//   }, [redirectMessage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +64,7 @@ export default function LoginForm() {
       // ✅ Validate return URL (prevent open redirect vulnerability)
       const safeRedirect = returnUrl && returnUrl.startsWith("/") 
         ? returnUrl 
-        : "/dashboard";
+        : "/";
       
       toast.success(
         i18next.language === "ar" 
@@ -164,7 +149,7 @@ export default function LoginForm() {
                 {/* EMAIL INPUT */}
                 <Form.Group controlId="formEmail" className="mb-3">
                   <Form.Label className="fw-semibold">
-                    {i18next.language === "ar" ? "البريد الإلكتروني" : "Email address"}
+                    {t("Email")}
                   </Form.Label>
                   <Form.Control
                     type="email"
@@ -176,7 +161,9 @@ export default function LoginForm() {
                     }
                     value={email}
                     onChange={(e) => {
-                      setEmail(e.target.value);
+                     // eslint-disable-next-line no-control-regex
+                     const asciiOnly = e.target.value.replace(/[^\x00-\x7F]/g, '');
+                      setEmail(asciiOnly)
                       if (formErrors.email) {
                         setFormErrors(prev => ({ ...prev, email: undefined }));
                       }
@@ -194,14 +181,16 @@ export default function LoginForm() {
                 {/* PASSWORD INPUT */}
                 <Form.Group controlId="formPassword" className="mb-4">
                   <Form.Label className="fw-semibold">
-                    {i18next.language === "ar" ? "كلمة المرور" : "Password"}
+                    {t("Password")}
                   </Form.Label>
                   <Form.Control
                     type="password"
                     placeholder={i18next.language === "ar" ? "كلمة المرور" : "Password"}
                     value={password}
                     onChange={(e) => {
-                      setPassword(e.target.value);
+                      // eslint-disable-next-line no-control-regex
+                      const asciiOnly = e.target.value.replace(/[^\x00-\x7F]/g, '');
+                       setPassword(asciiOnly);
                       if (formErrors.password) {
                         setFormErrors(prev => ({ ...prev, password: undefined }));
                       }

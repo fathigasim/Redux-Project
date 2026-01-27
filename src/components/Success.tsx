@@ -44,7 +44,7 @@ const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
       try {
         
         const response = await api.get(
-          `/api/payment/order/${orderRef}`
+          `/payment/order/${orderRef}`
         );
 
         if (response.status !== 200) {

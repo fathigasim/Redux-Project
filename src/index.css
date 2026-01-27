@@ -97,6 +97,18 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+button,
+.btn,
+[role="button"] {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+button:active,
+.btn:active,
+[role="button"]:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) inset;
+}
 
 @media (prefers-color-scheme: light) {
   :root {

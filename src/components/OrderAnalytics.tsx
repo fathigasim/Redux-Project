@@ -3,12 +3,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { type RootState, type AppDispatch } from "../app/store";
 
 import { fetchAllOrders } from "../features/orderstatSlice";
-import { Container } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { CSVLink } from 'react-csv';
 import * as XLSX from 'xlsx';
 import { Link } from "react-router";
-
-
+import { FaFileCsv } from "react-icons/fa6";
+import { FaRegFileExcel } from "react-icons/fa";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PdfReportComponent from './Reports/PdfReportComponent';
 import {
   ResponsiveContainer,
   LineChart,
@@ -21,10 +23,10 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-
+import { FaRegFilePdf } from "react-icons/fa6";
 const OrderAnalytics: React.FC = () => {
  const dispatch = useDispatch<AppDispatch>();
-const { chartData, loading, error } = useSelector((state: RootState) => state.orderstats);
+const { chartData,chartData:orders, loading, error } = useSelector((state: RootState) => state.orderstats);
 
 useEffect(() => {
   dispatch(fetchAllOrders());
@@ -84,17 +86,38 @@ if(monthlyData.length === 0){
   return (
     <>
     <Container>
-      <div style={{display:'flex',flexDirection:'row',justifyContent:'space-between',border:'2px solid firebrick',gap:'4rem',marginTop:'2rem'}}>
- <div style={{flex:1}}><CSVLink data={monthlyData} filename={`${new Date().toLocaleDateString("default", { month: "short" })}-report.csv`}>
-   Download CSV
+      <Row>
+        <Col sm={4} md={2} style={{marginTop:20}}>
+     
+ <CSVLink className="btn btn-primary" data={monthlyData} filename={`${new Date().toLocaleDateString("default", { month: "short" })}-report.csv`}>
+   <span><FaFileCsv /> Download CSV</span>
 </CSVLink>
- <a href="#" style={{cursor:'pointer'}} onClick={exportToExcel}>Download Excel</a>
-  
-  <Link to="/printPdf"> Pdf Report</Link>
-</div>
-</div>
+</Col>
+<Col sm={4} md={2} style={{marginTop:20}}>
+ <a href="#" className="btn btn-primary" style={{cursor:'pointer'}} onClick={exportToExcel}>
+  <span><FaRegFileExcel /> Download Excel</span></a>
+  </Col>
+<Col sm={4} md={2}  style={{marginTop:20}}>
+  {/* <Link className="btn btn-primary" to="/printPdf"><span><FaRegFilePdf /> Pdf Report</span></Link> */}
+    {/* Download button */}
+        <PDFDownloadLink className="btn btn-primary" style={{textDecoration:"none"}}
+          document={<PdfReportComponent orders={orders} />}
+          fileName={`orders-report-${new Date().toISOString().split('T')[0]}.pdf`}
+        >
+         <span><FaRegFilePdf />  
+        {/* {({ loading }) =>
+            loading ? "Generating PDF..." : "Download Orders Report"
+          } */}
+          {loading ?("Generating..."):("Download PDF")}
+           
+             </span>
+        </PDFDownloadLink> 
+    
+  </Col>
+
+</Row>
     </Container>
-    <Container style={{marginTop:100}}>
+    <Container style={{marginTop:50}}>
     <div className="p-4 space-y-8">
       <h2 className="text-xl font-semibold mb-4">📊 Order Analytics</h2>
 

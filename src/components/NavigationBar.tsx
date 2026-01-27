@@ -40,7 +40,8 @@ const NavigationBar = () => {
   const isLoggedIn = Boolean(user && accessToken);
 
   // Calculate cart total
-   const cartTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  //    const safeItems = Array.isArray(items) ? items : [];
+  //  const cartTotal = safeItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   //Format currency
   const formatCurrency = (amount: number) =>
@@ -104,7 +105,7 @@ const NavigationBar = () => {
           {/* Login Button (Only When Not Logged In) */}
           {!isLoggedIn && (
             <Link to="/login" className="btn btn-outline-info btn-sm">
-              {t('Login')}
+              {t('Login_nav')}
             </Link>
           )}
 
@@ -162,7 +163,7 @@ const NavigationBar = () => {
 
                     <div className="d-flex justify-content-between p-2 fw-bold">
                       <span>{t('Total')}:</span>
-                      <span>{formatCurrency(cartTotal)}</span>
+                      {/* <span>{formatCurrency(cartTotal)}</span> */}
                     </div>
 
                     <div className="d-flex justify-content-center">
@@ -231,11 +232,11 @@ const NavigationBar = () => {
       <Container fluid className="px-2 py-2">
         <Navbar.Toggle aria-controls="navbarMain" />
         <Navbar.Collapse id="navbarMain">
-          <Nav className="me-auto">
+          {/* <Nav className="me-auto">
             <Nav.Link as={Link} to="/">
               {t('Products')}
             </Nav.Link>
-          </Nav>
+          </Nav> */}
 
           {/* Search Bar */}
           {/* <Form className="d-flex mt-2 mt-lg-0" onSubmit={handleSearch}>

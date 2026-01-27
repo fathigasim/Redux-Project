@@ -87,7 +87,7 @@ export const fetchOrders= createAsyncThunk<OrderResponse,FetchOrdersParams>(
       pageSize,
     };
 
-    const res = await api.get("/api/Order",{ params });
+    const res = await api.get("/Order",{ params });
     console.log("fetchOrders -> response", res.data);
     return res.data as OrderResponse;
   }
@@ -106,7 +106,7 @@ export const OrderByDate= createAsyncThunk<OrderResponse,string>(
     //   pageSize,
     // };
 
-    const res = await api.get(`/api/Order/${date}`);
+    const res = await api.get(`/Order/${date}`);
     console.log("fetchOrders -> response", res.data);
     return await res.data as OrderResponse;
   }

@@ -1,5 +1,6 @@
 {
     "remove": "Remove",
     "login_first": "Login first to proceed to checkout",
-    "remove_basket":"Remove Basket"
+    "remove_basket":"Remove Basket",
+    "Pay": "Pay"
 }

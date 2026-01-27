@@ -13,6 +13,8 @@ const PdfReport = () => {
           dispatch(fetchAllOrders());
           
         }, [dispatch]);
+        // Detect production
+  const isDevelopment = process.env.NODE_ENV === "development";
   return (
    <div className="container mt-4">
       <h2>PDF Report Example</h2>
@@ -30,14 +32,47 @@ const PdfReport = () => {
       <hr />
 
       {/* In-page viewer (optional) */}
+            {/* Only show preview in development */}
+      {isDevelopment && (
+        <>
+          <h4>Preview (Development Only):</h4>
       <h4>Preview:</h4>
       <div style={{ border: "1px solid #ddd", height: "600px" }}>
         <PDFViewer width="100%" height="600">
           <PdfReportComponent orders={orders} />
         </PDFViewer>
       </div>
+      </>
+      )}
     </div>
   )
 }
 
-export default PdfReport
+ export default PdfReport
+// import React from 'react';
+// import { PDFDownloadLink } from "@react-pdf/renderer";
+// import { Document, Page, Text } from '@react-pdf/renderer';
+
+// // Define the PDF document as a component
+// const TestPdfDocument = () => (
+//   <Document>
+//     <Page>
+//       <Text>Test</Text>
+//     </Page>
+//   </Document>
+// );
+
+// // Main component
+// const PdfReport = () => {
+//   return (
+//     <div className="container mt-4">
+//       <h2>PDF Report</h2>
+      
+//       <PDFDownloadLink document={<TestPdfDocument />} fileName="test.pdf">
+//         {({ loading }) => (loading ? "Generating PDF..." : "Download Test PDF")}
+//       </PDFDownloadLink>
+//     </div>
+//   );
+// };
+
+// export default PdfReport;

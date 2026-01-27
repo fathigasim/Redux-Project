@@ -4,8 +4,9 @@ import { toast } from "react-toastify";
 import { forgotPassword, clearMessages } from "../features/manageSlice";
 import { type RootState, type AppDispatch } from "../app/store";
 import { Container,Form,Button } from "react-bootstrap";
-
+import { useTranslation } from "react-i18next";
 export default function ForgotPassword() {
+  const { t } = useTranslation("usermanagement");
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, success } = useSelector(
     (state: RootState) => state.manage
@@ -50,41 +51,17 @@ export default function ForgotPassword() {
   }, [dispatch,error, success]);
 
   return (
-    // <Container className="" style={{marginTop:"40px !important",top:"100px"}}>
-    // <div className="flex flex-col items-center justify-center h-screen bg-gray-50 ">
-         
-    //   <form noValidate onSubmit={handleSubmit} className="p-6 bg-white shadow rounded w-96 px-3 py-3">
-    //     <h2 className="text-xl font-semibold mb-4">Forgot Password</h2>
-    //       {formErrors && <p style={{ color: "red" }}>{formErrors.email}</p>}
-    //     <label className="block mb-2 text-sm font-medium">Email</label>
-    //     <input
-    //       type="email"
-    //       value={email}
-    //       onChange={(e) => setEmail(e.target.value)}
-    //       className="border rounded w-full p-2 mb-4"
-    //       required
-    //     />
-    //           {emailSuccess && <p style={{ color: "green" }}>{emailSuccess}</p>} 
-    //     <button
-    //       type="submit"
-    //       disabled={loading}
-    //       className="bg-blue-600 text-black w-full py-2 rounded hover:bg-blue-700"
-    //     >
-    //       {loading ? "Sending..." : "Send Reset Link"}
-    //     </button>
-    //   </form>
-    // </div>
-    // </Container>
    
     <div style={{margin:"auto",maxWidth:"400px",justifyContent:"center"}} >
     <Form noValidate onSubmit={handleSubmit} className="p-6 bg-white shadow rounded w-96 px-3 py-3">
       <Form.Group className="mb-3" controlId="formGroupEmail">
-        <Form.Label>Email address</Form.Label>
+        <Form.Label>{t("email")}</Form.Label>
         <Form.Control  type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="border rounded w-full p-2 mb-4"
-          required  placeholder="Enter email"
+          required
+           placeholder={t("Enter_email")}
       />
       {emailSuccess && <p style={{ color: "green" }}>{emailSuccess}</p>}
       </Form.Group>
@@ -96,7 +73,7 @@ export default function ForgotPassword() {
         disabled={loading}
            className="bg-blue-600 text-black w-full py-2 rounded hover:bg-blue-700"
        >
-        {loading ? "Sending..." : "Send Reset Link"}
+        {loading ? `${t("sending")}` : `${t("send_reset_link")}`}
       </Button>
     </Form>
     </div>

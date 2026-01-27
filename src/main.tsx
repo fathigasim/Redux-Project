@@ -4,18 +4,19 @@ import { store } from './app/store'
 
 import './index.css'
 import './App.css'
-import App from './App.tsx'
+import "./i18n";
+import i18next from './i18n'
+import App from './App'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from './context/themeContext';
 import { ToastContainer } from 'react-toastify';
 import LoadingFallback from './components/LoadingFallback';
 import 'react-toastify/dist/ReactToastify.css';
-
+import './testTranslations';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap-rtl/dist/css/bootstrap-rtl.min.css';
 
-import "./i18n";
-import i18next from './i18n'
+
 
 
 

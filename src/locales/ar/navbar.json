@@ -9,11 +9,13 @@
     "English": "الإنجليزية",
     "Arabic": "العربية",
     "Account": "الحساب",
-    "Orders": "الطلبات",
+    "Orders": " تقارير الطلبات",
     "ProductManagement": "إدارة المنتجات",
     "Products": "المنتجات",
     "Cart_is_Empty": "السلة فارغة",
     "Analytics": "التحليلات",
     "Order_By_Date": "الطلب حسب التاريخ",
-    "Operations": "العمليات"
+    "Operations": "العمليات",
+     "Login_nav":" الدخول",
+     "Orders_List":"قائمة الطلبات"
 }
