@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 
 import { fetchProducts, clearMessages } from "../features/productSlice";
-import { GetCategory, type CategoryDto } from "../features/CategorySlice";
+import { GetCategory } from "../features/CategorySlice";
 import { GetBasket } from "../features/basketSlice";
 import { type RootState, type AppDispatch } from "../app/store";
 
@@ -89,10 +89,21 @@ useEffect(() => {
   fetchCategories();
 }, [dispatch]);
   // Load basket on mount
-  useEffect(() => {
-    dispatch(GetBasket());
-  }, [dispatch,items.length]);
+  // useEffect(() => {
+  //   dispatch(GetBasket());
+  // }, [dispatch,items.length]);
+   useEffect( ()=>{
+    const fetchBasket=async()=>{
+              try{
+          await  dispatch(GetBasket()).unwrap();
+            }
+            catch(err:any){
+                console.log(err)
+            }
+          }
+       fetchBasket();
 
+    },[dispatch])
   // Sync local search with URL on mount/URL change
   useEffect(() => {
     setLocalSearch(currentSearch);

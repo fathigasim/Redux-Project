@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { resetPassword, clearMessages } from "../features/manageSlice";
 import { type RootState, type AppDispatch } from "../app/store";
-import { Alert, Col, Row } from 'react-bootstrap'
+import { Alert, Col, Container, Row } from 'react-bootstrap'
 
 export default function ResetPassword() {
   const [resetError, setResetError] = useState<{newPassword:string, newPasswordConfirm?:string}>
@@ -59,10 +59,11 @@ export default function ResetPassword() {
   }, [dispatch,navigate,error, success]);
 
   return (
-    <Row lg={6} md={8} sm={12} >
-      <Col className="p-4">
-      <form noValidate onSubmit={handleSubmit} className="bg-white shadow rounded w-96">
+    <Row >
    
+      <form style={{margin:"5px",padding:"5px"}} noValidate onSubmit={handleSubmit} className="bg-white shadow rounded">
+
+      <Container className="col-md-4 offset-4" >
         <h2 className="text-xl font-semibold mb-4">Reset Password</h2>
     {resetError && <p style={{ color: "red" }}>{resetError.newPassword}</p>}
      <Row className="mt-3">
@@ -97,9 +98,10 @@ export default function ResetPassword() {
           {loading ? "Resetting..." : "Reset Password"}
         </button>
         </Row>
+        </Container>
       </form>
-      
-      </Col>
+     
+     
     </Row>
   );
 }

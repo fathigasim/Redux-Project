@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { useDebounce } from "use-debounce";
 import { toast } from "react-toastify";
+import { Button, Form, FormControl, FormGroup, FormLabel, FormSelect } from "react-bootstrap";
 import { GetCategory, type CategoryDto } from "../features/CategorySlice";
 import {
   addProduct,
@@ -18,7 +19,7 @@ import { Container } from "react-bootstrap";
 import i18next from "i18next";
 import "./Products.css";
 import {Row,Col} from "react-bootstrap";
-  import { fromMainValueToError } from "recharts/types/state/selectors/axisSelectors";
+
 import Paginationbootstrap from "./Paginationbootstrapold";
 
 const ProductManagement = () => {
@@ -37,7 +38,7 @@ const ProductManagement = () => {
     page, 
     pageSize, 
     products,
-    formErrors 
+ 
   } = useSelector((state: RootState) => state.products);
  const { 
     loading: categoryLoading, 
@@ -48,8 +49,8 @@ const ProductManagement = () => {
 
   // Local state
   const [thename, setTheName] = useState("");
-  const [theprice, setThePrice] = useState("");
-  const [stock, setStock] = useState("");
+  const [theprice, setThePrice] = useState("1");
+  const [stock, setStock] = useState("0");
     const [category, setCategory] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -59,6 +60,12 @@ const ProductManagement = () => {
   const [editimage, setEditImage] = useState<File | null>(null);
   const [localSearch, setLocalSearch] = useState(searchQuery ?? "");
   const [debouncedSearch] = useDebounce(localSearch, 500);
+ const [formErrors, setFormErrors] = useState<{ 
+    name?: string; 
+    price?: string; 
+    image?:string;
+    stock?:string;
+  }>({});
 
   const editFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -147,6 +154,15 @@ useEffect(() => {
       dispatch(fetchProducts({ page: 1 }));
     } catch (err: any) {
       console.error("Add product error:", err);
+      if(err?.Name||err?.Image||err?.Price||err?.Stock){
+        setFormErrors({
+         name: Array.isArray(err.Name) ? err.Name[0] : err.Email,
+          price: Array.isArray(err.Password) ? err.Price[0] : err.Price,
+          image: Array.isArray(err.Image) ? err.Image[0] : err.Image,
+           stock: Array.isArray(err.Stock) ? err.Stock[0] : err.Stock,
+        })
+          
+      }
       // Errors are now handled in Redux and displayed via formErrors from state
     }
   };
@@ -247,19 +263,10 @@ useEffect(() => {
       </h2>
 
       {/* FORM ERRORS */}
-      {(formErrors.name || formErrors.price || formErrors.image) && (
-        <div className="alert alert-danger">
-          <ul style={{ margin: 0, paddingLeft: 20 }}>
-            {formErrors.name && <li>{formErrors.name}</li>}
-            {formErrors.price && <li>{formErrors.price}</li>}
-            {formErrors.image && typeof formErrors.image === 'string' && <li>{formErrors.image}</li>}
-            {formErrors.stock && <li>{formErrors.stock}</li>}
-          </ul>
-        </div>
-      )}
+  
 
       {/* ADD FORM */}
-      <form 
+      <Form noValidate
         onSubmit={handleAdd} 
        
        className="mb-10"
@@ -267,40 +274,83 @@ useEffect(() => {
         <div >
           <Row>
             <Col>
-        <input
+            <FormGroup>
+        <Form.Control
        
           placeholder={i18next.language === "ar" ? "الاسم" : "Name"}
           value={thename}
-          onChange={(e) => setTheName(e.target.value)}
-          className={formErrors.name ? "form-control col-md-2 is-invalid" : "form-control"}
+          onChange={(e) =>{ setTheName(e.target.value)
+
+                   if (formErrors.name) {
+      setFormErrors(prev => ({
+        ...prev,
+        name: undefined
+      }))}
+          }}
+          //  className={`rounded-3 py-2 ${i18next.language === 'ar' ? 'text-end' : 'text-start'}`}
+           isInvalid={!!formErrors.name}
+           disabled={loading}
         />
+          <Form.Control.Feedback type="invalid">
+                            {formErrors.name}
+                          </Form.Control.Feedback>
+        </FormGroup>
 </Col>
         <Col>
-        <input
+        <FormGroup>
+        <FormControl
         
           placeholder={i18next.language === "ar" ? "السعر" : "Price"}
-          min="0"
-          //step="0.01"
+          min="1"
+         
           type="number"
           value={theprice}
-          onChange={(e) => setThePrice(e.target.value)}
-          className={formErrors.price ? "form-control col-md-2 is-invalid" : "form-control"}
-        />
+          onChange={(e) =>{ setThePrice(e.target.value)
+                   if (formErrors.price) {
+      setFormErrors(prev => ({
+        ...prev,
+        price: undefined
+      }))}
+          }}
+          // className={formErrors.price ? "form-control col-md-2 is-invalid" : "form-control"}
+       isInvalid={!!formErrors.price}
+       disabled={loading}
+       />
+        <Form.Control.Feedback type="invalid">
+                            {formErrors.price}
+                          </Form.Control.Feedback>
+        </FormGroup>
         </Col>
         <Col>
- <input
+        <FormGroup>
+ <FormControl
           style={{ padding: "0.5rem", borderRadius: "0.3rem", flex: "1 1 150px" }}
           placeholder={i18next.language === "ar" ? "المخزون" : "Stock"}
           min="0"
           //step="0.01"
           type="number"
           value={stock}
-          onChange={(e) => setStock(e.target.value)}
-          className={formErrors.stock ? "form-control col-md-2 is-invalid" : "form-control"}
+          onChange={(e) =>{setStock(e.target.value)
+
+              if (formErrors.stock) {
+      setFormErrors(prev => ({
+        ...prev,
+        stock: undefined
+      }))}
+          }}
+          
+          // className={formErrors.stock ? "form-control col-md-2 is-invalid" : "form-control"}
+           isInvalid={!!formErrors.stock}
+       disabled={loading}
         />
+          <Form.Control.Feedback type="invalid">
+                            {formErrors.stock}
+                          </Form.Control.Feedback>
+        </FormGroup>
         </Col>
         <Col>
-         <select 
+        <FormGroup>
+         <FormSelect 
                      className="mb-2 form-control col-md-2"
                      value={category}
                      onChange={(e) => setCategory(e.target.value )}
@@ -315,10 +365,12 @@ useEffect(() => {
                        </option>
                     
                      ))}
-                        </select>
+                        </FormSelect>
+                        </FormGroup>
         </Col>
         <Col>
-  <label className="btn btn-outline-secondary btn d-inline-flex align-items-center gap-2">
+        <FormGroup>
+  <FormLabel className="btn btn-outline-secondary btn d-inline-flex align-items-center gap-2">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
@@ -337,21 +389,36 @@ useEffect(() => {
       ? "اختر صورة"
       : "Choose Image"}
 
-    <input
-      type="file"
-      accept="image/*"
-      hidden
-      onChange={(e) => {
-        const file = e.target.files?.[0];
-        if (file) setImage(file);
-      }}
-    />
-  </label>
+   <Form.Control
+  type="file"
+  accept="image/*"
+  hidden
+  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0];
+    if (!file) return;
+    if (file) setImage(file);
+
+           if (formErrors.image) {
+      setFormErrors(prev => ({
+        ...prev,
+        image: undefined
+      }))}
+  }}
+  isInvalid={!!formErrors.image}
+  disabled={loading}
+/>
+
+<Form.Control.Feedback type="invalid">
+  {formErrors.image}
+</Form.Control.Feedback>
+
+</FormLabel>
+</FormGroup>
 </Col>
      </Row>
      
       <Col>
-        <button 
+        <Button
           className="btn btn-primary" 
           type="submit" 
           disabled={loading}
@@ -360,12 +427,12 @@ useEffect(() => {
             ? (i18next.language === "ar" ? "جارٍ الإضافة..." : "Adding...")
             : (i18next.language === "ar" ? "إضافة المنتج" : "Add Product")
           }
-        </button>
+      </Button> 
 
         </Col>
         </div>
        
-      </form>
+      </Form>
 
    
 {/* FILTERS */}

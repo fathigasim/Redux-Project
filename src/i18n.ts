@@ -1,15 +1,35 @@
-// src/i18n.js
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
-// Import files individually to catch errors
-let enNavbar, enBasket, enLogin, enCart, enProduct, enCommon, enProfile, enRegister, enUserManagement;
-let arNavbar, arBasket, arLogin, arCart, arProduct, arCommon, arProfile, arRegister, arUserManagement;
+/* =======================
+   English translations
+======================= */
+import enNavbar from "./locales/en/navbar.json";
+import enBasket from "./locales/en/basket.json";
+import enLogin from "./locales/en/login.json";
+import enCart from "./locales/en/cart.json";
+import enProduct from "./locales/en/product.json";
+import enCommon from "./locales/en/common.json";
+import enProfile from "./locales/en/profile.json";
+import enRegister from "./locales/en/register.json";
+import enUserManagement from "./locales/en/usermanagement.json";
 
+/* =======================
+   Arabic translations
+======================= */
+import arNavbar from "./locales/ar/navbar.json";
+import arBasket from "./locales/ar/basket.json";
+import arLogin from "./locales/ar/login.json";
+import arCart from "./locales/ar/cart.json";
+import arProduct from "./locales/ar/product.json";
+import arCommon from "./locales/ar/common.json";
+import arProfile from "./locales/ar/profile.json";
+import arRegister from "./locales/ar/register.json";
+import arUserManagement from "./locales/ar/usermanagement.json";
 
-
-// Load English translations
-
+/* =======================
+   Resources
+======================= */
 const resources = {
   en: {
     navbar: enNavbar,
@@ -20,7 +40,7 @@ const resources = {
     common: enCommon,
     profile: enProfile,
     register: enRegister,
-    usermanagement: enUserManagement
+    usermanagement: enUserManagement,
   },
   ar: {
     navbar: arNavbar,
@@ -31,33 +51,50 @@ const resources = {
     common: arCommon,
     profile: arProfile,
     register: arRegister,
-    usermanagement: arUserManagement
-  }
+    usermanagement: arUserManagement,
+  },
 };
 
-console.log('Final resources structure:', JSON.stringify(resources, null, 2));
-
+/* =======================
+   Init i18next
+======================= */
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en',
-    fallbackLng: 'en',
-    ns: ['navbar', 'basket', 'login', 'cart', 'product', 'common', 'profile', 'register', 'usermanagement'],
-    defaultNS: 'common',
+    lng: "en",
+    fallbackLng: "en",
+
+    ns: [
+      "navbar",
+      "basket",
+      "login",
+      "cart",
+      "product",
+      "common",
+      "profile",
+      "register",
+      "usermanagement",
+    ],
+    defaultNS: "common",
+
     interpolation: {
       escapeValue: false,
     },
+
     react: {
       useSuspense: false,
     },
+
     debug: false,
   })
   .then(() => {
-    console.log('✅ i18next initialized successfully');
+    console.log("✅ i18next initialized");
+     console.log("LANG:", i18n.language);
+  console.log("STORE:", i18n.store.data);
   })
-  .catch((error) => {
-    console.error('❌ i18next initialization failed:', error);
+  .catch((err) => {
+    console.error("❌ i18next init failed", err);
   });
 
 export default i18n;

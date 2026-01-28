@@ -271,27 +271,10 @@ const productSlice = createSlice({
         state.error = null;
         state.loading=false;
       })
-     .addCase(addProduct.rejected, (state, action) => {
+     .addCase(addProduct.rejected, (state) => {
   state.loading = false;
   state.success = null;
-  state.formErrors = {}; // reset previous validation errors
 
-  const payload = action.payload as
-    | { Name?: string[]; Price?: string[],Image:File[] }
-    | { general?: string }
-    | undefined;
-
-  if (payload && ('Name' in payload || 'Price' in payload ||'Image' in payload)) {
-    state.error = null;
-    state.formErrors = {
-      name: Array.isArray(payload.Name) ? payload.Name[0] : undefined,
-      price: Array.isArray(payload.Price) ? payload.Price[0] : undefined, 
-    image: Array.isArray(payload.Image) ? payload.Image[0] : undefined,};
-  } else if (payload && 'general' in payload) {
-    state.error = payload.general as string;
-  } else {
-    state.error = action.error?.message || "Error adding product";
-  }
 })
 
 
