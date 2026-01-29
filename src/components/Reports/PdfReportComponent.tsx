@@ -29,6 +29,7 @@ const locale = i18n.language === "ar" ? "ar-SA" : i18n.language;
             <View style={styles.heading}>
               <Text style={styles.text}>Order ID: {order.id}</Text>
               <Text style={styles.text}>User ID: {order.userId}</Text>
+               <Text style={styles.text}>Date: {order.createdAt}</Text>
               <Text style={styles.text}>
                 Total Amount: {new Intl.NumberFormat(locale, {
                   style: "currency",

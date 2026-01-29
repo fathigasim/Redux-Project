@@ -2,10 +2,10 @@ import React from 'react'
 import { Button, Card } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Product } from '../features/productSlice';
-import AddToBasket from '../features/basketSlice';
+
 import { useDispatch } from 'react-redux';
 import { type AppDispatch } from '../app/store';
-import { basketInput, addToBasket } from '../features/basketSlice';
+import { basketInput, addToBasket,GetBasket } from '../features/basketSlice';
 import { toast } from 'react-toastify';
 import { BsCartPlus } from 'react-icons/bs';
 const ProductCart = ({ product }: { product: Product }) => {
@@ -14,7 +14,8 @@ const ProductCart = ({ product }: { product: Product }) => {
    const  handleAddToCart = async (basket: basketInput) => { 
     try{
    await dispatch(addToBasket({prodId:basket.prodId,inputQnt:1})).unwrap();
-    toast.success("Product added to cart");
+     await  dispatch(GetBasket()).unwrap();
+   toast.success("Product added to cart");
     }
     catch(err :any){
       console.log(`some error ${err}`)

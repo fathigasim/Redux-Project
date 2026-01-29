@@ -1,7 +1,10 @@
 
 {
+    "Order":"Order",
     "Order_Date": "Order Date",
     "Product": "Product",
     "Quantity": "Quantity",
-    "Price": "Price"
+    "Price": "Price",
+    "Items":"Items",
+    "Status":"Status"
 }

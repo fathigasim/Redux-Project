@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+
 import { useSelector, useDispatch } from 'react-redux'
-import { GetBasket,RemoveFromBasket,ClearBasket} from '../features/basketSlice'
+import {type basketRemove ,GetBasket,RemoveFromBasket,ClearBasket} from '../features/basketSlice'
 import {type RootState,type AppDispatch } from '../app/store'
 import i18n from '../i18n'
 import { toast } from 'react-toastify'
@@ -18,32 +18,28 @@ const Basket = () => {
       const { user, accessToken } = useSelector((state: RootState) => state.auth);
        const isLoggedIn = Boolean(user && accessToken);
       const dispatch = useDispatch<AppDispatch>()
-    useEffect( ()=>{
-    const fetchBasket=async()=>{
-              try{
-          await  dispatch(GetBasket()).unwrap();
-            }
-            catch(err:any){
-                console.log(err)
-            }
-          }
-       fetchBasket();
-
-    },[dispatch])
-
-      const clearTheBasket = async()=>{
-          try{
-               await dispatch(ClearBasket()).unwrap();
-
-               toast.success("basketItems deleted")
+  
+     const RemoveItemFromBasket = async({productId,quantity}:basketRemove)=>{
+           try{
+            await dispatch(RemoveFromBasket({productId,quantity}))
+  await dispatch(GetBasket()).unwrap(); 
+           }
+        catch(err:any){
+          console.log(err)
+        }
+     }
+      // const clearTheBasket = async()=>{
+      //     try{
+      //          await dispatch(ClearBasket()).unwrap();
+                  
+      //          toast.success("basketItems deleted")
                     
         
-          }
-          catch(err:any){
-                 alert(err)
-          }
-
-      }
+      //     }
+      //     catch(err:any){
+      //            alert(err)
+      //     }
+      // }
   const handleCheckout = async () => {
     
     try {
@@ -105,10 +101,8 @@ const Basket = () => {
         <td ><img src={basket.image} style={{width:'50px',height:'50px'}} className='img img-thumbnail' alt='default.png'/> </td><td>{basket.productName}</td><td>{basket.price}</td>
         <td>{basket.quantity}</td><td>
             <button style={{boxShadow:"5px 5px 10px rgba(0,0,0,0.5)"}} className='btn btn-danger' onClick={()=>{
-              dispatch(RemoveFromBasket({productId:basket.productId,quantity:1})
-            )
-         
-        } }><span><MdDeleteForever /> {t("remove")}</span></button></td>
+              RemoveItemFromBasket({productId:basket.productId,quantity:1})}
+              }><span><MdDeleteForever /> {t("remove")}</span></button></td>
       </tr>
       
       ))
@@ -123,10 +117,19 @@ const Basket = () => {
                       }).format(total)}</p>
                       </div>
                        <div className='' style={{display:'flex',justifyContent:'space-around',minHeight:'2rem',gap:'8rem',padding:'1px'}}>
-        <div style={{zIndex:'100',justifyItems:'stretch'}}>  <button className='btn btn-danger rounded-pill' onClick={()=>{
+        <div style={{zIndex:'100',justifyItems:'stretch'}}>  <button className='btn btn-danger rounded-pill' onClick={async ()=>{
           const confirmation=window.confirm('Are you sure you want to delete');
-          if(confirmation)
-          dispatch(clearTheBasket)}}><span><MdDeleteForever /> {t("remove_basket")}</span></button></div>
+          if(confirmation){
+            try{
+         await dispatch(ClearBasket()).unwrap();
+         toast.success("Basket Cleared")
+            }
+            catch(err:any){
+               toast.error(err || "Failed to clear basket");
+            }
+          }
+        }}
+          ><span><MdDeleteForever /> {t("remove_basket")}</span></button></div>
            <div style={{justifyItems:'end'}} >
             <button 
             style={{boxShadow:"5px 5px 10px rgba(0,0,0,0.5)"}}

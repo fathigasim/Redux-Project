@@ -9,8 +9,21 @@ import { formatters } from '../../utils/formatters';
 import { Link } from 'react-router-dom';
 import { FaSearch } from "react-icons/fa";
 import { BiSolidError } from "react-icons/bi";
-import i18n from '../../i18n';
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PdfOrderByDateReportComponent from './PdfOrderByDateReportComponent';
+import { FaRegFilePdf } from "react-icons/fa6";
+import { useTranslation } from 'react-i18next';
 const OrderDates =  () => {
+  const { t, i18n } = useTranslation("order");
+
+const labels = {
+  order: t("Order"),
+  orderDate: t("Order_Date"),
+  status: t("Status"),
+  items: t("Items"),
+  totalAmount: t("Total_Amount"),
+};
+const locale = i18n.language === "ar" ? "ar-SA" : i18n.language;
       const { loading, error, order } = useSelector((state: RootState) => state.orders);
         const dispatch=useAppDispatch()
         const today = new Date().toISOString().split("T")[0];
@@ -59,7 +72,18 @@ const [date, setDate] = useState(today);
             
             
         <Col>
-        <Link className='btn btn-info mb-2' to="/printOrderByDate">Print Report</Link>
+         <PDFDownloadLink className="btn btn-primary" style={{textDecoration:"none",marginBottom:"1.5rem"}}
+                  document={<PdfOrderByDateReportComponent orders={order} labels={labels} locale={locale}/>}
+                  fileName={`orders-report-${new Date().toISOString().split('T')[0]}.pdf`}
+                >
+                 <span><FaRegFilePdf />  
+                {/* {({ loading }) =>
+                    loading ? "Generating PDF..." : "Download Orders Report"
+                  } */}
+                  {loading ?("Generating..."):("Print PDF")}
+                   
+                     </span>
+                </PDFDownloadLink> 
  <div style={{justifyContent:"start",flexDirection:"column",display:"flex",flexWrap:"wrap",gap:"10px"}}>
            {order.map((ord:any,index:number)=>(
            

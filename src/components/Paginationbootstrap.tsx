@@ -1,125 +1,138 @@
-// components/Paginationbootstrap.tsx
-import React, { useMemo } from "react";
+import React from "react";
 import Pagination from "react-bootstrap/Pagination";
 import Container from "react-bootstrap/Container";
+import { type URLSearchParamsInit } from "react-router-dom";
 
 interface PaginationbootstrapProps {
   page: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
-  maxVisible?: number; // Maximum number of page buttons to show
-  showFirstLast?: boolean; // Show first/last buttons
-  size?: "sm" | "lg"; // Pagination size
+  searchParams: URLSearchParams;
+  setSearchParams: (nextInit: URLSearchParamsInit) => void;
+  maxVisible?: number; // Maximum visible page numbers (default: 5)
 }
 
-const Paginationbootstrap: React.FC<PaginationbootstrapProps> = ({
+const Paginationbootstrapnew: React.FC<PaginationbootstrapProps> = ({
   page,
   totalPages,
-  onPageChange,
-  maxVisible = 5,
-  showFirstLast = true,
-  size,
+  searchParams,
+  setSearchParams,
+  maxVisible = 5, // Show 5 page numbers by default
 }) => {
-  // Calculate which page numbers to display
-  const pageNumbers = useMemo(() => {
-    if (totalPages <= maxVisible) {
-      // Show all pages if total is less than max
+  const handlePageChange = (num: number) => {
+    if (num < 1 || num > totalPages) return;
+    
+    const params = {
+      ...Object.fromEntries(searchParams),
+      page: num.toString(),
+    };
+    setSearchParams(params);
+  };
+
+  // Calculate which page numbers to show
+  const getPageNumbers = (): (number | string)[] => {
+    if (totalPages <= maxVisible + 2) {
+      // Show all pages if total is small
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    const half = Math.floor(maxVisible / 2);
-    let start = Math.max(1, page - half);
-    let end = Math.min(totalPages, start + maxVisible - 1);
+    const pages: (number | string)[] = [];
+    const halfVisible = Math.floor(maxVisible / 2);
 
-    // Adjust start if we're near the end
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
+    // Always show first page
+    pages.push(1);
+
+    // Calculate start and end of visible range
+    let start = Math.max(2, page - halfVisible);
+    let end = Math.min(totalPages - 1, page + halfVisible);
+
+    // Adjust if near the beginning
+    if (page <= halfVisible + 1) {
+      end = Math.min(maxVisible, totalPages - 1);
+      start = 2;
     }
 
-    const pages: number[] = [];
+    // Adjust if near the end
+    if (page >= totalPages - halfVisible) {
+      start = Math.max(2, totalPages - maxVisible);
+      end = totalPages - 1;
+    }
+
+    // Add ellipsis after first page if needed
+    if (start > 2) {
+      pages.push("ellipsis-start");
+    }
+
+    // Add visible page numbers
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
 
+    // Add ellipsis before last page if needed
+    if (end < totalPages - 1) {
+      pages.push("ellipsis-end");
+    }
+
+    // Always show last page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+
     return pages;
-  }, [page, totalPages, maxVisible]);
+  };
 
-  // Show ellipsis indicators
-  const showStartEllipsis = pageNumbers[0] > 1;
-  const showEndEllipsis = pageNumbers[pageNumbers.length - 1] < totalPages;
+  const pageNumbers = getPageNumbers();
 
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1) {
+    return null; // Don't show pagination for single page
+  }
 
   return (
     <Container className="d-flex justify-content-center mt-4">
-      <Pagination size={size}>
-        {/* First Page */}
-        {showFirstLast && (
-          <Pagination.First
-            disabled={page === 1}
-            onClick={() => onPageChange(1)}
-            aria-label="Go to first page"
-          />
-        )}
+      <Pagination>
+        {/* First */}
+        <Pagination.First
+          disabled={page === 1}
+          onClick={() => handlePageChange(1)}
+        />
 
         {/* Previous */}
         <Pagination.Prev
-          disabled={page <= 1}
-          onClick={() => onPageChange(page - 1)}
-          aria-label="Go to previous page"
+          disabled={page === 1}
+          onClick={() => handlePageChange(page - 1)}
         />
 
-        {/* Start Ellipsis */}
-        {showStartEllipsis && (
-          <>
-            <Pagination.Item onClick={() => onPageChange(1)}>
-              1
-            </Pagination.Item>
-            <Pagination.Ellipsis disabled />
-          </>
-        )}
-
         {/* Page Numbers */}
-        {pageNumbers.map((num) => (
-          <Pagination.Item
-            key={num}
-            active={num === page}
-            onClick={() => onPageChange(num)}
-            aria-label={`Go to page ${num}`}
-            aria-current={num === page ? "page" : undefined}
-          >
-            {num}
-          </Pagination.Item>
-        ))}
+        {pageNumbers.map((num, index) => {
+          if (typeof num === "string") {
+            // Render ellipsis
+            return <Pagination.Ellipsis key={num} disabled />;
+          }
 
-        {/* End Ellipsis */}
-        {showEndEllipsis && (
-          <>
-            <Pagination.Ellipsis disabled />
-            <Pagination.Item onClick={() => onPageChange(totalPages)}>
-              {totalPages}
+          return (
+            <Pagination.Item
+              key={num}
+              active={num === page}
+              onClick={() => handlePageChange(num)}
+            >
+              {num}
             </Pagination.Item>
-          </>
-        )}
+          );
+        })}
 
         {/* Next */}
         <Pagination.Next
-          disabled={page >= totalPages}
-          onClick={() => onPageChange(page + 1)}
-          aria-label="Go to next page"
+          disabled={page === totalPages}
+          onClick={() => handlePageChange(page + 1)}
         />
 
-        {/* Last Page */}
-        {showFirstLast && (
-          <Pagination.Last
-            disabled={page === totalPages}
-            onClick={() => onPageChange(totalPages)}
-            aria-label="Go to last page"
-          />
-        )}
+        {/* Last */}
+        <Pagination.Last
+          disabled={page === totalPages}
+          onClick={() => handlePageChange(totalPages)}
+        />
       </Pagination>
     </Container>
   );
 };
 
-export default Paginationbootstrap;
+export default Paginationbootstrapnew;

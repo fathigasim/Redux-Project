@@ -23,7 +23,7 @@ export interface Order {
 
 interface  OrderResponse {
   items: Order[];
-  totalItems: number;
+  totalCount: number;
   pageNumber: number;
   pageSize: number;
 }
@@ -165,7 +165,7 @@ const orderSlice = createSlice({
         state.loading = false;
         state.order = action.payload.items;
        
-         state.totalCount = action.payload.totalItems;
+         state.totalCount = action.payload.totalCount;
         state.page = action.payload.pageNumber;
 
         // ✅ FIX: Only override if backend sends pageSize

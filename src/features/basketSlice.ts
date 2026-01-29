@@ -187,7 +187,7 @@ const basketSlice = createSlice({
       .addCase(addToBasket.fulfilled, (state, action) => {
         state.message=action.payload;
         state.loading=false;
-        state.items=action.payload.items;
+        // state.items.push(action.payload.items);
       }) .addCase(addToBasket.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -215,10 +215,10 @@ const basketSlice = createSlice({
         state.error="Error getting data";
         
       })
-       .addCase(RemoveFromBasket.fulfilled, (state,action) => {
+       .addCase(RemoveFromBasket.fulfilled, (state) => {
       
         state.loading=false;
-        state.items=action.payload;
+     
         state.error=null;
         
       })

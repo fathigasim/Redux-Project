@@ -3,10 +3,10 @@ import { useSearchParams } from "react-router";
 import { useSelector,useDispatch } from "react-redux";
 import {type AppDispatch, type RootState } from "../app/store";
 import {fetchOrders} from "../features/orderSlice"
-import { Card, Col, Container, ListGroup, Row } from "react-bootstrap";
+import { Card, Col, Container, Row } from "react-bootstrap";
 import { setPage } from "../features/orderSlice";
 import './styles.css'
-import Paginationbootstrap from "./Paginationbootstrapold";
+import Paginationbootstrap from "./Paginationbootstrap";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 const Order = () => {
@@ -28,9 +28,14 @@ const Order = () => {
       {loading &&<div>...Loading</div>}
         {error &&
             <p>{error}</p>}
+       
+       
+          
+        
         
           <div>
-            <Row md={8} className="g-4">
+              <h4 className=" text-center">Orders List</h4>
+            <Row md={8} className="g-4 mt-3">
             {order&&order.length >0 ?(
                    order.map((ord)=>(
                    
