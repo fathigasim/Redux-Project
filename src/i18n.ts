@@ -13,7 +13,7 @@ import enCommon from "./locales/en/common.json";
 import enProfile from "./locales/en/profile.json";
 import enRegister from "./locales/en/register.json";
 import enUserManagement from "./locales/en/usermanagement.json";
-
+import enOrder from "./locales/en/order.json";
 /* =======================
    Arabic translations
 ======================= */
@@ -26,7 +26,7 @@ import arCommon from "./locales/ar/common.json";
 import arProfile from "./locales/ar/profile.json";
 import arRegister from "./locales/ar/register.json";
 import arUserManagement from "./locales/ar/usermanagement.json";
-
+import arOrder from "./locales/ar/order.json";
 /* =======================
    Resources
 ======================= */
@@ -41,6 +41,7 @@ const resources = {
     profile: enProfile,
     register: enRegister,
     usermanagement: enUserManagement,
+    order:enOrder
   },
   ar: {
     navbar: arNavbar,
@@ -52,6 +53,7 @@ const resources = {
     profile: arProfile,
     register: arRegister,
     usermanagement: arUserManagement,
+    order:arOrder
   },
 };
 
@@ -75,6 +77,7 @@ i18n
       "profile",
       "register",
       "usermanagement",
+      "order"
     ],
     defaultNS: "common",
 

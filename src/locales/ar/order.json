@@ -1,9 +1,24 @@
 {
-    "Order":"الطلب",
-    "Order_Date": "تاريخ الطلب",
-    "Product": "المنتج",
-    "Quantity": "الكمية",
-    "Price": "السعر",
-    "Items":"العناصر",
-    "Status":"الحالة"
+  "Order_Report_By_Date": "تقارير الطلبات حسب التاريخ",
+  "Search_By_Date": "البحث حسب التاريخ",
+  "Search": "بحث",
+  "Searching": "جاري البحث",
+  "Error": "خطأ",
+  "No_Data": "لا توجد بيانات",
+  "Print_PDF": "طباعة PDF",
+  "Generating": "جاري إنشاء الملف...",
+  "Order_ID": "رقم الطلب",
+  "Order_Date": "التاريخ ",
+  "Order_Total": "إجمالي الطلب",
+  "Order_Report": "تقرير الطلبات",
+  "Product": "المنتج",
+  "Quantity": "الكمية",
+  "Price": "السعر",
+  "Total": "الإجمالي",
+  "Status": "الحالة",
+  "Items": "العناصر",
+  "Total_Amount": "المبلغ الإجمالي",
+  "Pending": "قيد الانتظار",
+"Completed": "مكتمل"
+
 }

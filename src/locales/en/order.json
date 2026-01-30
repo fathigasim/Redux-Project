@@ -1,10 +1,24 @@
-
 {
-    "Order":"Order",
-    "Order_Date": "Order Date",
-    "Product": "Product",
-    "Quantity": "Quantity",
-    "Price": "Price",
-    "Items":"Items",
-    "Status":"Status"
+  "Order_Report_By_Date": "Order Reports By Date",
+  "Search_By_Date": "Search by date",
+  "Search": "Search",
+  "Searching": "Searching",
+  "Error": "Error",
+  "No_Data": "No data",
+  "Print_PDF": "Print PDF",
+  "Generating": "Generating PDF...",
+  "Order_ID": "Order ID",
+  "Order_Date": "Order Date",
+  "Order_Total": "Order Total",
+  "Order_Report": "Order Report",
+  "Product": "Product",
+  "Quantity": "Quantity",
+  "Price": "Price",
+  "Total": "Total",
+  "Status": "Status",
+  "Items": "Items",
+  "Total_Amount": "Total Amount",
+  "Pending": "Pending",
+"Completed": "Completed"
+
 }

@@ -50,7 +50,7 @@ const ProductManagement = () => {
   // Local state
   const [thename, setTheName] = useState("");
   const [theprice, setThePrice] = useState("1");
-  const [stock, setStock] = useState("0");
+  const [stock, setStock] = useState("0");    
     const [category, setCategory] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
