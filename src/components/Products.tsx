@@ -166,7 +166,7 @@ useEffect(() => {
   return (
     <>
       {/* Basket Section */}
-      {items.length > 0 && (
+   
         <Container 
           fluid="md" 
           style={{ marginTop: 20, fontFamily: 'intel-one-mono-roboto' }}
@@ -174,7 +174,7 @@ useEffect(() => {
           {/* <h4>{t("cartItems")}: {items.length}</h4> */}
           <Basket />
         </Container>
-      )}
+    
 
       {/* Filters Section */}
       <Container 

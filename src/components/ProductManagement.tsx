@@ -74,6 +74,9 @@ const ProductManagement = () => {
   const currentCategory = searchParams.get("category") || "";
   const currentSort = searchParams.get("sort") || "";
   const currentPage = Number(searchParams.get("page")) || 1;
+
+
+
   // Initial load - sync URL params with Redux
   useEffect(() => {
       // const search = searchParams.get("search") || "";
@@ -177,6 +180,7 @@ useEffect(() => {
   };
 
   const handleUpdate = async (id: string) => {
+   
     if (!editname || !editprice) {
       toast.error(
         i18next.language === "ar" 
@@ -196,17 +200,17 @@ useEffect(() => {
         formData.append("image", editimage);
       }
 
-      await dispatch(updateProduct({ 
+     const result= await dispatch(updateProduct({ 
         id, 
         formData 
       })).unwrap();
-
+  
       toast.success(
         i18next.language === "ar" 
-          ? message
-          : message
+          ? result.message
+          : result.message
       );
-
+    dispatch(clearMessages())
       setEditingId(null);
       setEditName("");
       setEditPrice("");
@@ -232,9 +236,10 @@ useEffect(() => {
         .unwrap()
         .then(() => {
           toast.success(
-            i18next.language === "ar" 
-              ? "تم الحذف بنجاح" 
-              : "Successfully deleted"
+            message
+            // i18next.language === "ar" 
+            //   ? "تم الحذف بنجاح" 
+            //   : "Successfully deleted"
           );
           dispatch(fetchProducts({ page }));
         })

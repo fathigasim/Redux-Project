@@ -15,7 +15,9 @@ export interface Product {
   stock:number;
   categoryId:number;
 }
-
+export interface ProductDeleteResponse{
+  message:string|null;
+}
 interface ProductResponse {
   items: Product[];
   totalCount: number;
@@ -28,6 +30,7 @@ interface ProductResponse {
 
 interface ProductState {
   products: Product[];
+  productDeleteResponse:ProductDeleteResponse
   totalRecords: number;
   searchTerm:string|null;
   minPrice: string | null;
@@ -53,7 +56,7 @@ interface ProductState {
 // ---------------------------
 const initialState: ProductState = {
   products: [],
-  
+  productDeleteResponse:null,
   searchTerm:"",
   minPrice: null,
   maxPrice: null,
@@ -175,19 +178,19 @@ export const updateProduct = createAsyncThunk<
   }
 );
 export const deleteProduct = createAsyncThunk<
-  string,
+  ProductDeleteResponse,
   string,
   { rejectValue: { message: string } }
 >(
   'products/deleteProduct',
-  async (id, { rejectWithValue }) => {
+  async ( id,{ rejectWithValue }) => {
     if (!id) {
       return rejectWithValue({ message: 'Product ID is required for delete' });
     }
 
     try {
-      await api.delete(`/products/${id}`);
-      return id;
+    const res=  await api.delete(`/products/${id}`);
+      return res.data as ProductDeleteResponse;
     } catch (error) {
       return rejectWithValue({ 
         message: error instanceof Error ? error.message : 'Failed to delete product'
@@ -227,6 +230,8 @@ const productSlice = createSlice({
     clearMessages(state) {
       state.error = null;
       state.success = null;
+      state.message =null;
+
     },
     setPage(state, action: PayloadAction<number>) {
       state.page = action.payload;
@@ -299,7 +304,8 @@ const productSlice = createSlice({
      
       // Delete
       .addCase(deleteProduct.fulfilled, (state, action) => {
-        state.products = state.products.filter((p) => p.id !== action.payload);
+        state.message = action.payload.message;
+     
       });
     }});
 // ---------------------------
